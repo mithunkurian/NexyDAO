@@ -9,8 +9,8 @@ These safeguards are not trading signals or buy/sell strategies.
 
 | Role | Responsibility and authority | Milestone |
 |---|---|---|
-| Human owner | Mandate and approval of future execution policy releases | All |
-| AI CEO | Strategy and investment/research proposals | 1 |
+| Human owner | Invests capital into NexyDAO, controls access, intervenes when needed | All |
+| AI CEO | Mandate, strategy, operating budgets, performance oversight and investment/research proposals | 1; fuller operations 3–5 |
 | Research agents | Opportunity discovery and source collection | 2 |
 | Portfolio Manager | Allocation proposals, alternatives, aggregate exposures | 3 |
 | Risk Officer: capital | Independent loss, sizing and liquidity challenges | 1 |
@@ -23,6 +23,28 @@ Risk officers cannot be overruled by the CEO. Each receives the proposal in a fr
 API call without the other officer's response. Committee members receive both reviews
 but not one another's votes. Calls to the same model may share errors and biases;
 logical separation does not establish statistical independence.
+
+## Owner and CEO responsibilities
+
+The owner's investment role means supplying capital to the company. Routine portfolio
+investment decisions belong to the CEO and pass through independent risk and committee
+review. The owner has only three responsibilities: invest capital, grant/revoke access
+(including credentials and service permissions), and intervene or stop operations when
+needed. Routine strategy, budget planning and performance review do not require owner
+approval.
+
+The CEO owns the investment mandate, strategy, acceptable operating risk within the
+enforced envelope, investment universe, operating budget planning, performance and cost
+oversight, and coordination of research and portfolio work. The $5,000 simulated starting
+capital and 15% annual net objective remain the initial company brief. The CEO must
+account for uncertainty and may recommend changes through the review workflow.
+
+CEO responsibility does not grant authority to change enforced capital limits, spending
+ceilings, credentials, broker permissions, or execution locks. Business policy proposals
+must satisfy independent validation before a future policy service adopts them; agents
+cannot modify that service. The owner controls access and may intervene, without becoming
+a routine investment approver. In milestone 1 the CEO expresses its responsibilities in
+decision rationale; budget management and performance accounting are not yet implemented.
 
 ## Decision workflow
 

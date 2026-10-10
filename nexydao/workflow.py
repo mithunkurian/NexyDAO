@@ -1,6 +1,6 @@
 import json
 
-from .records import PROPOSAL, REVIEW, VOTE, validate, validate_references
+from .records import PROPOSAL, REVIEW, VOTE, PROMPT_VERSION, SCHEMA_VERSION, validate, validate_references
 from .safety import evaluate
 
 COMMON = """You serve NexyDAO, an AI investment company with $5,000 simulated USD.
@@ -13,6 +13,11 @@ milestone is verified. Do not invent prices, sources or facts. With insufficient
 choose hold/investigate or reject/revise. You have no execution, credentials, filesystem
 or policy modification tools. Approval is advisory and never authorizes broker access.
 Cite only evidence IDs provided; an empty citation list is permitted for abstention.
+The human owner's roles are only to invest capital into NexyDAO, control access and
+intervene when needed. The CEO owns mandate, strategy, operating budget planning and
+performance oversight. Routine decisions require independent risk/committee review,
+not owner approval. CEO responsibility never permits overriding enforced capital or
+spending limits, granting access, changing safeguards or enabling execution.
 """
 
 
@@ -54,7 +59,10 @@ def run_cycle(store, provider, evidence):
             store.event(run, role, result)
             return result
 
-        proposal = ask("ceo", "Act as CEO: propose the next investment or research decision.", PROPOSAL, context)
+        proposal = ask("ceo", "Act as CEO: own strategic direction, operating budget planning and performance "
+                       "oversight. Use available memory and API costs to assess progress and cost efficiency; "
+                       "acknowledge unavailable performance data. Propose the next investment or research "
+                       "decision within enforced limits, without seeking routine owner approval.", PROPOSAL, context)
         risk_context = {**context, "proposal": proposal}
         reviews = [ask("risk_capital", "Independently challenge capital loss, sizing and liquidity.", REVIEW, risk_context),
                    ask("risk_evidence", "Independently challenge provenance, freshness, contradictions and security.", REVIEW, risk_context)]
@@ -64,7 +72,7 @@ def run_cycle(store, provider, evidence):
                      ("investment", "Vote independently on thesis and alternatives; respect risk challenges."),
                      ("fiduciary", "Vote independently on capital preservation and net costs."),
                      ("audit", "Vote independently on evidence sufficiency and conflicts of interest.")]]
-        result = {"schema_version": 1, "prompt_version": 1, "mode": mode,
+        result = {"schema_version": SCHEMA_VERSION, "prompt_version": PROMPT_VERSION, "mode": mode,
                   "run_id": run, "proposal": proposal, "risk_reviews": reviews,
                   "committee_votes": votes, "policy": evaluate(proposal, reviews, votes),
                   "api_costs": store.costs()}

@@ -1,6 +1,9 @@
 """Shared strict schemas and local validation; model output is always untrusted."""
 import math
 
+SCHEMA_VERSION = 1
+PROMPT_VERSION = 2
+
 
 def schema(properties):
     return {"type": "object", "properties": properties,

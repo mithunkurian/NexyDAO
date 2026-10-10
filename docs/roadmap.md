@@ -23,7 +23,8 @@ SSRF, prompt injection, market closures and unavailable data.
 
 Add simulated positions, fills, cash, FX, fees and mark-to-market reconciliation.
 Portfolio Manager proposes thesis-driven allocations and alternatives. CEO sets mandate
-and accepts/revises strategy; revisions require fresh reviews. Independently enforce
+and accepts/revises strategy, plans operating budgets, and oversees performance and
+costs; routine owner approval is not required. Revisions require fresh reviews. Independently enforce
 aggregate exposure, concentration, cash reserve, drawdown and stress loss limits.
 Evaluate diverse regimes and report net costs and performance against the objective.
 No indicator-based order rules.
@@ -31,13 +32,15 @@ No indicator-based order rules.
 ## 4 — Authorization and tested paper execution
 
 Separate executor OS identity from agents. Executor alone gets broker connectivity.
-Owner-approved policy versions and short-lived signed permits bind account, proposal
+Independently validated, versioned policies and short-lived signed permits bind account, proposal
 hash, contract, quantity, limit price, expiry and unique nonce. Enforce kill switch,
 fresh verified evidence, exposure reservation, idempotency and reconciliation.
 Agent votes alone never mint permits. Test forged/stale/replayed permits, network
 ambiguity, duplicates, partial fills, account mismatch, restarts and concurrent orders.
-Security review and explicit owner release signoff precede narrowly authorized paper
-orders. Execution remains disabled until all authorization acceptance checks pass.
+Security review and authorization acceptance checks precede narrowly authorized paper
+orders. The owner grants or revokes broker/service access and can intervene; the CEO owns
+routine business policy and investment decisions within independently enforced limits.
+Execution remains disabled until all authorization acceptance checks pass.
 
 ## 5 — Autonomous paper operations
 

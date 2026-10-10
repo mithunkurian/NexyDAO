@@ -12,6 +12,11 @@ and execution authorization are later milestones.
 See [architecture and workflow](docs/architecture.md), [roadmap](docs/roadmap.md) and
 [Google Cloud deployment](docs/deployment.md).
 
+The human owner invests capital into NexyDAO, controls access and intervenes when
+needed. The CEO owns mandate, strategy, operating budget planning and performance
+oversight. Routine investment decisions follow independent risk and committee review.
+Agents cannot change enforced safeguards or grant themselves execution authority.
+
 ## Installation and offline testing (Python 3.12)
 
 ```bash

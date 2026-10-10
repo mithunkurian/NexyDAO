@@ -4,7 +4,7 @@ from decimal import Decimal
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 
-from .records import validate
+from .records import PROMPT_VERSION, SCHEMA_VERSION, validate
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -51,7 +51,7 @@ class OpenAIProvider:
         self.store.event(run, role + ":request", {
             "model": c.model, "input_rate_per_million": str(c.input_rate),
             "output_rate_per_million": str(c.output_rate), "reserved_usd": str(reserve),
-            "max_output_tokens": c.max_output, "prompt_version": 1, "schema_version": 1})
+            "max_output_tokens": c.max_output, "prompt_version": PROMPT_VERSION, "schema_version": SCHEMA_VERSION})
         response = self.transport(payload, c.api_key)
         usage = response.get("usage", {})
         inp, out = usage.get("input_tokens"), usage.get("output_tokens")
