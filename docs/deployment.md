@@ -2,8 +2,9 @@
 
 Target: Ubuntu 24.04, Python 3.12, 1 GB RAM plus 1 GB swap. Sequential CLI batches,
 SQLite and standard-library HTTPS; no web server, containers, vector DB or local model.
-No inbound port opens. IBKR Gateway is not needed for milestone 1; assess its memory
-requirements separately before adding the market data adapter.
+No inbound broker/VNC port opens. IBKR Gateway is optional for the read-only
+account check; see [paper Gateway trial instructions](ibkr-paper.md). The 1 GB
+trial is experimental and requires sustained memory/operational testing.
 
 ## Install and verify
 
@@ -13,7 +14,7 @@ SSH with existing access, substituting your actual project/zone:
 gcloud compute ssh nexydao --project YOUR_PROJECT --zone YOUR_ZONE
 sudo apt-get update
 sudo apt-get install -y python3.12-venv git
-git clone --branch codex/first-milestone https://github.com/mithunkurian/NexyDAO.git
+git clone https://github.com/mithunkurian/NexyDAO.git
 cd NexyDAO
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -e .
@@ -89,4 +90,5 @@ backup access. Monitor disk, failures, abandoned `running` runs and unsettled AP
 Audit grows over time; model memory is bounded. Reconcile estimates with invoices and
 preserve uncertain reservations. Never erase the DB to replenish budget. Roll back to a
 known tested commit, rerun offline tests and restart. This milestone cannot change IBKR
-positions or access a broker account.
+positions. The optional `broker-check` command can read a private account summary
+from the local paper Gateway; it is never called by agent deliberation.
