@@ -42,6 +42,9 @@ class Socket:
 
 
 class BrokerTests(unittest.TestCase):
+    def setUp(self):
+        (Path(__file__).resolve().parents[1] / "data").mkdir(exist_ok=True)
+
     def session(self, accounts="DU12345", rows=None, end=True):
         rows = rows if rows is not None else [frame(63, 1, 9101, accounts, tag, "123.45", "USD") for tag in TAGS]
         return Socket(frame(178, "broker-time") + frame(9, 1, 999) + frame(15, 1, accounts)
