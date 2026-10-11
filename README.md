@@ -82,6 +82,8 @@ and incomplete-response handling. API rates are estimates; reconcile against bil
 
 ## Read-only paper Gateway check
 
+Current progress and validation are recorded in the [milestone register](docs/milestones.md).
+
 `python -m nexydao broker-check` retrieves a bounded private account snapshot from
 localhost paper Gateway. No orders or AI calls are made. See [setup, safeguards and
 limitations](docs/ibkr-paper.md). Execution remains disabled.

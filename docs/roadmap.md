@@ -1,5 +1,8 @@
 # Development roadmap
 
+See the [milestone register](milestones.md) for delivered checkpoints, validation
+evidence and open acceptance gates. Current marker: M2A, read-only paper connectivity.
+
 ## 1 — Auditable deliberation (this PR)
 
 Architecture, hierarchy, review workflow, real CEO/committee Responses API adapter,
