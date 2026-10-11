@@ -12,6 +12,11 @@ required to validate model access; offline tests require no credentials.
 
 ## 2 — Verified evidence and research
 
+The first read-only account probe is implemented in `broker-check` (see
+`ibkr-paper.md`): bounded account lookup/summary, local private snapshots, account
+namespace/pin checks and offline safety tests. This is account plumbing only;
+verified market quotes, research and broker/executor OS isolation remain unfinished.
+
 Read-only IBKR paper data adapter and approved public-source adapters. Verify paper
 account identity rather than assuming it from port. Record contract IDs, bid/ask,
 currency, observation/retrieval times, raw content hashes, provenance and expiry.

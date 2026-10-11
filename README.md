@@ -79,3 +79,9 @@ A real paid API smoke test is operator-run on the VM and has not been performed 
 The adapter follows official [Structured Outputs documentation](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses)
 using Responses `text.format`, strict JSON schema, local validation and explicit refusal
 and incomplete-response handling. API rates are estimates; reconcile against billing.
+
+## Read-only paper Gateway check
+
+`python -m nexydao broker-check` retrieves a bounded private account snapshot from
+localhost paper Gateway. No orders or AI calls are made. See [setup, safeguards and
+limitations](docs/ibkr-paper.md). Execution remains disabled.

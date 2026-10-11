@@ -1,4 +1,4 @@
-"""Non-agent policy. No broker library or network capability exists here."""
+"""Non-agent policy. No execution library or network capability exists here."""
 from decimal import Decimal
 
 INITIAL_CAPITAL = Decimal("5000")

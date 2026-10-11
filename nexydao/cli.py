@@ -24,12 +24,16 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check"])
     parser.add_argument("--evidence", type=Path)
     args = parser.parse_args()
     store = None
     try:
         config = Config.from_env()
+        if args.command == "broker-check":
+            from .ibkr import BrokerConfig, run_check
+            print(json.dumps(run_check(BrokerConfig.from_env()), indent=2))
+            return
         store = Store(config.db)
         if args.command == "costs":
             result = store.costs()
