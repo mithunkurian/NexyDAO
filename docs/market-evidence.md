@@ -82,7 +82,11 @@ least 15 seconds. Do not buy additional subscriptions as part of a troubleshooti
 
 Offline fixtures test the protocol and trust boundary. A successful live collection
 and an AI cycle consuming its fresh receipt remain distinct operational acceptance
-gates. The Sunday 2026-10-11 trial does not establish open-market acceptance.
+gates. The Sunday 2026-10-11 trial validated the exact account pin, wrong-pin rejection
+and unique SPY contract resolution on the VM. The subscription received no fresh tick
+within 15 seconds and issued no receipt. It does not establish open-market acceptance
+or confirm tick-by-tick entitlements. Earlier API sessions disconnected before identity;
+later spaced connections passed, so reconnection reliability still needs testing.
 Research agents, company filings/news verification, cross-source validation, simulated
 portfolio accounting and independent execution authorization remain future work.
 Execution is always disabled, even with a valid receipt and unanimous model votes.

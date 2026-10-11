@@ -15,7 +15,7 @@ The historical Git marker remains unchanged; subsequent validation is recorded b
 | Checkpoint | Status | Evidence / remaining acceptance |
 | --- | --- | --- |
 | M1: Architecture and auditable AI deliberation | VM AI cycle validated | Six paid role calls completed, cost reservations settled and memory persisted after reopening SQLite. |
-| M2A: Read-only IBKR paper connectivity | Validated; PR #2 merged | Four summary fields retrieved; private snapshot saved; subscription cancelled and connection closed. Exact pin saved; live pin acceptance pending reconnection. |
+| M2A: Read-only IBKR paper connectivity | Validated; PR #2 merged | Four summary fields retrieved; exact pin matched; deliberate wrong pin rejected before summary; private snapshot saved; connection closed. |
 | M2B: Verified market evidence and research | Quote adapter implemented; operational acceptance pending | Signed receipts, unique contract resolution, freshness and tampering tests. Live fresh quote/AI consumption, research agents and full source verification remain pending. |
 | M3: Portfolio Manager and simulated accounting | Not implemented | $5,000 ledger, positions, cash/FX/fees, reconciliation, aggregate exposure and drawdown controls. |
 | M4: Independent authorization and paper execution | Not implemented; execution disabled | Executor isolation, signed permits, kill switch, exposure reservations, replay/idempotency and partial-fill tests. |
@@ -42,13 +42,11 @@ in size and operational risk. The company is not yet autonomously investing.
 
 ## Open gates before wider integration
 
-1. Validate the saved exact account pin and deliberate mismatch rejection against an
-   active Gateway session. The original smoke test used namespace recognition with the pin unset.
-2. Verify independent VM/cloud ingress restrictions: Gateway's API socket was observed
+1. Verify independent VM/cloud ingress restrictions: Gateway's API socket was observed
    bound to a wildcard address despite the localhost connection setting.
-3. Consume a fresh signed quote in a paid cycle; the no-quote baseline is validated below.
-4. Implement M2B verified market evidence; account balances alone are not investment evidence.
-5. Test Gateway reconnection, daily/weekly authentication requirements, recovery and
+2. Consume a fresh signed quote in a paid cycle; the no-quote baseline is validated below.
+3. Complete M2B research and source verification; account balances alone are not investment evidence.
+4. Test Gateway reconnection, daily/weekly authentication requirements, recovery and
    sustained memory/swap behavior before unattended operation.
 
 The $5,000 simulated capital and 15% annual net return objective remain unchanged.
@@ -78,3 +76,17 @@ also passed. The isolated VM trial release has a private 32-byte receipt key. It
 check found Gateway not connected, so no fresh receipt or live pin acceptance was
 claimed. PR #3 remains a draft pending those operational checks and open-market
 quote consumption. No additional paid AI cycle was run for the quote trial.
+
+After the owner reconnected paper Gateway, client ID 91 successfully matched the
+private exact pin and retrieved all four account summary fields. A separate deliberate
+wrong-pin check returned `account_mismatch` before the summary request. No account ID
+or balance was sent to models or committed. The quote check negotiated protocol 178,
+resolved exactly one SPY SMART/USD stock contract and reached the live BidAsk
+subscription. No fresh tick arrived within the 15-second deadline; the socket closed
+without issuing a receipt. This is contract/connection validation, not fresh quote
+acceptance or evidence that tick-by-tick entitlements are sufficient.
+
+Some earlier connections disconnected before account identity; later spaced checks
+passed. Reconnection reliability remains an open operational gate. PR #3 remains a
+draft pending a fresh live receipt and an AI cycle consuming it. Execution remained
+disabled throughout; the checks made no additional OpenAI calls.
