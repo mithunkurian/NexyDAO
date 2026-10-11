@@ -71,3 +71,10 @@ The exact account pin was saved outside Git with mode 0600. The timed Gateway se
 ended before a live pin/mismatch check completed; connection refusal is not evidence
 of account rejection. The new market adapter's offline tests are separate from live
 market acceptance. See [market evidence trial](market-evidence.md).
+
+Quote adapter validation baseline: `abde107bbbf1944904bb0b14d9f97471e0b574cc`.
+All 45 offline tests passed on Windows Python 3.12 and the Ubuntu VM; GitHub Actions
+also passed. The isolated VM trial release has a private 32-byte receipt key. Its live
+check found Gateway not connected, so no fresh receipt or live pin acceptance was
+claimed. PR #3 remains a draft pending those operational checks and open-market
+quote consumption. No additional paid AI cycle was run for the quote trial.
