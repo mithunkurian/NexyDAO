@@ -12,6 +12,8 @@ remain later milestones; a quote alone does not establish an investment thesis.
 
 See [architecture and workflow](docs/architecture.md), [roadmap](docs/roadmap.md) and
 [Google Cloud deployment](docs/deployment.md).
+Follow the [development tracker](docs/development-tracker.md) for the current work
+queue, acceptance checks, blockers and PR status.
 
 The human owner invests capital into NexyDAO, controls access and intervenes when
 needed. The CEO owns mandate, strategy, operating budget planning and performance

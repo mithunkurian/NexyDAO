@@ -2,6 +2,7 @@
 
 See the [milestone register](milestones.md) for delivered checkpoints, validation
 evidence and open acceptance gates. Current marker: M2A, read-only paper connectivity.
+The [development tracker](development-tracker.md) records current tasks and next checks.
 
 ## 1 — Auditable deliberation (this PR)
 
@@ -10,15 +11,17 @@ two risk officers, strict records, SQLite memory, costs, execution denial, offli
 tests/CI and small-VM instructions. Acceptance: persistence survives restart; budget
 reservations work across connections; malformed/refused/incomplete outputs fail closed;
 unknown evidence fails; veto/quorum checks hold; live mode and enabling execution fail;
-even unanimous approval cannot send orders. A real API smoke test on the VM is still
-required to validate model access; offline tests require no credentials.
+even unanimous approval cannot send orders. A real six-call API cycle on the VM has
+validated model access, memory and costs; offline tests require no credentials.
 
 ## 2 — Verified evidence and research
 
 The first read-only account probe is implemented in `broker-check` (see
 `ibkr-paper.md`): bounded account lookup/summary, local private snapshots, account
-namespace/pin checks and offline safety tests. This is account plumbing only;
-verified market quotes, research and broker/executor OS isolation remain unfinished.
+namespace/pin checks and offline safety tests. The quote adapter now implements
+unique contract resolution, signed receipts and freshness enforcement; a fresh live
+quote and its AI consumption remain unvalidated. Research and broker/executor OS
+isolation remain unfinished.
 
 Read-only IBKR paper data adapter and approved public-source adapters. Verify paper
 account identity rather than assuming it from port. Record contract IDs, bid/ask,
