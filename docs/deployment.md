@@ -5,6 +5,8 @@ SQLite and standard-library HTTPS; no web server, containers, vector DB or local
 No inbound broker/VNC port opens. IBKR Gateway is optional for the read-only
 account check; see [paper Gateway trial instructions](ibkr-paper.md). The 1 GB
 trial is experimental and requires sustained memory/operational testing.
+The optional [market quote trial](market-evidence.md) requires a private receipt key,
+exact account pin and fresh market data; neither command enables execution.
 
 ## Install and verify
 

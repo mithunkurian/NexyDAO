@@ -7,16 +7,16 @@ Git marker: `milestone-2a-paper-connectivity`.
 
 This marker records tested development code and a successful bounded VM trial.
 It is not a production release, permission to execute orders, or evidence of returns.
-PR #1 is merged; [PR #2](https://github.com/mithunkurian/NexyDAO/pull/2) is open for review
-at the time this marker is recorded. The marker does not merge or deploy that PR.
+PR #1 and [PR #2](https://github.com/mithunkurian/NexyDAO/pull/2) are merged.
+The historical Git marker remains unchanged; subsequent validation is recorded below.
 
 ## Progress against the roadmap
 
 | Checkpoint | Status | Evidence / remaining acceptance |
 | --- | --- | --- |
-| M1: Architecture and auditable AI deliberation | Implementation delivered; PR #1 merged | CEO, two risk reviewers, three committee voters, structured records, SQLite memory and cost tracking, execution denial, offline tests. A paid end-to-end OpenAI cycle on the VM still needs operational validation. |
-| M2A: Read-only IBKR paper connectivity | Validated; PR #2 awaiting merge | Gateway installed on the existing 1 GB VM; paper account namespace recognized; four summary fields retrieved; private snapshot saved; subscription cancelled and connection closed. |
-| M2B: Verified market evidence and research | Not implemented | Contract/quote retrieval, timestamps/provenance/expiry, source verification, research agents and injection/fabricated-evidence tests. |
+| M1: Architecture and auditable AI deliberation | VM AI cycle validated | Six paid role calls completed, cost reservations settled and memory persisted after reopening SQLite. |
+| M2A: Read-only IBKR paper connectivity | Validated; PR #2 merged | Four summary fields retrieved; private snapshot saved; subscription cancelled and connection closed. Exact pin saved; live pin acceptance pending reconnection. |
+| M2B: Verified market evidence and research | Quote adapter implemented; operational acceptance pending | Signed receipts, unique contract resolution, freshness and tampering tests. Live fresh quote/AI consumption, research agents and full source verification remain pending. |
 | M3: Portfolio Manager and simulated accounting | Not implemented | $5,000 ledger, positions, cash/FX/fees, reconciliation, aggregate exposure and drawdown controls. |
 | M4: Independent authorization and paper execution | Not implemented; execution disabled | Executor isolation, signed permits, kill switch, exposure reservations, replay/idempotency and partial-fill tests. |
 | M5: Autonomous paper operations | Not implemented | Scheduling, recovery, alerts, outcome learning, sustained paper evaluation and net performance reporting. |
@@ -42,12 +42,11 @@ in size and operational risk. The company is not yet autonomously investing.
 
 ## Open gates before wider integration
 
-1. Pin the exact paper account locally and validate account mismatch rejection against
-   the intended account. The smoke test used namespace recognition with the exact pin unset.
+1. Validate the saved exact account pin and deliberate mismatch rejection against an
+   active Gateway session. The original smoke test used namespace recognition with the pin unset.
 2. Verify independent VM/cloud ingress restrictions: Gateway's API socket was observed
    bound to a wildcard address despite the localhost connection setting.
-3. Validate the real paid CEO/risk/committee cycle, audit persistence and recorded costs
-   using locally provisioned credentials and a bounded budget.
+3. Consume a fresh signed quote in a paid cycle; the no-quote baseline is validated below.
 4. Implement M2B verified market evidence; account balances alone are not investment evidence.
 5. Test Gateway reconnection, daily/weekly authentication requirements, recovery and
    sustained memory/swap behavior before unattended operation.
@@ -56,3 +55,19 @@ The $5,000 simulated capital and 15% annual net return objective remain unchange
 No measured investment return is available yet. Owner duties remain capital provision,
 access control and intervention; the CEO owns routine company management within
 independently enforced safeguards.
+
+## Follow-on VM validation, 2026-10-11
+
+Merged main `b435b10` was unpacked into an isolated trial release without modifying
+the owner's existing repository or credential files. One paid cycle completed with
+the CEO choosing `investigate`, two risk reviews and three committee votes. The run
+ID was `3d27b450-2083-4125-ac93-c5f1cd97f187`. Six cost entries settled, with zero
+unsettled reservations and cumulative estimated token cost **$0.00079860** at the
+configured model rates. The persistent SQLite database retained memory after reopening.
+The lifetime budget was $0.10; execution remained false. This validates deliberation
+and accounting, not investment performance or verified market research.
+
+The exact account pin was saved outside Git with mode 0600. The timed Gateway session
+ended before a live pin/mismatch check completed; connection refusal is not evidence
+of account rejection. The new market adapter's offline tests are separate from live
+market acceptance. See [market evidence trial](market-evidence.md).
