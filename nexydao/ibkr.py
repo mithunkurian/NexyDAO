@@ -19,6 +19,7 @@ from pathlib import Path
 TAGS = ("NetLiquidation", "TotalCashValue", "AvailableFunds", "BuyingPower")
 MAX_FRAME = 65536
 WARNINGS = {2104, 2106, 2107, 2108, 2158}
+PAPER_ACCOUNT_PATTERN = r"DU[A-Z]*[0-9]+"
 
 
 class ProbeError(RuntimeError):
@@ -39,7 +40,7 @@ class BrokerConfig:
             raise ValueError("Only localhost paper port 4002 is permitted")
         if not 1 <= self.client_id <= 9999 or not 1 <= self.timeout <= 60:
             raise ValueError("Invalid bounded broker settings")
-        if self.expected_account and not re.fullmatch(r"DU[0-9]+", self.expected_account):
+        if self.expected_account and not re.fullmatch(PAPER_ACCOUNT_PATTERN, self.expected_account):
             raise ValueError("Expected account must be in the paper DU namespace")
 
     @classmethod
@@ -55,7 +56,7 @@ class BrokerConfig:
 def paper_account(accounts, expected=""):
     # Reject mixed/live/advisor account lists rather than choosing the first entry.
     values = accounts.split(",")
-    if len(values) != 1 or not re.fullmatch(r"DU[0-9]+", values[0]):
+    if len(values) != 1 or not re.fullmatch(PAPER_ACCOUNT_PATTERN, values[0]):
         raise ProbeError("single_paper_account_required")
     if expected and values[0] != expected:
         raise ProbeError("account_mismatch")

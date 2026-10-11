@@ -73,6 +73,13 @@ class BrokerTests(unittest.TestCase):
             probe(BrokerConfig(expected_account="DU999"), lambda *a, **k: sock)
         self.assertEqual(len(sock.sent), 3)
 
+    def test_regional_paper_account_format(self):
+        sock = self.session(accounts="DUH12345")
+        result = probe(BrokerConfig(expected_account="DUH12345"), lambda *a, **k: sock)
+        self.assertTrue(result['expected_account_matched'])
+        self.assertEqual(len(result['values']), 4)
+        self.assertFalse(result['execution_authorized'])
+
     def test_localhost_paper_port_is_fixed(self):
         for kwargs in ({"host": "35.184.88.154"}, {"port": 4001}, {"expected_account": "U123"},
                        {"timeout": 0}, {"timeout": 61}, {"client_id": 0}):

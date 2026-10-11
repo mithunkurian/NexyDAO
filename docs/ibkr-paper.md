@@ -32,7 +32,8 @@ commands and no OpenAI calls. Unknown versions fail closed; compatibility with e
 Gateway upgrade must be retested. Do not use IBKR's comprehensive sample program as
 a probe: sample programs can exercise order operations.
 
-The probe requires exactly one account in IBKR's `DU` paper namespace. Live,
+The probe requires exactly one account in IBKR's `DU` paper namespace, including
+regional letters before the numeric suffix (for example, the synthetic `DUH12345`). Live,
 mixed and multiple accounts are rejected before requesting a summary. This namespace
 is paper identity evidence, not cryptographic attestation or an execution permit.
 Port 4002 by itself does not prove paper mode. For an account identity pin, set
