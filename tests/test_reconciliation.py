@@ -75,8 +75,10 @@ class ReconciliationTests(unittest.TestCase):
     def test_own_cancellation_notice_only_in_completed_unsubscribed_phase(self):
         notice=frame(4,2,-1,2100,'Account subscription cancelled')
         self.assertEqual(self.payload(late=notice)['positions'],[])
+        self.assertEqual(self.payload(late=frame(4,2,-1,2100,'Account subscription cancelled',''))['positions'],[])
         for kwargs in ({'cash':notice+self.cash()},{'late':notice+notice},
-                       {'late':frame(4,2,123,2100,'unrelated')}):
+                       {'late':frame(4,2,123,2100,'unrelated')},
+                       {'late':frame(4,2,-1,2100,'Account subscription cancelled','nonempty rejection')}):
             with self.assertRaises(ProbeError): self.payload(**kwargs)
 
     def test_account_not_ready_fails_in_both_phases(self):

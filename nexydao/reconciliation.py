@@ -127,7 +127,8 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
                 # Own completed subscription was explicitly cancelled. Handle
                 # exactly one global cancellation acknowledgement in this phase.
                 # The same code during an active cash subscription still fails.
-                if fields[:4] == ['4','2','-1','2100'] and len(fields) == 5 and not unsubscribe_notice_seen:
+                notice_layout = len(fields) == 5 or (len(fields) == 6 and fields[5] == '')
+                if fields[:4] == ['4','2','-1','2100'] and notice_layout and not unsubscribe_notice_seen:
                     unsubscribe_notice_seen = True
                     continue
                 check_error(fields)
