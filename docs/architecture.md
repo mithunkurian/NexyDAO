@@ -9,7 +9,7 @@ These safeguards are not trading signals or buy/sell strategies.
 
 | Role | Responsibility and authority | Milestone |
 |---|---|---|
-| Human owner | Invests capital into NexyDAO, controls access, intervenes when needed | All |
+| Human owner | Invests capital, controls access, sets binding constraints above all agents, intervenes when needed | All |
 | AI CEO | Mandate, strategy, operating budgets, performance oversight and investment/research proposals | 1; fuller operations 3–5 |
 | Research agents: opportunity, countercase | Independent ideas/challenges from typed filing facts; no direct source/network authority | Initial slice 2; eight-call live workflow validated |
 | Portfolio Manager | Allocation proposals, alternatives, aggregate exposures | 3 |
@@ -30,8 +30,9 @@ The owner's investment role means supplying capital to the company. Routine port
 investment decisions belong to the CEO and pass through independent risk and committee
 review. The owner has only three responsibilities: invest capital, grant/revoke access
 (including credentials and service permissions), and intervene or stop operations when
-needed. Routine strategy, budget planning and performance review do not require owner
-approval.
+needed. The owner can additionally set binding constraints that supersede every agent,
+including the CEO. Routine strategy, budget planning and performance review still do
+not require owner approval. See `owner-policy.md` for mandatory rules and extension.
 
 The CEO owns the investment mandate, strategy, acceptable operating risk within the
 enforced envelope, investment universe, operating budget planning, performance and cost
@@ -74,6 +75,7 @@ repeat all reviews. Abstaining or asking for research is a valid outcome.
 - `ibkr` / `market`: bounded read-only paper snapshots/quotes, local integrity and freshness checks.
 - `sec`: fixed public filing endpoints, typed source observations and signed receipts.
 - `research`: two independent reports, strict schemas and application-enforced numeric bindings.
+- `owner_policy`: protected, versioned owner constraints, immutable cycle snapshot and independent cash/short/leverage preflight denial.
 
 Models receive serialized data only. They have no credentials, shell, database,
 filesystem or broker tools. An injected instruction may influence prose but cannot

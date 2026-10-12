@@ -41,6 +41,9 @@ costs; routine owner approval is not required. Revisions require fresh reviews. 
 aggregate exposure, concentration, cash reserve, drawdown and stress loss limits.
 Evaluate diverse regimes and report net costs and performance against the objective.
 No indicator-based order rules.
+Apply the mandatory owner policy: long-only positions, no leverage/borrowing, settled
+cash/fee reservations and independently verified state. Owner constraints supersede
+all agents; portfolio accounting must enforce them for aggregate positions and FX.
 
 ## 4 — Authorization and tested paper execution
 
@@ -54,6 +57,9 @@ Security review and authorization acceptance checks precede narrowly authorized 
 orders. The owner grants or revokes broker/service access and can intervene; the CEO owns
 routine business policy and investment decisions within independently enforced limits.
 Execution remains disabled until all authorization acceptance checks pass.
+Future live execution additionally requires verified Swedish ISK account/instrument
+eligibility and applicable US/Swedish (including cross-border/EU) legal checks. Agent
+or environment assertions cannot substitute for independent attestation.
 
 ## 5 — Autonomous paper operations
 

@@ -20,6 +20,12 @@ needed. The CEO owns mandate, strategy, operating budget planning and performanc
 oversight. Routine investment decisions follow independent risk and committee review.
 Agents cannot change enforced safeguards or grant themselves execution authority.
 
+The owner can also set binding constraints above all agents. The mandatory rules are
+no short selling, no leverage/borrowing, applicable US/Swedish legal compliance, and
+independently verified Swedish ISK eligibility for any future live execution. See
+[owner policy setup and extension](docs/owner-policy.md). `python -m nexydao owner-policy`
+shows the active policy; execution remains disabled and legal/ISK checks are unresolved.
+
 ## Installation and offline testing (Python 3.12)
 
 ```bash
