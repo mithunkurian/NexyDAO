@@ -6,11 +6,14 @@ a **15% annual net return objective**, not a guaranteed result.
 Milestone 1 runs an AI CEO, two independent Risk Officers and three Investment Committee
 members sequentially. Decisions originate from model reasoning, with recorded rationale
 and citations. No indicator-based trading strategies are implemented. Broker execution
-is unconditionally disabled; IBKR is a paper-only denial stub. Verified market ingestion
-and execution authorization are later milestones.
+is unconditionally disabled. Operator commands can read a paper account summary and
+collect a signed, fresh bid/ask receipt. Research verification and execution authorization
+remain later milestones; a quote alone does not establish an investment thesis.
 
 See [architecture and workflow](docs/architecture.md), [roadmap](docs/roadmap.md) and
 [Google Cloud deployment](docs/deployment.md).
+Follow the [development tracker](docs/development-tracker.md) for the current work
+queue, acceptance checks, blockers and PR status.
 
 The human owner invests capital into NexyDAO, controls access and intervenes when
 needed. The CEO owns mandate, strategy, operating budget planning and performance
@@ -87,3 +90,8 @@ Current progress and validation are recorded in the [milestone register](docs/mi
 `python -m nexydao broker-check` retrieves a bounded private account snapshot from
 localhost paper Gateway. No orders or AI calls are made. See [setup, safeguards and
 limitations](docs/ibkr-paper.md). Execution remains disabled.
+
+`python -m nexydao market-check` collects one fresh bid/ask observation with an exact
+paper-account pin and a private receipt key. `deliberate --market-evidence PATH`
+verifies its signature and expiry before paid calls. See [quote setup and acceptance
+limits](docs/market-evidence.md). Full research verification is still pending.
