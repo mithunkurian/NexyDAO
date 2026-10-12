@@ -12,6 +12,9 @@ receipt key and API budget. Configure source access and SEC identification local
 Configure `NEXYDAO_OWNER_POLICY_FILE` to an owner-managed, service-read-only policy
 file for editable rules. Built-in mandatory constraints apply when unset. See
 [owner policy](owner-policy.md); no configuration flag verifies legal or ISK eligibility.
+The [USD portfolio trial](portfolio.md) uses the same persistent SQLite database and
+cost ledger. Never point simulation fixture commands at real broker execution; these
+commands have no broker capability. Preserve this database across release upgrades.
 
 ## Install and verify
 

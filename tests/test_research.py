@@ -24,6 +24,7 @@ from nexydao.sec import (ResearchConfig, SourceError, PublicTLS, MAX_BYTES, CONC
                         decode, extract, fetch, load_research_evidence, run_source_check, source_path)
 from nexydao.store import Store
 from nexydao.workflow import run_cycle
+from nexydao.portfolio_manager import PLAN
 
 
 class ResearchTests(unittest.TestCase):
@@ -256,6 +257,9 @@ class ResearchTests(unittest.TestCase):
             def __init__(self): self.calls = []
             def decide(self, run, role, instructions, context, schema):
                 self.calls.append((role, copy.deepcopy(context)))
+                if 'allocations' in schema['properties']:
+                    return {'allocations':[],'cash_target_usd':5000,'alternatives':'Await quote',
+                            'portfolio_risks':'Missing quotes','abstain_reason':'Insufficient price data'}
                 if 'candidates' in schema['properties']:
                     report = parent.report(evidence)
                     if mutate: mutate(report)
@@ -324,6 +328,17 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(len(provider.calls), 1)
         self.assertEqual(store.db.execute('SELECT status FROM runs').fetchone()[0], 'failed')
         self.assertEqual(store.memory(), [])
+
+    def test_nine_call_research_manager_review_preserves_owner_constraints(self):
+        evidence=self.receipt()
+        store=Store(self.root/'nine.sqlite3')
+        self.addCleanup(store.close)
+        provider=self.provider(evidence)
+        result=run_cycle(store,provider,evidence,research=True,portfolio=True)
+        self.assertEqual(len(provider.calls),9)
+        self.assertEqual(provider.calls[2][0],'portfolio_manager')
+        self.assertEqual(len(provider.calls[2][1]['research_reports']),2)
+        self.assertFalse(result['policy']['execution_authorized'])
 
     def test_expired_cli_receipt_prevents_paid_provider_and_db(self):
         self.receipt()

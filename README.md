@@ -110,3 +110,12 @@ six-role review, checking structured numeric claims against source facts. Interp
 and thesis prose remain unverified; execution is disabled. See [setup, source scope and
 eight-call acceptance](docs/research.md). Live retrieval requires a locally configured
 identifying SEC User-Agent.
+
+## Portfolio/accounting trial
+
+`portfolio-report` shows the persistent $5,000 USD simulation. `portfolio` adds an
+AI Portfolio Manager for a seven-call advisory cycle; `--with-research` makes nine.
+Independent accounting/risk checks enforce owned-only sells, settled funding, fees,
+concentration, exposure and drawdown. Explicit `sim-fill` / `sim-settle` commands are
+operator fixtures, not agent or broker orders. See [scope, commands and remaining
+accounting gates](docs/portfolio.md). FX, tax and broker reconciliation are unfinished.

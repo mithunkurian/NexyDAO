@@ -3,21 +3,21 @@
 Updated: **12 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; M2B quote collection and quote-fed AI cycle validated.
-**Next checkpoint:** Review owner-policy PR #5, then build simulated portfolio accounting under the mandatory constraints.
+**Next checkpoint:** Validate the USD ledger and Portfolio Manager cycle in PR #6; continue broader accounting/security gates.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
 
 | Item | Current position |
 | --- | --- |
-| Capital | $5,000 simulated starting capital; full portfolio accounting is not built yet |
+| Capital | Persistent $5,000 USD simulation ledger; full FX/tax/broker accounting still pending |
 | Objective | 15% annual net return; an objective, never a guarantee |
 | Investment decisions | AI reasoning supported by verified evidence; no hardcoded trading strategy |
 | Owner | Provides capital, controls access, sets binding owner constraints and intervenes when needed |
 | CEO | Routine mandate, strategy, investment/research proposals, budget planning and performance oversight within enforced limits |
 | Infrastructure | Ubuntu 24.04 VM, Python 3.12, 1 GB RAM + 1 GB swap; sustained operation still needs testing |
-| Current AI roles | Six-call core review; opt-in research adds opportunity and countercase agents for eight calls |
-| Autonomy | Bounded SEC research and eight-call review validated; scheduling, portfolio management and execution remain pending |
+| Current AI roles | Six core calls; eight with research; seven with Portfolio Manager; nine with both |
+| Autonomy | Research validated; advisory Portfolio Manager and USD ledger implemented; live PM acceptance, scheduling and execution pending |
 
 ## Milestone board
 
@@ -28,7 +28,7 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | M1 | Architecture and auditable AI deliberation | **Validated** | Real six-call VM cycle; strict records; persistent memory; settled costs; execution denial |
 | M2A | Read-only IBKR paper connectivity | **Validated** | Exact account pin matched; four summary fields; deliberate wrong pin rejected before summary |
 | M2B | Verified market evidence and research | **In progress** | Quote component, typed SEC source checks and two-researcher cycle validated. Wider narrative/cross-publisher corroboration remains pending |
-| M3 | Portfolio Manager and simulated accounting | **Planned** | Positions, cash, FX, fees, fills, reconciliation and aggregate risk limits |
+| M3 | Portfolio Manager and simulated accounting | **In progress** | USD ledger, fixtures, settlement, bid marking, aggregate risk and advisory manager implemented; live PM/VM acceptance and FX/tax/broker reconciliation pending |
 | M4 | Independent authorization and paper execution | **Planned; locked** | Isolated executor, signed permits, kill switch, exposure reservations and execution failure tests |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
 
@@ -49,7 +49,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
 | S03 · Sustained 1 GB trial | **Open** | Observe memory/swap under repeated workloads and recovery; one successful short trial is insufficient |
 | S04 · Collector/consumer OS separation | **Planned** | Separate service identities and protected configuration/key; compromised application code cannot forge collector receipts |
-| P01 · Simulated ledger and Portfolio Manager | **Planned after evidence work** | Reconcile the $5,000 portfolio, fees and proposals; independently enforce aggregate exposure and drawdown limits |
+| P01 · Simulated ledger and Portfolio Manager | **Implemented; 92 local tests passed** | Transactional USD fills/settlement, internal reconciliation, signed bid marks, aggregate constraints and seven/nine-call workflows; live/VM validation pending |
 | X01 · Authorization and executor | **Locked until M4 acceptance** | Forged, stale and replayed permits; duplicate/partial fills; restarts and account mismatch all fail safely |
 
 ## Market-open validation session — completed
@@ -106,9 +106,9 @@ No investment return has been measured.
 | [#2](https://github.com/mithunkurian/NexyDAO/pull/2) | Read-only paper-account probe and milestone marker | **Merged** |
 | [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Merged** |
 | [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Merged — `6a4b604`** |
-| [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Ready for review; live execution remains disabled** |
+| [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Merged — `a0ea0b6`** |
 
-Development branch: `codex/owner-policy`.
+Development branch: `codex/portfolio-accounting`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
 Merged baseline `b435b10` and quote implementation `abde107` were tested in isolated
 VM release directories. The existing VM repository and credential files were preserved.
@@ -136,4 +136,4 @@ refresh its budget. This page is a maintained snapshot, not a background monitor
 an automatically synchronized ChatGPT Page.
 
 Details: [milestone evidence](milestones.md) · [roadmap](roadmap.md) ·
-[architecture](architecture.md) · [quote trial](market-evidence.md) · [research trial](research.md) · [owner policy](owner-policy.md) · [deployment](deployment.md).
+[architecture](architecture.md) · [quote trial](market-evidence.md) · [research trial](research.md) · [portfolio trial](portfolio.md) · [owner policy](owner-policy.md) · [deployment](deployment.md).

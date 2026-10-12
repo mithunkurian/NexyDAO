@@ -12,7 +12,7 @@ These safeguards are not trading signals or buy/sell strategies.
 | Human owner | Invests capital, controls access, sets binding constraints above all agents, intervenes when needed | All |
 | AI CEO | Mandate, strategy, operating budgets, performance oversight and investment/research proposals | 1; fuller operations 3–5 |
 | Research agents: opportunity, countercase | Independent ideas/challenges from typed filing facts; no direct source/network authority | Initial slice 2; eight-call live workflow validated |
-| Portfolio Manager | Allocation proposals, alternatives, aggregate exposures | 3 |
+| Portfolio Manager | Evidence-based incremental allocation proposals, alternatives, portfolio risks; no ledger/broker mutation | Initial USD slice 3; operational acceptance pending |
 | Risk Officer: capital | Independent loss, sizing and liquidity challenges | 1 |
 | Risk Officer: evidence | Independent provenance and security challenges | 1 |
 | Committee: investment, fiduciary, audit | Three independent advisory votes | 1 |
@@ -49,8 +49,9 @@ decision rationale; budget management and performance accounting are not yet imp
 
 ## Decision workflow
 
-1. Controller verifies signed quote/SEC receipts or labels manual input unverified, and loads three recent completed records.
+1. Controller verifies signed quote/SEC receipts or labels manual input unverified, loads three recent completed records and internally reconciled simulation state.
    Opt-in research runs two independent reports first; application code checks numeric claim bindings.
+   Opt-in Portfolio Manager adds an independently checked plan before CEO review.
 2. CEO proposes a decision, rationale, risks, citations and invalidation conditions.
 3. Two risk officers independently pass, challenge or veto.
 4. Three committee members independently approve, revise or reject.
@@ -76,6 +77,8 @@ repeat all reviews. Abstaining or asking for research is a valid outcome.
 - `sec`: fixed public filing endpoints, typed source observations and signed receipts.
 - `research`: two independent reports, strict schemas and application-enforced numeric bindings.
 - `owner_policy`: protected, versioned owner constraints, immutable cycle snapshot and independent cash/short/leverage preflight denial.
+- `portfolio`: transactional USD simulation, quarantine/settlement, internal replay reconciliation and signed bid marks.
+- `portfolio_manager`: AI allocation reasoning with quote binding and independent funding/exposure checks; no mutation tools.
 
 Models receive serialized data only. They have no credentials, shell, database,
 filesystem or broker tools. An injected instruction may influence prose but cannot
@@ -92,9 +95,11 @@ An investment proposal always fails the evidence gate, even with unanimous appro
 No browser tools are enabled. Empty evidence should lead AI to hold or request research.
 The offline demo is a labeled plumbing fixture, never an investment strategy.
 
-The account view is empty simulated cash, not the IBKR balance. Illustrative safeguards
-cap proposals at $500 and require $4,000 remaining cash. These must be revisited with
-aggregate portfolio accounting before execution. No performance result is claimed.
+The account view is the USD simulation ledger, not the IBKR balance. Aggregate holdings,
+fees and API estimates/reserves count against the $500 position / $4,000 cash limits;
+gross exposure and drawdown limits also constrain new risk. Signed bid marking and
+internal reconciliation do not establish actual broker reconciliation or investment
+performance. FX/tax, corporate actions and authorization remain pending.
 Future net return accounting deducts broker fees, slippage and AI costs from marked equity.
 
 ## Costs, failure handling and limitations
