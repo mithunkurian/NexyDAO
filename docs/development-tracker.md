@@ -2,7 +2,7 @@
 
 Updated: **12 October 2026 · Europe/Stockholm**
 
-**Current checkpoint:** M2A validated; M2B quote collection and quote-fed AI cycle validated.
+**Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
 **Next checkpoint:** Host ingress restriction and authenticated account-summary audit; then complete broker accounting and executor isolation.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
@@ -45,13 +45,13 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | E04 · Research agents and approved sources | **Validated · 12 Oct** | Two live SEC observations and independent reports; eight-call cycle completed with tightened schema; initial safety rejection retained in audit |
 | E05 · Research verification | **Partial; offline tested** | Typed numeric claim binding, source identity, signatures, freshness and contradictions. Prose/forecasts and cross-publisher corroboration remain unverified |
 | O01 · Mandatory owner policy | **Validated implementation; 76 tests passed locally/VM/CI** | No shorts, leverage or borrowing; applicable US/Swedish compliance; Swedish ISK for future live execution. Versioned extensions and independent denial; legal/account/holder attestation pending |
-| S01 · Independent broker ingress restriction | **Implementation tested; VM validation pending** | Narrow root-owned IPv4/IPv6 host guard; cloud policy and boot/recovery verification remain separate |
+| S01 · Independent broker ingress restriction | **Host guard validated; wider security gates open** | Kernel rule verified on VM for IPv4/IPv6; service enabled/active; SSH and loopback VNC preserved. Cloud policy, boot and OS isolation remain open |
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
 | S03 · Sustained 1 GB trial | **Open** | Observe memory/swap under repeated workloads and recovery; one successful short trial is insufficient |
 | S04 · Collector/consumer OS separation | **Planned** | Separate service identities and protected configuration/key; compromised application code cannot forge collector receipts |
 | P01 · Simulated ledger and Portfolio Manager | **USD slice validated; 92 tests locally/VM/CI** | Seven paid calls completed with safe quote-free abstention; persistent $5,000 funding unchanged. Positive quote-backed plans/nine-call combination tested offline; broader/live allocation coverage pending |
 | X01 · Authorization and executor | **Locked until M4 acceptance** | Forged, stale and replayed permits; duplicate/partial fills; restarts and account mismatch all fail safely |
-| A01 · Authenticated account summaries | **104 offline tests passed; fresh VM trial pending** | Exact pin, HMAC and 60-second expiry; explicit missing settled cash/positions/orders/fills. No funding import or reconciliation claim |
+| A01 · Authenticated account summaries | **104 tests locally/VM/CI; fresh paper trial pending** | Exact pin, HMAC and 60-second expiry; explicit missing settled cash/positions/orders/fills. No funding import or reconciliation claim |
 
 ## Market-open validation session — completed
 
@@ -97,6 +97,9 @@ Quote verification validates an observation; full investment research still requ
 | 12 Oct 2026 | Portfolio tests | Implementation `4398122`: 92 tests passed locally, Ubuntu VM and CI; ledger/concurrency/reconciliation and advisory seven/nine-call flows |
 | 12 Oct 2026 | Paid Portfolio Manager | Run `5666cb3b-1f13-4b79-aca4-d296ad2d008b`: seven calls, zero allocations without fresh quotes; CEO `investigate`; no simulated fills, revision unchanged, execution false |
 | 12 Oct 2026 | Portfolio costs/state | Cycle **$0.00669150**; cumulative **$0.01595760** over 29 calls; zero unsettled reservations. Memory persisted; $5,000 ledger funding seeded once and retained; internal reconciliation passed |
+| 12 Oct 2026 | Host guard and account audit tests | `7cf7809`: 104 tests passed locally, Ubuntu VM and CI; no OpenAI calls |
+| 12 Oct 2026 | Host guard deployment | Initial Windows archive line endings prevented service execution; Git attributes corrected. Final service enabled/active and exact kernel IPv4/IPv6 drop rule verified; SSH and loopback VNC preserved |
+| 12 Oct 2026 | VNC recovery | Owner reported 10061; local tunnel had stopped. Restored localhost forwarding and verified VNC banner at `127.0.0.1:15901`; Gateway authentication and fresh account audit pending |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
@@ -112,6 +115,7 @@ No investment return has been measured.
 | [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Merged — `6a4b604`** |
 | [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Merged — `a0ea0b6`** |
 | [#6](https://github.com/mithunkurian/NexyDAO/pull/6) | USD ledger and advisory Portfolio Manager | **Merged — `268f364`; limited USD slice, execution disabled** |
+| [#7](https://github.com/mithunkurian/NexyDAO/pull/7) | Host ingress guard and authenticated account summaries | **Draft — VM host protection validated; account trial pending** |
 
 Development branch: `codex/broker-access-audit`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).

@@ -189,3 +189,21 @@ Internal reconciliation and completed memory persistence passed. Cycle estimate 
 $0.00669150; cumulative $0.01595760 over 29 calls, zero unsettled reservations, under
 the existing $0.10 lifetime budget. Positive quote-backed allocation and nine-call
 coverage are offline-only; actual broker/FX/tax accounting and execution remain open.
+
+## Broker ingress and account audit, 2026-10-12
+
+PR #6 merged as `268f364`. Release `7cf7809` passed all 104 tests locally, on the
+Ubuntu VM and in CI. A narrow root-owned nftables service was installed, enabled
+and verified active. Its exact kernel rule drops non-loopback TCP packets to broker
+and VNC ports for IPv4 and IPv6, preserving SSH and localhost traffic. A fresh SSH
+tunnel connected after installation and returned the VNC protocol banner.
+The first service attempt failed on Windows archive line endings; explicit Git
+attributes corrected the Linux script/unit exports and the follow-up passed.
+
+Signed summary validation is offline/VM tested: exact pin, 60-second expiry, HMAC,
+bounded values, stale/altered/duplicate rejection and private reports. A fresh paper
+account collection is pending owner Gateway authentication. Balances are never
+imported into the $5,000 simulation; complete reconciliation remains false pending
+settled cash, positions/contracts, orders, fills/fees and external transfers.
+Cloud policy, boot recovery, sustained operation and OS separation are still open.
+No additional OpenAI calls or orders were made. See `broker-access.md`.
