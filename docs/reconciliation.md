@@ -83,10 +83,12 @@ comparison time; future authorization must independently check freshness and rev
 python3 -m unittest discover -s tests
 ```
 
-123 tests passed locally, including closed read-only messages/cancellation, exact
+Release `0ff1b3a` passed all 123 tests locally, on Ubuntu VM and in CI, including
+closed read-only messages/cancellation, exact
 pinning, both completion markers, stale/wrong-pin/tampered receipts, currency gaps,
 duplicates, racing cash, negative balances and contract-based comparisons without
-funding imports. VM/CI and fresh paper acceptance are pending for this implementation.
+funding imports. Following owner reauthentication after the timed Gateway trial
+expired, a spaced client 95 collection/consumer trial passed on this release.
 Deploy in a new isolated release as in [deployment instructions](deployment.md);
 preserve the existing credential directory, persistent cost DB, private owner policy
 and receipt key. No new credentials or packages are required.
@@ -96,6 +98,25 @@ The collector normalizes that prefix only for its closed cash-tag set. It handle
 one global 2100 cancellation acknowledgement only after its own completed cash
 subscription was cancelled; 2100 during collection or repeated acknowledgements
 still fail. AccountReady false fails in either download phase.
+Protocol 178 may append an empty advanced-rejection field to that acknowledgement;
+only the empty field is accepted. Nonempty rejection details still stop collection.
 The observed `SettledCashByDate` schedule is explicitly marked unparsed; its values
 are not interpreted as current settled cash. Per-currency settlement validation
 remains open whenever no explicit SettledCash value is returned.
+
+## Fresh paper acceptance — 12 October 2026
+
+The final trial collected six currency cash rows across three currencies and a
+completed empty position download. The consumer verified the signed receipt;
+wrong-account and exact expiry-boundary checks rejected it as intended. Private
+receipt mode was 0600; simulation state/revision and persistent API costs were
+unchanged. The host guard remained verified. No orders or OpenAI calls occurred.
+
+Both broker and simulation had zero positions. That comparison passed, but no
+positive-position match is claimed as live tested. Current per-currency SettledCash
+was absent; the observed settlement schedule was left unparsed. At least one
+currency cash observation was negative. This requires resolution before any future
+funding approval; a cash observation alone does not establish its economic cause.
+No balance was imported, converted or changed to make the comparison pass.
+Full reconciliation and broker funding verification remain false. A post-login
+probe initially disconnected; the spaced trial passed, and reliability remains open.
