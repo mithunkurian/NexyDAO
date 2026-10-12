@@ -28,8 +28,13 @@ it is not broker reconciliation or protection against an administrator rewriting
 Sale receipts are quarantined as unsettled cash until an explicit simulation settlement
 step. No broker/calendar settlement timetable is assumed. This is a workflow for testing
 accounting, not permission to spend actual unsettled proceeds. Unknown currency/FX,
-CFDs, shorts and non-stock fixture types fail. Contributions, withdrawals, corporate
-actions, dividends, taxes, broker settlement calendars, FIFO/tax lots and FX accounting
+CFDs, shorts and non-stock fixture types fail.
+
+The `STK` wire classification is not proof that a product is unleveraged or ISK-eligible.
+Actual instrument eligibility must be independently verified by the future executor;
+current proposals/fixtures cannot authorize that exposure or certify eligibility.
+
+Contributions, withdrawals, corporate actions, dividends, taxes, broker settlement calendars, FIFO/tax lots and FX accounting
 are **not yet implemented**. Weighted-average basis is only a simulation accounting
 choice, not an ISK tax calculation. Full M3 acceptance remains broader than this slice.
 
@@ -104,3 +109,9 @@ call non-mutating workflows. Fixtures are not verified investment performance.
 Deploy to an isolated release on the VM first, preserving credentials, owner policy,
 source keys and the existing API cost database. Validate one paid Portfolio Manager
 cycle and retain call/cost/memory results before marking operational acceptance.
+
+On 2026-10-12, implementation `4398122` passed 92 tests locally/VM/CI and a paid
+seven-call manager cycle with signed SEC observations. No quote was supplied, so
+the manager abstained from allocations and the CEO investigated. Accounting state
+did not change; funds, memory and internal reconciliation persisted. This validates
+the abstention/review path, not a live quote-backed allocation or broker-fill process.

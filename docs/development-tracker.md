@@ -3,7 +3,7 @@
 Updated: **12 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; M2B quote collection and quote-fed AI cycle validated.
-**Next checkpoint:** Validate the USD ledger and Portfolio Manager cycle in PR #6; continue broader accounting/security gates.
+**Next checkpoint:** Review/merge PR #6; extend FX/tax/broker accounting and independent execution/security gates.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -17,7 +17,7 @@ Updated: **12 October 2026 · Europe/Stockholm**
 | CEO | Routine mandate, strategy, investment/research proposals, budget planning and performance oversight within enforced limits |
 | Infrastructure | Ubuntu 24.04 VM, Python 3.12, 1 GB RAM + 1 GB swap; sustained operation still needs testing |
 | Current AI roles | Six core calls; eight with research; seven with Portfolio Manager; nine with both |
-| Autonomy | Research validated; advisory Portfolio Manager and USD ledger implemented; live PM acceptance, scheduling and execution pending |
+| Autonomy | Research and seven-call advisory Portfolio Manager validated; scheduling, broader accounting and execution pending |
 
 ## Milestone board
 
@@ -28,7 +28,7 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | M1 | Architecture and auditable AI deliberation | **Validated** | Real six-call VM cycle; strict records; persistent memory; settled costs; execution denial |
 | M2A | Read-only IBKR paper connectivity | **Validated** | Exact account pin matched; four summary fields; deliberate wrong pin rejected before summary |
 | M2B | Verified market evidence and research | **In progress** | Quote component, typed SEC source checks and two-researcher cycle validated. Wider narrative/cross-publisher corroboration remains pending |
-| M3 | Portfolio Manager and simulated accounting | **In progress** | USD ledger, fixtures, settlement, bid marking, aggregate risk and advisory manager implemented; live PM/VM acceptance and FX/tax/broker reconciliation pending |
+| M3 | Portfolio Manager and simulated accounting | **In progress** | USD ledger and advisory manager slice tested/VM-validated. Quote-backed allocations tested offline; FX/tax/corporate actions and actual broker reconciliation pending |
 | M4 | Independent authorization and paper execution | **Planned; locked** | Isolated executor, signed permits, kill switch, exposure reservations and execution failure tests |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
 
@@ -49,7 +49,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
 | S03 · Sustained 1 GB trial | **Open** | Observe memory/swap under repeated workloads and recovery; one successful short trial is insufficient |
 | S04 · Collector/consumer OS separation | **Planned** | Separate service identities and protected configuration/key; compromised application code cannot forge collector receipts |
-| P01 · Simulated ledger and Portfolio Manager | **Implemented; 92 local tests passed** | Transactional USD fills/settlement, internal reconciliation, signed bid marks, aggregate constraints and seven/nine-call workflows; live/VM validation pending |
+| P01 · Simulated ledger and Portfolio Manager | **USD slice validated; 92 tests locally/VM/CI** | Seven paid calls completed with safe quote-free abstention; persistent $5,000 funding unchanged. Positive quote-backed plans/nine-call combination tested offline; broader/live allocation coverage pending |
 | X01 · Authorization and executor | **Locked until M4 acceptance** | Forged, stale and replayed permits; duplicate/partial fills; restarts and account mismatch all fail safely |
 
 ## Market-open validation session — completed
@@ -93,6 +93,9 @@ Quote verification validates an observation; full investment research still requ
 | 12 Oct 2026 | Schema correction | Dataset-specific issuer/reference enums, candidate bounds and required nonempty claims added; 66 local tests passed; live retest pending |
 | 12 Oct 2026 | Live research retest | Implementation `c21c998`; all 66 VM tests/CI passed. Run `01ad46d4-0ba0-4d8f-ba55-d392a518df60`: eight calls, two independent reports with one candidate each, two risk reviews, three votes; CEO chose `investigate`; execution false |
 | 12 Oct 2026 | Research costs and memory | Successful cycle **$0.00530400**; cumulative **$0.00926610** over 22 calls including the failed attempt; zero unsettled reservations. Memory persisted after reopening |
+| 12 Oct 2026 | Portfolio tests | Implementation `4398122`: 92 tests passed locally, Ubuntu VM and CI; ledger/concurrency/reconciliation and advisory seven/nine-call flows |
+| 12 Oct 2026 | Paid Portfolio Manager | Run `5666cb3b-1f13-4b79-aca4-d296ad2d008b`: seven calls, zero allocations without fresh quotes; CEO `investigate`; no simulated fills, revision unchanged, execution false |
+| 12 Oct 2026 | Portfolio costs/state | Cycle **$0.00669150**; cumulative **$0.01595760** over 29 calls; zero unsettled reservations. Memory persisted; $5,000 ledger funding seeded once and retained; internal reconciliation passed |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
@@ -107,6 +110,7 @@ No investment return has been measured.
 | [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Merged** |
 | [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Merged — `6a4b604`** |
 | [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Merged — `a0ea0b6`** |
+| [#6](https://github.com/mithunkurian/NexyDAO/pull/6) | USD ledger and advisory Portfolio Manager | **Ready for review — limited USD slice, execution disabled** |
 
 Development branch: `codex/portfolio-accounting`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).

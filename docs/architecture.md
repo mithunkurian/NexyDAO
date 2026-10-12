@@ -12,7 +12,7 @@ These safeguards are not trading signals or buy/sell strategies.
 | Human owner | Invests capital, controls access, sets binding constraints above all agents, intervenes when needed | All |
 | AI CEO | Mandate, strategy, operating budgets, performance oversight and investment/research proposals | 1; fuller operations 3–5 |
 | Research agents: opportunity, countercase | Independent ideas/challenges from typed filing facts; no direct source/network authority | Initial slice 2; eight-call live workflow validated |
-| Portfolio Manager | Evidence-based incremental allocation proposals, alternatives, portfolio risks; no ledger/broker mutation | Initial USD slice 3; operational acceptance pending |
+| Portfolio Manager | Evidence-based incremental allocation proposals, alternatives, portfolio risks; no ledger/broker mutation | Initial USD slice 3; seven-call live abstention validated, positive allocation offline-tested |
 | Risk Officer: capital | Independent loss, sizing and liquidity challenges | 1 |
 | Risk Officer: evidence | Independent provenance and security challenges | 1 |
 | Committee: investment, fiduciary, audit | Three independent advisory votes | 1 |
