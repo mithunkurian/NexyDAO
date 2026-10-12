@@ -207,3 +207,14 @@ imported into the $5,000 simulation; complete reconciliation remains false pendi
 settled cash, positions/contracts, orders, fills/fees and external transfers.
 Cloud policy, boot recovery, sustained operation and OS separation are still open.
 No additional OpenAI calls or orders were made. See `broker-access.md`.
+
+Following owner authentication, the fresh paper-summary trial on release `7cf7809`
+passed with client 95. Earlier probes stopped safely on notification 10141; no
+warning allowlist, account checks or authorization controls were relaxed. Four
+summary fields were collected, signed and consumed before expiry. A different
+account pin and the exact 60-second expiry boundary both failed validation.
+The receipt is private mode 0600, and simulation cash/unsettled cash/revision were
+unchanged. USD summary coverage was incomplete; no negative summary values were
+observed. This establishes the initial authenticated summary slice only, not USD
+funding, complete reconciliation, reliable reconnection or execution readiness.
+No OpenAI calls or orders were made in this trial.

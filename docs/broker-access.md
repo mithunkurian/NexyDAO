@@ -70,3 +70,17 @@ paper balance to the $5,000 simulation or import broker money into the ledger. S
 
 Offline tests cover altered rules, wrong interface/family/ports, timeouts, tampering,
 wrong pins, expiry, duplicate/missing/nonfinite values and failed receipt preservation.
+
+## Recorded VM trial — 12 October 2026
+
+Release `7cf7809` passed all 104 tests locally, on Ubuntu and in CI. The installed
+service was enabled/active; exact IPv4/IPv6 kernel protection and a repeat restart
+were verified. SSH and loopback VNC remained usable. The initial Windows archive
+line-ending failure was corrected with explicit Git attributes for deployment files.
+
+After owner paper login, a spaced client 95 audit collected four summary fields,
+signed the private receipt and validated it through the consumer. Wrong-pin and
+expiry-boundary checks failed as intended, and ledger cash/revision stayed unchanged.
+USD summary coverage was incomplete. Earlier startup probes rejected notification
+10141; the successful trial retained the same strict error handling. Reconnection
+reliability remains open. No OpenAI requests, funding imports or orders occurred.
