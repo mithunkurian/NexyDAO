@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "policy_version": 1,
+  "no_short_selling": true,
+  "no_leverage_or_borrowing": true,
+  "legal_jurisdictions": ["US", "SE"],
+  "live_account_type": "ISK",
+  "live_account_country": "SE",
+  "blocked_symbols": [],
+  "max_position_usd": "500",
+  "min_cash_reserve_usd": "4000",
+  "additional_rules": []
+}

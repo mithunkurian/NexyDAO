@@ -3,7 +3,7 @@
 Updated: **12 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; M2B quote collection and quote-fed AI cycle validated.
-**Next checkpoint:** Review/merge PR #4; extend evidence coverage and build simulated portfolio accounting.
+**Next checkpoint:** Review owner-policy PR #5, then build simulated portfolio accounting under the mandatory constraints.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -13,7 +13,7 @@ Updated: **12 October 2026 · Europe/Stockholm**
 | Capital | $5,000 simulated starting capital; full portfolio accounting is not built yet |
 | Objective | 15% annual net return; an objective, never a guarantee |
 | Investment decisions | AI reasoning supported by verified evidence; no hardcoded trading strategy |
-| Owner | Provides capital, controls access and intervenes when needed |
+| Owner | Provides capital, controls access, sets binding owner constraints and intervenes when needed |
 | CEO | Routine mandate, strategy, investment/research proposals, budget planning and performance oversight within enforced limits |
 | Infrastructure | Ubuntu 24.04 VM, Python 3.12, 1 GB RAM + 1 GB swap; sustained operation still needs testing |
 | Current AI roles | Six-call core review; opt-in research adds opportunity and countercase agents for eight calls |
@@ -44,6 +44,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | E03 · PR #3 | **Merged** | Merge commit `bf94f8a`; local main synced; execution remains disabled |
 | E04 · Research agents and approved sources | **Validated · 12 Oct** | Two live SEC observations and independent reports; eight-call cycle completed with tightened schema; initial safety rejection retained in audit |
 | E05 · Research verification | **Partial; offline tested** | Typed numeric claim binding, source identity, signatures, freshness and contradictions. Prose/forecasts and cross-publisher corroboration remain unverified |
+| O01 · Mandatory owner policy | **Validated implementation; 76 tests passed locally/VM/CI** | No shorts, leverage or borrowing; applicable US/Swedish compliance; Swedish ISK for future live execution. Versioned extensions and independent denial; legal/account/holder attestation pending |
 | S01 · Independent broker ingress restriction | **Open** | Verify VM/cloud enforcement prevents remote API access; Gateway was observed bound to a wildcard socket |
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
 | S03 · Sustained 1 GB trial | **Open** | Observe memory/swap under repeated workloads and recovery; one successful short trial is insufficient |
@@ -104,9 +105,10 @@ No investment return has been measured.
 | [#1](https://github.com/mithunkurian/NexyDAO/pull/1) | Foundation, hierarchy, AI deliberation, records, memory, costs and safeguards | **Merged** |
 | [#2](https://github.com/mithunkurian/NexyDAO/pull/2) | Read-only paper-account probe and milestone marker | **Merged** |
 | [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Merged** |
-| [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Ready for review — live acceptance passed** |
+| [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Merged — `6a4b604`** |
+| [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Ready for review; live execution remains disabled** |
 
-Development branch: `codex/research-verification`.
+Development branch: `codex/owner-policy`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
 Merged baseline `b435b10` and quote implementation `abde107` were tested in isolated
 VM release directories. The existing VM repository and credential files were preserved.
@@ -117,6 +119,9 @@ The quote trial is not a production deployment or authorization to trade.
 - Agents have no filesystem, shell, credential or broker execution tools.
 - Broker execution remains unconditionally denied, regardless of CEO or committee approval.
 - Owner access control and intervention remain independent of agent decisions.
+- Binding owner constraints outrank all agents; new rules require independent enforcement before investment authorization.
+- Owner-policy baseline `d34f605` passed 75 VM/CI tests with a private policy file and retained audit hash; the added snapshot-construction guard brings local tests to 76.
+- Final implementation `ad1fe0d` passed all 76 tests on the VM and in CI; no paid API or broker operations were performed.
 - Paper-account identity and exact pin are checked independently before market requests.
 - Signed receipts establish local integrity, not an IBKR signature or verified investment thesis.
 - OS isolation, aggregate portfolio risk accounting and executor authorization remain explicit future gates.
@@ -131,4 +136,4 @@ refresh its budget. This page is a maintained snapshot, not a background monitor
 an automatically synchronized ChatGPT Page.
 
 Details: [milestone evidence](milestones.md) · [roadmap](roadmap.md) ·
-[architecture](architecture.md) · [quote trial](market-evidence.md) · [research trial](research.md) · [deployment](deployment.md).
+[architecture](architecture.md) · [quote trial](market-evidence.md) · [research trial](research.md) · [owner policy](owner-policy.md) · [deployment](deployment.md).

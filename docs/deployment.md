@@ -9,6 +9,9 @@ The optional [market quote trial](market-evidence.md) requires a private receipt
 exact account pin and fresh market data; neither command enables execution.
 The opt-in [research trial](research.md) uses the same persistent database, private
 receipt key and API budget. Configure source access and SEC identification locally.
+Configure `NEXYDAO_OWNER_POLICY_FILE` to an owner-managed, service-read-only policy
+file for editable rules. Built-in mandatory constraints apply when unset. See
+[owner policy](owner-policy.md); no configuration flag verifies legal or ISK eligibility.
 
 ## Install and verify
 

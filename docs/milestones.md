@@ -152,3 +152,17 @@ unsettled reservations under the unchanged $0.10 lifetime budget. Completed memo
 survived reopening SQLite. No contact, credentials or raw receipts were committed.
 This passes the initial SEC research workflow's live gates, not all M2B verification,
 investment quality, unattended reliability, portfolio accounting or order authorization.
+
+## Owner-policy milestone, 2026-10-12
+
+PR #4 merged as `6a4b604`. Binding owner constraints now supersede every agent:
+no shorts, no leverage/borrowing, applicable US/Swedish legal compliance, and verified
+Swedish ISK eligibility before any future live execution. Versioned configuration
+supports additional rules and tighter limits. Policy changes stop active reviews;
+legal/account verification remains unresolved and execution always denied.
+Baseline `d34f605` passed 75 tests on the VM/CI and an offline policy/audit check.
+A direct snapshot-construction guard adds another local passing test (76 total).
+No paid API, live account changes or orders were made for this milestone.
+Final implementation `ad1fe0d8afacd5c2609408a706975f8eef9b8d63` also passed all 76
+tests on the VM and in CI. PR #5 is ready for code review; legal/account/holder/asset
+eligibility and future authorization remain open gates, not agent-certified facts.

@@ -269,6 +269,11 @@ class ResearchTests(unittest.TestCase):
         provider = self.provider(evidence)
         result = run_cycle(store, provider, evidence, research=True)
         self.assertEqual(len(provider.calls), 8)
+        for role, context in provider.calls:
+            self.assertTrue(context['owner_policy']['no_short_selling'])
+            self.assertTrue(context['owner_policy']['no_leverage_or_borrowing'])
+            self.assertEqual(context['owner_policy']['legal_jurisdictions'], ['US', 'SE'])
+            self.assertEqual(context['owner_policy']['live_account_type'], 'ISK')
         self.assertEqual(provider.calls[0][1], provider.calls[1][1])
         self.assertNotIn('research_reports', provider.calls[1][1])
         self.assertEqual(len(provider.calls[2][1]['research_reports']), 2)

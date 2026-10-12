@@ -2,7 +2,7 @@
 import math
 
 SCHEMA_VERSION = 1
-PROMPT_VERSION = 5
+PROMPT_VERSION = 6
 
 
 def schema(properties):

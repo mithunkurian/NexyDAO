@@ -19,8 +19,8 @@ Other evidence and prior memory are unverified. Do not invent prices, sources or
 choose hold/investigate or reject/revise. You have no execution, credentials, filesystem
 or policy modification tools. Approval is advisory and never authorizes broker access.
 Cite only evidence IDs provided; an empty citation list is permitted for abstention.
-The human owner's roles are only to invest capital into NexyDAO, control access and
-intervene when needed. The CEO owns mandate, strategy, operating budget planning and
+The human owner invests capital, controls access, sets binding owner constraints and
+intervenes when needed. The CEO owns mandate, strategy, operating budget planning and
 performance oversight. Routine decisions require independent risk/committee review,
 not owner approval. CEO responsibility never permits overriding enforced capital or
 spending limits, granting access, changing safeguards or enabling execution.
@@ -48,27 +48,32 @@ def load_evidence(path):
     return [{**item, "verification": "unverified"} for item in items]
 
 
-def run_cycle(store, provider, evidence, research=False):
+def run_cycle(store, provider, evidence, research=False, owner_policy=None):
+    from .owner_policy import from_env
+    owner_policy = owner_policy or from_env()
+    owner_policy.assert_current()
     mode = getattr(provider, "mode", "ai")
     run = store.start(mode)
     try:
         context = {"evidence": evidence, "memory": store.memory(),
                    "account": {"simulated_capital_usd": 5000, "positions": [],
                                "annual_net_target": 0.15, "execution_enabled": False},
-                   "api_costs": store.costs()}
+                   "api_costs": store.costs(), "owner_policy": owner_policy.document(),
+                   "owner_policy_sha256": owner_policy.digest}
         store.event(run, "input", context)
         reports = []
         if research:
             from .research import run_research
-            reports = run_research(store, provider, run, evidence)
+            reports = run_research(store, provider, run, evidence, owner_policy)
             context['research_reports'] = reports
 
         def ask(role, instructions, spec, data):
+            owner_policy.assert_current()
             from .market import check_evidence_freshness
             from .sec import check_research_freshness
             check_evidence_freshness(evidence)
             check_research_freshness(evidence)
-            result = provider.decide(run, role, COMMON + instructions, data, spec)
+            result = provider.decide(run, role, COMMON + owner_policy.instructions() + instructions, data, spec)
             validate(result, spec)
             validate_references(result, evidence)
             store.event(run, role, result)
@@ -89,7 +94,9 @@ def run_cycle(store, provider, evidence, research=False):
                      ("audit", "Vote independently on evidence sufficiency and conflicts of interest.")]]
         result = {"schema_version": SCHEMA_VERSION, "prompt_version": PROMPT_VERSION, "mode": mode,
                   "run_id": run, "proposal": proposal, "risk_reviews": reviews,
-                  "committee_votes": votes, "policy": evaluate(proposal, reviews, votes),
+                  "committee_votes": votes, "policy": evaluate(proposal, reviews, votes, owner_policy),
+                  "owner_policy_version": owner_policy.document()['policy_version'],
+                  "owner_policy_sha256": owner_policy.digest,
                   "api_costs": store.costs()}
         if research:
             result['research_reports'] = reports
@@ -97,6 +104,7 @@ def run_cycle(store, provider, evidence, research=False):
         from .sec import check_research_freshness
         check_evidence_freshness(evidence)
         check_research_freshness(evidence)
+        owner_policy.assert_current()
         store.event(run, "policy", result["policy"])
         store.finish(run, "completed", result)
         return result

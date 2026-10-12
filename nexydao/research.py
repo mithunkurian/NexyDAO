@@ -61,18 +61,20 @@ def report_schema(evidence):
     return spec
 
 
-def run_research(store, provider, run, evidence):
+def run_research(store, provider, run, evidence, owner_policy):
     facts = [e for e in evidence if e.get('verification') == 'verified_filing_observation']
     if not facts:
         raise SourceError('verified_filing_observations_required')
     context = {'filing_observations': facts, 'memory': store.memory(),
-               'scope': 'Filing observations only; no current valuation or investment authorization.'}
+               'scope': 'Filing observations only; no current valuation or investment authorization.',
+               'owner_policy': owner_policy.document(), 'owner_policy_sha256': owner_policy.digest}
     reports = []
     # Both receive the same facts; neither receives the other's report.
     for role, focus in [('research_opportunity', 'Identify potential opportunities and competing explanations.'),
                         ('research_countercase', 'Independently search for downside, contradictions and missing evidence.')]:
         check_research_freshness(facts)
-        report = provider.decide(run, role, INSTRUCTIONS + focus, context, report_schema(facts))
+        owner_policy.assert_current()
+        report = provider.decide(run, role, INSTRUCTIONS + owner_policy.instructions() + focus, context, report_schema(facts))
         validate_claims(report, facts)
         check_research_freshness(facts)
         store.event(run, role, {'report': report, 'numeric_claim_bindings': 'matched_source_observations',

@@ -5,6 +5,7 @@ from pathlib import Path
 from .config import Config
 from .ibkr import ProbeError
 from .sec import SourceError
+from .owner_policy import OwnerPolicyError, from_env as owner_policy_from_env
 from .provider import OpenAIProvider
 from .records import PROPOSAL, REVIEW
 from .store import Store
@@ -26,7 +27,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "market-check", "source-check", "research"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "market-check", "source-check", "research", "owner-policy"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -34,8 +35,13 @@ def main():
     store = None
     try:
         config = Config.from_env()
+        owner_policy = owner_policy_from_env()
         if (args.evidence or args.market_evidence or args.research_evidence) and args.command not in {"demo", "deliberate", "research"}:
             raise ValueError("Evidence arguments apply only to deliberation")
+        if args.command == 'owner-policy':
+            print(json.dumps({'policy': owner_policy.document(), 'sha256': owner_policy.digest,
+                              'execution_authorized': False}, indent=2))
+            return
         if args.command == 'source-check':
             from .sec import ResearchConfig, run_source_check
             print(json.dumps(run_source_check(ResearchConfig.from_env()), indent=2))
@@ -64,9 +70,9 @@ def main():
             result = store.costs()
         else:
             provider = DemoProvider() if args.command == "demo" else OpenAIProvider(config, store)
-            result = run_cycle(store, provider, evidence, research=args.command == 'research')
+            result = run_cycle(store, provider, evidence, research=args.command == 'research', owner_policy=owner_policy)
         print(json.dumps(result, indent=2))
-    except (ProbeError, SourceError) as exc:
+    except (ProbeError, SourceError, OwnerPolicyError) as exc:
         # All ProbeError messages are fixed local codes, never vendor response text.
         parser.exit(1, f"NexyDAO stopped safely ({exc}). Execution remains disabled.\n")
     except Exception as exc:

@@ -7,8 +7,12 @@ MAX_POSITION = Decimal("500")
 MIN_CASH_RESERVE = Decimal("4000")
 
 
-def evaluate(proposal, reviews, votes):
+def evaluate(proposal, reviews, votes, owner_policy=None):
+    from .owner_policy import from_env, proposal_reasons
+    owner_policy = owner_policy or from_env()
+    owner_policy.assert_current()
     reasons = ["execution_disabled_milestone_1"]
+    reasons.extend(proposal_reasons(proposal, owner_policy))
     if proposal["action"] == "propose_investment":
         reasons.append("verified_market_evidence_pipeline_not_implemented")
         if not proposal["symbol"] or not proposal["evidence_ids"] or proposal["allocation_usd"] <= 0:
