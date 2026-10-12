@@ -18,6 +18,11 @@ CASH_TAGS = {'CashBalance', 'SettledCash', 'TotalCashBalance'}
 NUMBER = r'-?[0-9]{1,16}(?:\.[0-9]{1,12})?'
 
 
+def cash_tag(tag):
+    # Gateway 1050 observed prefix for currency ledger values. No fuzzy aliases.
+    return tag.removeprefix('$LEDGER-')
+
+
 def number(value):
     if not isinstance(value, str) or not re.fullmatch(NUMBER, value):
         raise ProbeError('invalid_reconciliation_number')
@@ -58,6 +63,7 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
     started = clock()
     deadline = time.monotonic() + config.timeout
     cash, holdings = {}, {}
+    schedule_unparsed = False
     with connector((config.host, config.port), timeout=config.timeout) as sock:
         sock.sendall(b'API\0' + struct.pack('!I', 9) + b'v100..178')
         wire = Wire(sock, deadline)
@@ -95,6 +101,9 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
                     if len(fields) != 6 or fields[1] != '2' or fields[5] != account:
                         raise ProbeError('invalid_cash_update_account_or_layout')
                     tag, value, denomination = fields[2:5]
+                    if tag == 'AccountReady' and value != 'true': raise ProbeError('broker_account_not_ready')
+                    if tag == 'SettledCashByDate': schedule_unparsed = True
+                    tag = cash_tag(tag)
                     if tag not in CASH_TAGS or denomination == 'BASE': continue
                     if not currency(denomination): raise ProbeError('invalid_cash_currency')
                     number(value)
@@ -111,15 +120,28 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
             try: send('cancel_cash')
             except (OSError, ProbeError): pass
         send('positions')
+        unsubscribe_notice_seen = False
         try:
             for _ in range(2000):
-                fields = receive()
+                fields = wire.receive()
+                # Own completed subscription was explicitly cancelled. Handle
+                # exactly one global cancellation acknowledgement in this phase.
+                # The same code during an active cash subscription still fails.
+                if fields[:4] == ['4','2','-1','2100'] and len(fields) == 5 and not unsubscribe_notice_seen:
+                    unsubscribe_notice_seen = True
+                    continue
+                check_error(fields)
+                if fields[0] == '15':
+                    if len(fields) != 3 or paper_account(fields[2], account) != account:
+                        raise ProbeError('account_changed_during_state_download')
                 # Late cash updates are validated for identity but invalidate the
                 # observation window if relevant balances changed after its end.
                 if fields[0] == '6':
-                    if len(fields) != 6 or fields[5] != account: raise ProbeError('invalid_cash_update_account_or_layout')
-                    if fields[2] in CASH_TAGS and fields[4] != 'BASE':
-                        if cash.get((fields[2], fields[4])) != fields[3]: raise ProbeError('cash_changed_during_positions')
+                    if len(fields) != 6 or fields[1] != '2' or fields[5] != account: raise ProbeError('invalid_cash_update_account_or_layout')
+                    if fields[2] == 'AccountReady' and fields[3] != 'true': raise ProbeError('broker_account_not_ready')
+                    tag = cash_tag(fields[2])
+                    if tag in CASH_TAGS and fields[4] != 'BASE':
+                        if cash.get((tag, fields[4])) != fields[3]: raise ProbeError('cash_changed_during_positions')
                 elif fields[0] == '61':
                     item = position(fields, account)
                     key = item['contract_id']
@@ -137,6 +159,7 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
                'account_sha256': hashlib.sha256(account.encode()).hexdigest(),
                'started_at': started, 'received_at': clock(), 'expires_at': started + TTL,
                'cash_download_complete': True, 'positions_download_complete': True,
+               'settled_cash_schedule_unparsed': schedule_unparsed,
                'cash': [{'tag': t, 'currency': c, 'value': v} for (t,c),v in sorted(cash.items())],
                'positions': [holdings[k] for k in sorted(holdings)]}
     validate_state(payload, config.expected_account, clock())
@@ -146,12 +169,14 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
 def validate_state(payload, expected_account, now=None):
     now = time.time() if now is None else now
     keys = {'schema_version','source','protocol_version','account_sha256','started_at',
-            'received_at','expires_at','cash_download_complete','positions_download_complete','cash','positions'}
+            'received_at','expires_at','cash_download_complete','positions_download_complete',
+            'settled_cash_schedule_unparsed','cash','positions'}
     if not isinstance(payload, dict) or set(payload) != keys: raise ProbeError('invalid_state_schema')
     if (type(payload['schema_version']) is not int or payload['schema_version'] != 1
             or payload['source'] != SOURCE or type(payload['protocol_version']) is not int or payload['protocol_version'] != 178
             or not expected_account or payload['account_sha256'] != hashlib.sha256(expected_account.encode()).hexdigest()
-            or payload['cash_download_complete'] is not True or payload['positions_download_complete'] is not True):
+            or payload['cash_download_complete'] is not True or payload['positions_download_complete'] is not True
+            or type(payload['settled_cash_schedule_unparsed']) is not bool):
         raise ProbeError('invalid_state_identity_or_completion')
     times = [payload[k] for k in ('started_at','received_at','expires_at')]
     if any(type(t) not in (int,float) or not 0 < t < 1e12 for t in times): raise ProbeError('invalid_state_time')
@@ -222,6 +247,7 @@ def reconcile_state(payload, config, ledger, now=None):
     matched = identified and observed == expected
     return {'status':'partial_cash_position_comparison', 'internal_simulation_reconciliation':True,
             'cash_currency_count':len(currencies), 'per_currency_cash_pairs_complete':complete,
+            'settled_cash_schedule_unparsed':payload['settled_cash_schedule_unparsed'],
             'usd_settled_cash_observed':usd is not None, 'simulated_cash_comparison':cash_comparison,
             'negative_currency_cash_observed':any(v<0 for v in cash.values()),
             'positions_match_simulation':matched, 'simulated_contract_identity_complete':identified,
@@ -231,6 +257,6 @@ def reconcile_state(payload, config, ledger, now=None):
             'ledger_revision':snapshot['revision'], 'broker_reconciliation':False,
             'broker_funding_verified':False, 'broker_balances_imported':False,
             'observation_atomic':False, 'fx_conversion_performed':False,
-            'missing_checks':['open_orders_and_reservations','fills_fees_and_external_transfers',
+            'missing_checks': ([] if complete else ['per_currency_settled_cash']) + ['open_orders_and_reservations','fills_fees_and_external_transfers',
                               'funding_allocation_and_fx','atomic_or_stable_account_state'],
             'execution_authorized':False}

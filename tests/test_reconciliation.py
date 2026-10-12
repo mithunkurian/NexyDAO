@@ -63,6 +63,27 @@ class ReconciliationTests(unittest.TestCase):
         for command in ('placeOrder','cancelOrder','global_cancel'):
             with self.assertRaises(PermissionError): state_message(command,self.config)
 
+    def test_gateway_ledger_prefix_and_unparsed_settlement_schedule(self):
+        payload=self.payload(cash=self.cash('$LEDGER-CashBalance')+self.cash('$LEDGER-TotalCashBalance')+
+                             self.cash('SettledCashByDate','unsupported schedule'))
+        self.assertEqual({r['tag'] for r in payload['cash']},{'CashBalance','TotalCashBalance'})
+        result=reconcile_state(payload,self.config,self.ledger,self.now)
+        self.assertTrue(result['settled_cash_schedule_unparsed'])
+        self.assertFalse(result['usd_settled_cash_observed'])
+        self.assertIn('per_currency_settled_cash',result['missing_checks'])
+
+    def test_own_cancellation_notice_only_in_completed_unsubscribed_phase(self):
+        notice=frame(4,2,-1,2100,'Account subscription cancelled')
+        self.assertEqual(self.payload(late=notice)['positions'],[])
+        for kwargs in ({'cash':notice+self.cash()},{'late':notice+notice},
+                       {'late':frame(4,2,123,2100,'unrelated')}):
+            with self.assertRaises(ProbeError): self.payload(**kwargs)
+
+    def test_account_not_ready_fails_in_both_phases(self):
+        not_ready=self.cash('AccountReady','false','')
+        for kwargs in ({'cash':not_ready+self.cash()},{'late':not_ready}):
+            with self.assertRaises(ProbeError): self.payload(**kwargs)
+
     def test_exact_pin_required_before_network(self):
         with patch('socket.create_connection') as connect:
             with self.assertRaises(ProbeError): collect_state(BrokerConfig(),connect)

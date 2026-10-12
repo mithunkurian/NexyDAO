@@ -83,10 +83,19 @@ comparison time; future authorization must independently check freshness and rev
 python3 -m unittest discover -s tests
 ```
 
-120 tests passed locally, including closed read-only messages/cancellation, exact
+123 tests passed locally, including closed read-only messages/cancellation, exact
 pinning, both completion markers, stale/wrong-pin/tampered receipts, currency gaps,
 duplicates, racing cash, negative balances and contract-based comparisons without
 funding imports. VM/CI and fresh paper acceptance are pending for this implementation.
 Deploy in a new isolated release as in [deployment instructions](deployment.md);
 preserve the existing credential directory, persistent cost DB, private owner policy
 and receipt key. No new credentials or packages are required.
+
+Gateway 1050 discovery returned the exact `$LEDGER-` prefix for currency cash tags.
+The collector normalizes that prefix only for its closed cash-tag set. It handles
+one global 2100 cancellation acknowledgement only after its own completed cash
+subscription was cancelled; 2100 during collection or repeated acknowledgements
+still fail. AccountReady false fails in either download phase.
+The observed `SettledCashByDate` schedule is explicitly marked unparsed; its values
+are not interpreted as current settled cash. Per-currency settlement validation
+remains open whenever no explicit SettledCash value is returned.

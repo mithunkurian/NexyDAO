@@ -52,7 +52,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | P01 · Simulated ledger and Portfolio Manager | **USD slice validated; 92 tests locally/VM/CI** | Seven paid calls completed with safe quote-free abstention; persistent $5,000 funding unchanged. Positive quote-backed plans/nine-call combination tested offline; broader/live allocation coverage pending |
 | X01 · Authorization and executor | **Locked until M4 acceptance** | Forged, stale and replayed permits; duplicate/partial fills; restarts and account mismatch all fail safely |
 | A01 · Authenticated account summaries | **Initial summary slice validated; 104 tests locally/VM/CI** | Fresh four-tag receipt and consumer verified exact pin/HMAC; wrong pin and expiry rejected. USD summary incomplete; settled cash/positions/orders/fills and funding reconciliation remain open |
-| A02 · Per-currency cash and contract positions | **120 local tests passed; VM/CI and fresh paper trial pending** | Signed completed account/position downloads, BASE exclusion, missing currency flags, exact contract comparisons; no ledger imports or execution |
+| A02 · Per-currency cash and contract positions | **123 local tests passed; final VM/CI and fresh paper trial pending** | Signed completed downloads, exact Gateway ledger prefix, BASE exclusion, missing currency/settlement flags and contract comparisons; no ledger imports or execution |
 
 ## Market-open validation session — completed
 
