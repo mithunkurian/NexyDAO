@@ -3,7 +3,7 @@
 Updated: **12 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; M2B quote collection and quote-fed AI cycle validated.
-**Next checkpoint:** Validate SEC retrieval and the eight-call research workflow in PR #4.
+**Next checkpoint:** Review/merge PR #4; extend evidence coverage and build simulated portfolio accounting.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -17,7 +17,7 @@ Updated: **12 October 2026 · Europe/Stockholm**
 | CEO | Routine mandate, strategy, investment/research proposals, budget planning and performance oversight within enforced limits |
 | Infrastructure | Ubuntu 24.04 VM, Python 3.12, 1 GB RAM + 1 GB swap; sustained operation still needs testing |
 | Current AI roles | Six-call core review; opt-in research adds opportunity and countercase agents for eight calls |
-| Autonomy | Bounded SEC research is implemented; live research acceptance, scheduling, portfolio management and execution remain pending |
+| Autonomy | Bounded SEC research and eight-call review validated; scheduling, portfolio management and execution remain pending |
 
 ## Milestone board
 
@@ -27,7 +27,7 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | --- | --- | --- | --- |
 | M1 | Architecture and auditable AI deliberation | **Validated** | Real six-call VM cycle; strict records; persistent memory; settled costs; execution denial |
 | M2A | Read-only IBKR paper connectivity | **Validated** | Exact account pin matched; four summary fields; deliberate wrong pin rejected before summary |
-| M2B | Verified market evidence and research | **In progress** | Quote component validated; two researchers and typed SEC verification implemented/tested. Live research acceptance and broader corroboration pending |
+| M2B | Verified market evidence and research | **In progress** | Quote component, typed SEC source checks and two-researcher cycle validated. Wider narrative/cross-publisher corroboration remains pending |
 | M3 | Portfolio Manager and simulated accounting | **Planned** | Positions, cash, FX, fees, fills, reconciliation and aggregate risk limits |
 | M4 | Independent authorization and paper execution | **Planned; locked** | Isolated executor, signed permits, kill switch, exposure reservations and execution failure tests |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
@@ -42,7 +42,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | E01 · Fresh SPY quote | **Validated · 12 Oct** | Fresh paper BidAsk observation received; exact pin, unique contract, signature and expiry verified |
 | E02 · Quote-fed AI cycle | **Validated · 12 Oct** | Six role calls completed while evidence remained fresh; one quote citation; memory and settled costs persisted |
 | E03 · PR #3 | **Merged** | Merge commit `bf94f8a`; local main synced; execution remains disabled |
-| E04 · Research agents and approved sources | **Live source passed; AI acceptance pending** | Private contact provisioned; two live SEC observations verified. Initial paid research stopped on invalid structure; tightened schema retest pending |
+| E04 · Research agents and approved sources | **Validated · 12 Oct** | Two live SEC observations and independent reports; eight-call cycle completed with tightened schema; initial safety rejection retained in audit |
 | E05 · Research verification | **Partial; offline tested** | Typed numeric claim binding, source identity, signatures, freshness and contradictions. Prose/forecasts and cross-publisher corroboration remain unverified |
 | S01 · Independent broker ingress restriction | **Open** | Verify VM/cloud enforcement prevents remote API access; Gateway was observed bound to a wildcard socket |
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
@@ -90,6 +90,8 @@ Quote verification validates an observation; full investment research still requ
 | 12 Oct 2026 | Live SEC source | Private contact configured; MSFT ticker/CIK and two typed filing observations retrieved, signed and verified; contact excluded from prompts/Git |
 | 12 Oct 2026 | Research safety stop | Initial attempt stopped before CEO on invalid candidate structure after two calls; cumulative **$0.00396210**, 14 calls, zero unsettled reservations. Not a completed research acceptance run |
 | 12 Oct 2026 | Schema correction | Dataset-specific issuer/reference enums, candidate bounds and required nonempty claims added; 66 local tests passed; live retest pending |
+| 12 Oct 2026 | Live research retest | Implementation `c21c998`; all 66 VM tests/CI passed. Run `01ad46d4-0ba0-4d8f-ba55-d392a518df60`: eight calls, two independent reports with one candidate each, two risk reviews, three votes; CEO chose `investigate`; execution false |
+| 12 Oct 2026 | Research costs and memory | Successful cycle **$0.00530400**; cumulative **$0.00926610** over 22 calls including the failed attempt; zero unsettled reservations. Memory persisted after reopening |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
@@ -102,7 +104,7 @@ No investment return has been measured.
 | [#1](https://github.com/mithunkurian/NexyDAO/pull/1) | Foundation, hierarchy, AI deliberation, records, memory, costs and safeguards | **Merged** |
 | [#2](https://github.com/mithunkurian/NexyDAO/pull/2) | Read-only paper-account probe and milestone marker | **Merged** |
 | [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Merged** |
-| [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Draft — live source/eight-call acceptance pending** |
+| [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Ready for review — live acceptance passed** |
 
 Development branch: `codex/research-verification`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).

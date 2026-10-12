@@ -98,3 +98,11 @@ Use an isolated trial release as in [VM deployment](deployment.md). Preserve exi
 database, keys and credentials. Validate one real signed receipt, then one eight-call
 cycle using the bounded budget; record commit, source freshness, run ID, calls and
 costs. Unattended scheduling still requires reliability and security acceptance.
+
+Live acceptance on 2026-10-12 retrieved two SEC observations and completed an eight-call
+cycle using corrected implementation `c21c998`. An earlier two-call attempt stopped
+before CEO on invalid candidate structure; its costs remain recorded. The corrected
+run produced two independent supported candidate reports, CEO investigation, risk and
+committee review, persisted memory and settled costs. All 66 tests passed locally,
+on the VM and in CI. This validates workflow and narrow typed bindings; it does not
+verify theses or authorize trading.

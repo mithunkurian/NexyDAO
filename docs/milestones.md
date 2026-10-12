@@ -17,7 +17,7 @@ The historical Git marker remains unchanged; subsequent validation is recorded b
 | --- | --- | --- |
 | M1: Architecture and auditable AI deliberation | VM AI cycle validated | Six paid role calls completed, cost reservations settled and memory persisted after reopening SQLite. |
 | M2A: Read-only IBKR paper connectivity | Validated; PR #2 merged | Four summary fields retrieved; exact pin matched; deliberate wrong pin rejected before summary; private snapshot saved; connection closed. |
-| M2B: Verified market evidence and research | Quote validated; research implemented with open gates | Quote-fed six-call cycle passed. Typed SEC collection and two researchers implemented; live eight-call acceptance and broader verification pending. |
+| M2B: Verified market evidence and research | Quote and initial SEC research validated; broader coverage pending | Quote-fed six-call cycle and SEC-fed eight-call research cycle passed. Narrative/cross-publisher verification remains pending. |
 | M3: Portfolio Manager and simulated accounting | Not implemented | $5,000 ledger, positions, cash/FX/fees, reconciliation, aggregate exposure and drawdown controls. |
 | M4: Independent authorization and paper execution | Not implemented; execution disabled | Executor isolation, signed permits, kill switch, exposure reservations, replay/idempotency and partial-fill tests. |
 | M5: Autonomous paper operations | Not implemented | Scheduling, recovery, alerts, outcome learning, sustained paper evaluation and net performance reporting. |
@@ -135,3 +135,20 @@ This is safety rejection, not a completed eight-call acceptance. The report sche
 bounds candidates to the available issuers, restricts symbol/reference enums to the
 verified dataset and requires nonempty claims. All 66 local tests passed; live retest
 is required. No contact identifier was committed or included in model context.
+
+## Live research acceptance, 2026-10-12
+
+Corrected implementation `c21c9988257d8382775fca64be20748f2ae2f7d5` passed all 66
+offline tests on Windows and Ubuntu, and CI. The still-fresh signed live SEC receipt
+was reused rather than retrieved again. Run `01ad46d4-0ba0-4d8f-ba55-d392a518df60`
+completed eight OpenAI calls: opportunity and countercase reports (one candidate each),
+CEO, two Risk Officers and three committee voters. Structured numeric claims matched
+source observations; both report theses remained explicitly unverified. The CEO chose
+`investigate`, and execution remained false.
+
+Estimated successful cycle cost was **$0.00530400**. Persistent cumulative costs were
+**$0.00926610** across 22 calls, including the two-call rejected attempt, with zero
+unsettled reservations under the unchanged $0.10 lifetime budget. Completed memory
+survived reopening SQLite. No contact, credentials or raw receipts were committed.
+This passes the initial SEC research workflow's live gates, not all M2B verification,
+investment quality, unattended reliability, portfolio accounting or order authorization.

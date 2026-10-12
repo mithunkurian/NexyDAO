@@ -11,7 +11,7 @@ These safeguards are not trading signals or buy/sell strategies.
 |---|---|---|
 | Human owner | Invests capital into NexyDAO, controls access, intervenes when needed | All |
 | AI CEO | Mandate, strategy, operating budgets, performance oversight and investment/research proposals | 1; fuller operations 3–5 |
-| Research agents: opportunity, countercase | Independent ideas/challenges from typed filing facts; no direct source/network authority | Initial slice 2; live acceptance pending |
+| Research agents: opportunity, countercase | Independent ideas/challenges from typed filing facts; no direct source/network authority | Initial slice 2; eight-call live workflow validated |
 | Portfolio Manager | Allocation proposals, alternatives, aggregate exposures | 3 |
 | Risk Officer: capital | Independent loss, sizing and liquidity challenges | 1 |
 | Risk Officer: evidence | Independent provenance and security challenges | 1 |
