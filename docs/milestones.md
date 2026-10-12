@@ -8,7 +8,7 @@ Git marker: `milestone-2a-paper-connectivity`.
 This marker records tested development code and a successful bounded VM trial.
 It is not a production release, permission to execute orders, or evidence of returns.
 PR #1, [PR #2](https://github.com/mithunkurian/NexyDAO/pull/2) and
-[PR #3](https://github.com/mithunkurian/NexyDAO/pull/3) are merged.
+[PR #3](https://github.com/mithunkurian/NexyDAO/pull/3), PR #4 and PR #5 are merged.
 The historical Git marker remains unchanged; subsequent validation is recorded below.
 
 ## Progress against the roadmap
@@ -18,7 +18,7 @@ The historical Git marker remains unchanged; subsequent validation is recorded b
 | M1: Architecture and auditable AI deliberation | VM AI cycle validated | Six paid role calls completed, cost reservations settled and memory persisted after reopening SQLite. |
 | M2A: Read-only IBKR paper connectivity | Validated; PR #2 merged | Four summary fields retrieved; exact pin matched; deliberate wrong pin rejected before summary; private snapshot saved; connection closed. |
 | M2B: Verified market evidence and research | Quote and initial SEC research validated; broader coverage pending | Quote-fed six-call cycle and SEC-fed eight-call research cycle passed. Narrative/cross-publisher verification remains pending. |
-| M3: Portfolio Manager and simulated accounting | Not implemented | $5,000 ledger, positions, cash/FX/fees, reconciliation, aggregate exposure and drawdown controls. |
+| M3: Portfolio Manager and simulated accounting | USD slice validated; broader scope pending | Persistent ledger/risk/marks and advisory manager tested. Seven paid calls passed with quote-free abstention. Positive quoted plans/nine-call flow tested offline; FX/tax/broker accounting open. |
 | M4: Independent authorization and paper execution | Not implemented; execution disabled | Executor isolation, signed permits, kill switch, exposure reservations, replay/idempotency and partial-fill tests. |
 | M5: Autonomous paper operations | Not implemented | Scheduling, recovery, alerts, outcome learning, sustained paper evaluation and net performance reporting. |
 
@@ -166,3 +166,26 @@ No paid API, live account changes or orders were made for this milestone.
 Final implementation `ad1fe0d8afacd5c2609408a706975f8eef9b8d63` also passed all 76
 tests on the VM and in CI. PR #5 is ready for code review; legal/account/holder/asset
 eligibility and future authorization remain open gates, not agent-certified facts.
+
+## USD portfolio implementation, 2026-10-12
+
+PR #5 merged as `a0ea0b6`. The new branch seeds the $5,000 USD simulation once and
+adds explicit operator fixture fills, unsettled sale proceeds, idempotent settlement,
+fee-inclusive average basis, realized P&L, signed fresh bid marks and replay-based
+internal reconciliation. API estimates/reserves reduce available funding and net
+equity estimates. Portfolio Manager proposals add one advisory call before CEO review,
+with quote citations and independent aggregate cash/concentration/exposure/drawdown
+constraints. They never mutate positions or authorize orders. All 92 local tests
+passed; VM/CI and paid manager acceptance are pending. FX/tax and broker reconciliation
+are deliberately not represented as implemented. See `portfolio.md` for scope.
+
+Implementation `4398122a482a443f67589d2ca7b28e0dc6764677` passed all 92 tests locally,
+on Ubuntu/Python 3.12 VM and in CI. Paid run `5666cb3b-1f13-4b79-aca4-d296ad2d008b`
+completed seven calls: Portfolio Manager, CEO, two risk reviews and three votes. No
+fresh quote was supplied; the manager correctly proposed zero allocations, and the
+CEO chose `investigate`. No fixtures/orders were produced; the ledger revision stayed
+unchanged and $5,000 settled cash with zero positions was retained after reopening.
+Internal reconciliation and completed memory persistence passed. Cycle estimate was
+$0.00669150; cumulative $0.01595760 over 29 calls, zero unsettled reservations, under
+the existing $0.10 lifetime budget. Positive quote-backed allocation and nine-call
+coverage are offline-only; actual broker/FX/tax accounting and execution remain open.

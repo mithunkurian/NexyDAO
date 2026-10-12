@@ -48,16 +48,18 @@ def load_evidence(path):
     return [{**item, "verification": "unverified"} for item in items]
 
 
-def run_cycle(store, provider, evidence, research=False, owner_policy=None):
+def run_cycle(store, provider, evidence, research=False, owner_policy=None, portfolio=False):
     from .owner_policy import from_env
     owner_policy = owner_policy or from_env()
     owner_policy.assert_current()
+    from .portfolio import Portfolio
+    ledger=Portfolio(store)
+    revision=ledger.revision()
     mode = getattr(provider, "mode", "ai")
     run = store.start(mode)
     try:
         context = {"evidence": evidence, "memory": store.memory(),
-                   "account": {"simulated_capital_usd": 5000, "positions": [],
-                               "annual_net_target": 0.15, "execution_enabled": False},
+                   "account": ledger.snapshot(),
                    "api_costs": store.costs(), "owner_policy": owner_policy.document(),
                    "owner_policy_sha256": owner_policy.digest}
         store.event(run, "input", context)
@@ -66,9 +68,18 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None):
             from .research import run_research
             reports = run_research(store, provider, run, evidence, owner_policy)
             context['research_reports'] = reports
+        plan=None
+        if portfolio:
+            from .portfolio_manager import run_manager
+            context['account']=ledger.snapshot()
+            context['api_costs']=store.costs()
+            plan=run_manager(store,provider,run,context,evidence,owner_policy,ledger,revision)
+            context['portfolio_plan']=plan
+            context['account']=ledger.snapshot()
 
         def ask(role, instructions, spec, data):
             owner_policy.assert_current()
+            ledger.assert_revision(revision)
             from .market import check_evidence_freshness
             from .sec import check_research_freshness
             check_evidence_freshness(evidence)
@@ -82,7 +93,9 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None):
         proposal = ask("ceo", "Act as CEO: own strategic direction, operating budget planning and performance "
                        "oversight. Use available memory and API costs to assess progress and cost efficiency; "
                        "acknowledge unavailable performance data. Propose the next investment or research "
-                       "decision within enforced limits, without seeking routine owner approval.", PROPOSAL, context)
+                       "decision within enforced limits, without seeking routine owner approval. Treat allocation_usd "
+                       "as incremental committed cash including costs, not a target position; use the recorded "
+                       "simulation state and challenge the Portfolio Manager's plan if supplied.", PROPOSAL, context)
         risk_context = {**context, "proposal": proposal}
         reviews = [ask("risk_capital", "Independently challenge capital loss, sizing and liquidity.", REVIEW, risk_context),
                    ask("risk_evidence", "Independently challenge provenance, freshness, contradictions and security.", REVIEW, risk_context)]
@@ -94,17 +107,21 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None):
                      ("audit", "Vote independently on evidence sufficiency and conflicts of interest.")]]
         result = {"schema_version": SCHEMA_VERSION, "prompt_version": PROMPT_VERSION, "mode": mode,
                   "run_id": run, "proposal": proposal, "risk_reviews": reviews,
-                  "committee_votes": votes, "policy": evaluate(proposal, reviews, votes, owner_policy),
+                  "committee_votes": votes, "policy": evaluate(proposal, reviews, votes, owner_policy,ledger.snapshot()),
                   "owner_policy_version": owner_policy.document()['policy_version'],
                   "owner_policy_sha256": owner_policy.digest,
                   "api_costs": store.costs()}
         if research:
             result['research_reports'] = reports
+        if portfolio:
+            result['portfolio_plan']=plan
+        result['portfolio_snapshot']=ledger.snapshot()
         from .market import check_evidence_freshness
         from .sec import check_research_freshness
         check_evidence_freshness(evidence)
         check_research_freshness(evidence)
         owner_policy.assert_current()
+        ledger.assert_revision(revision)
         store.event(run, "policy", result["policy"])
         store.finish(run, "completed", result)
         return result
