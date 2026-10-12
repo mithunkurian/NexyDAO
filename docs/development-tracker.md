@@ -86,6 +86,7 @@ Quote verification validates an observation; full investment research still requ
 | 12 Oct 2026 | Quote-fed AI cycle | Run `0b5996e0-3d11-48da-8cd2-84eab52123f3`; six calls, two risk reviews, three votes; CEO chose `investigate` and cited one evidence item; execution false |
 | 12 Oct 2026 | Costs and memory | Cycle estimate **$0.00196425**; cumulative **$0.00276285** across 12 calls; zero unsettled reservations; completed run persisted after reopening SQLite |
 | 12 Oct 2026 | Research implementation | 65 offline tests passed locally; eight-call workflow, independent contexts, claim rejection, source bounds and mocked costs. Not paid/live acceptance |
+| 12 Oct 2026 | Research VM/CI | All 65 tests passed on Ubuntu/Python 3.12 in isolated release `184ed13`; offline demo denied execution; CI passed. No SEC or paid API requests |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
@@ -98,6 +99,7 @@ No investment return has been measured.
 | [#1](https://github.com/mithunkurian/NexyDAO/pull/1) | Foundation, hierarchy, AI deliberation, records, memory, costs and safeguards | **Merged** |
 | [#2](https://github.com/mithunkurian/NexyDAO/pull/2) | Read-only paper-account probe and milestone marker | **Merged** |
 | [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Merged** |
+| [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Draft — live source/eight-call acceptance pending** |
 
 Development branch: `codex/research-verification`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).

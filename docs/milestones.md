@@ -120,3 +120,9 @@ claims; thesis prose, forecasts and economic truth remain unverified. All 65 off
 tests passed locally. Live SEC/paid research acceptance awaits an operator-provisioned
 identifying User-Agent and is not claimed. No additional paid research run has occurred.
 Full narrative/cross-source verification, OS isolation and execution remain future gates.
+
+Research implementation baseline: `184ed131a3fa392573037bfd21ee330034d88534`.
+All 65 tests also passed on the 1 GB Ubuntu VM in an isolated release; the offline
+demo denied execution and GitHub Actions passed. [PR #4](https://github.com/mithunkurian/NexyDAO/pull/4)
+is a draft pending live SEC retrieval and paid eight-call acceptance. The VM check made
+no SEC or OpenAI requests and did not alter the persistent application cost database.
