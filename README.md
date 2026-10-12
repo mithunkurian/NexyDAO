@@ -14,6 +14,8 @@ See [architecture and workflow](docs/architecture.md), [roadmap](docs/roadmap.md
 [Google Cloud deployment](docs/deployment.md).
 Follow the [development tracker](docs/development-tracker.md) for the current work
 queue, acceptance checks, blockers and PR status.
+See [broker ingress and authenticated account audits](docs/broker-access.md) for the
+host guard and read-only reconciliation prerequisites.
 
 The human owner invests capital into NexyDAO, controls access and intervenes when
 needed. The CEO owns mandate, strategy, operating budget planning and performance
