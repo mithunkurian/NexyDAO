@@ -163,3 +163,6 @@ legal/account verification remains unresolved and execution always denied.
 Baseline `d34f605` passed 75 tests on the VM/CI and an offline policy/audit check.
 A direct snapshot-construction guard adds another local passing test (76 total).
 No paid API, live account changes or orders were made for this milestone.
+Final implementation `ad1fe0d8afacd5c2609408a706975f8eef9b8d63` also passed all 76
+tests on the VM and in CI. PR #5 is ready for code review; legal/account/holder/asset
+eligibility and future authorization remain open gates, not agent-certified facts.
