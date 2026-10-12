@@ -44,7 +44,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | E03 · PR #3 | **Merged** | Merge commit `bf94f8a`; local main synced; execution remains disabled |
 | E04 · Research agents and approved sources | **Validated · 12 Oct** | Two live SEC observations and independent reports; eight-call cycle completed with tightened schema; initial safety rejection retained in audit |
 | E05 · Research verification | **Partial; offline tested** | Typed numeric claim binding, source identity, signatures, freshness and contradictions. Prose/forecasts and cross-publisher corroboration remain unverified |
-| O01 · Mandatory owner policy | **Implemented; 75 local tests passed** | No shorts, leverage or borrowing; applicable US/Swedish compliance; Swedish ISK for future live execution. Versioned extensions and independent denial; legal/account attestation pending |
+| O01 · Mandatory owner policy | **Implemented; 76 local tests passed** | No shorts, leverage or borrowing; applicable US/Swedish compliance; Swedish ISK for future live execution. Versioned extensions and independent denial; legal/account/holder attestation pending |
 | S01 · Independent broker ingress restriction | **Open** | Verify VM/cloud enforcement prevents remote API access; Gateway was observed bound to a wildcard socket |
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
 | S03 · Sustained 1 GB trial | **Open** | Observe memory/swap under repeated workloads and recovery; one successful short trial is insufficient |
@@ -106,6 +106,7 @@ No investment return has been measured.
 | [#2](https://github.com/mithunkurian/NexyDAO/pull/2) | Read-only paper-account probe and milestone marker | **Merged** |
 | [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Merged** |
 | [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Merged — `6a4b604`** |
+| [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Validation in progress; live execution remains disabled** |
 
 Development branch: `codex/owner-policy`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
@@ -119,6 +120,7 @@ The quote trial is not a production deployment or authorization to trade.
 - Broker execution remains unconditionally denied, regardless of CEO or committee approval.
 - Owner access control and intervention remain independent of agent decisions.
 - Binding owner constraints outrank all agents; new rules require independent enforcement before investment authorization.
+- Owner-policy baseline `d34f605` passed 75 VM/CI tests with a private policy file and retained audit hash; the added snapshot-construction guard brings local tests to 76.
 - Paper-account identity and exact pin are checked independently before market requests.
 - Signed receipts establish local integrity, not an IBKR signature or verified investment thesis.
 - OS isolation, aggregate portfolio risk accounting and executor authorization remain explicit future gates.

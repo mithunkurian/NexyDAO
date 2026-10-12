@@ -28,7 +28,7 @@ logical separation does not establish statistical independence.
 
 The owner's investment role means supplying capital to the company. Routine portfolio
 investment decisions belong to the CEO and pass through independent risk and committee
-review. The owner has only three responsibilities: invest capital, grant/revoke access
+review. The owner invests capital, grants/revokes access
 (including credentials and service permissions), and intervene or stop operations when
 needed. The owner can additionally set binding constraints that supersede every agent,
 including the CEO. Routine strategy, budget planning and performance review still do

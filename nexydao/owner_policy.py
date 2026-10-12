@@ -65,6 +65,11 @@ class OwnerPolicy:
     payload: bytes
     path: Path | None = None
 
+    def __post_init__(self):
+        if not isinstance(self.payload, bytes) or len(self.payload) > 16000:
+            raise OwnerPolicyError('invalid_owner_policy_snapshot')
+        validate_document(json.loads(self.payload))
+
     @property
     def digest(self):
         return hashlib.sha256(self.payload).hexdigest()

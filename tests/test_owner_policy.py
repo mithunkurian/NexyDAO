@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from nexydao.cli import DemoProvider, main
-from nexydao.owner_policy import BASE, OwnerPolicyError, load_policy, cash_preflight
+from nexydao.owner_policy import BASE, OwnerPolicy, OwnerPolicyError, load_policy, cash_preflight
 from nexydao.safety import evaluate
 from nexydao.store import Store
 from nexydao.workflow import run_cycle
@@ -63,6 +63,10 @@ class OwnerTests(unittest.TestCase):
         copied['no_short_selling'] = False
         self.assertTrue(policy.document()['no_short_selling'])
         with self.assertRaises(Exception): policy.payload = b'changed'
+
+    def test_direct_snapshot_construction_cannot_weaken_constraints(self):
+        invalid = {**BASE, 'no_short_selling': False}
+        with self.assertRaises(OwnerPolicyError): OwnerPolicy(json.dumps(invalid).encode())
 
     def test_all_six_roles_get_owner_policy_and_results_are_audited(self):
         policy = self.policy()

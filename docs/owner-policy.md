@@ -80,6 +80,10 @@ describes eligible asset categories; it does not certify a particular account/in
 [IBKR announced Swedish ISK availability](https://investors.interactivebrokers.com/en/general/about/mediaRelations/10-6-25.php)
 in September 2025. Your existing account type/API access and individual eligibility
 have not been verified. Do not label an ordinary account ISK through configuration.
+Account-holder eligibility also matters: [section 9 of the ISK Act](https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-20111268-om-investeringssparkonto_sfs-2011-1268/)
+restricts holders to individuals or estates. A corporate legal entity cannot be assumed
+eligible because the software is called an investment company; future live design
+must verify the eligible holder and permitted account access.
 [SEC margin guidance](https://www.sec.gov/about/reports-publications/investorpubsmarginhtm)
 describes borrowing mechanics; the owner prohibits them regardless of broker permissions.
 
