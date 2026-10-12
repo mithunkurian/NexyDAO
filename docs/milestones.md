@@ -7,7 +7,8 @@ Git marker: `milestone-2a-paper-connectivity`.
 
 This marker records tested development code and a successful bounded VM trial.
 It is not a production release, permission to execute orders, or evidence of returns.
-PR #1 and [PR #2](https://github.com/mithunkurian/NexyDAO/pull/2) are merged.
+PR #1, [PR #2](https://github.com/mithunkurian/NexyDAO/pull/2) and
+[PR #3](https://github.com/mithunkurian/NexyDAO/pull/3) are merged.
 The historical Git marker remains unchanged; subsequent validation is recorded below.
 
 ## Progress against the roadmap
@@ -16,7 +17,7 @@ The historical Git marker remains unchanged; subsequent validation is recorded b
 | --- | --- | --- |
 | M1: Architecture and auditable AI deliberation | VM AI cycle validated | Six paid role calls completed, cost reservations settled and memory persisted after reopening SQLite. |
 | M2A: Read-only IBKR paper connectivity | Validated; PR #2 merged | Four summary fields retrieved; exact pin matched; deliberate wrong pin rejected before summary; private snapshot saved; connection closed. |
-| M2B: Verified market evidence and research | Quote component validated; research pending | Fresh live SPY quote, signed receipt and quote-fed six-call AI cycle passed. Research agents and full source verification remain pending. |
+| M2B: Verified market evidence and research | Quote validated; research implemented with open gates | Quote-fed six-call cycle passed. Typed SEC collection and two researchers implemented; live eight-call acceptance and broader verification pending. |
 | M3: Portfolio Manager and simulated accounting | Not implemented | $5,000 ledger, positions, cash/FX/fees, reconciliation, aggregate exposure and drawdown controls. |
 | M4: Independent authorization and paper execution | Not implemented; execution disabled | Executor isolation, signed permits, kill switch, exposure reservations, replay/idempotency and partial-fill tests. |
 | M5: Autonomous paper operations | Not implemented | Scheduling, recovery, alerts, outcome learning, sustained paper evaluation and net performance reporting. |
@@ -109,3 +110,13 @@ M2B research, establish investment performance or approve execution. Earlier con
 attempts still disconnected before collection; a subsequent controlled check succeeded.
 Gateway authentication and the private VNC tunnel required manual recovery after the
 timed trial ended. Unattended recovery and sustained operation remain unvalidated.
+
+## Research implementation, 2026-10-12
+
+PR #3 merged as `bf94f8a`. The next branch implements fixed SEC submissions and
+company-concept retrieval, signed typed observations and two independent researcher
+reports ahead of the six-role review. Application code checks structured numeric
+claims; thesis prose, forecasts and economic truth remain unverified. All 65 offline
+tests passed locally. Live SEC/paid research acceptance awaits an operator-provisioned
+identifying User-Agent and is not claimed. No additional paid research run has occurred.
+Full narrative/cross-source verification, OS isolation and execution remain future gates.

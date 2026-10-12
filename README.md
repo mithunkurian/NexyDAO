@@ -95,3 +95,12 @@ limitations](docs/ibkr-paper.md). Execution remains disabled.
 paper-account pin and a private receipt key. `deliberate --market-evidence PATH`
 verifies its signature and expiry before paid calls. See [quote setup and acceptance
 limits](docs/market-evidence.md). Full research verification is still pending.
+
+## Research trial
+
+`source-check` retrieves signed SEC filing observations for a configured issuer universe.
+`research --research-evidence PATH` runs two independent researchers before the existing
+six-role review, checking structured numeric claims against source facts. Interpretation
+and thesis prose remain unverified; execution is disabled. See [setup, source scope and
+eight-call acceptance](docs/research.md). Live retrieval requires a locally configured
+identifying SEC User-Agent.
