@@ -1,9 +1,9 @@
 # NexyDAO — Development tracker
 
-Updated: **11 October 2026 · Europe/Stockholm**
+Updated: **12 October 2026 · Europe/Stockholm**
 
-**Current checkpoint:** M2A validated; M2B quote adapter implemented, live acceptance pending.
-**Next checkpoint:** Fresh quote → six-role AI deliberation → PR #3 ready for review.
+**Current checkpoint:** M2A validated; M2B quote collection and quote-fed AI cycle validated.
+**Next checkpoint:** Review/merge PR #3, then research agents and source verification.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -27,7 +27,7 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | --- | --- | --- | --- |
 | M1 | Architecture and auditable AI deliberation | **Validated** | Real six-call VM cycle; strict records; persistent memory; settled costs; execution denial |
 | M2A | Read-only IBKR paper connectivity | **Validated** | Exact account pin matched; four summary fields; deliberate wrong pin rejected before summary |
-| M2B | Verified market evidence and research | **In progress** | Quote adapter, signatures, freshness and integrity tests implemented. Fresh live quote, AI consumption and research/source verification still pending |
+| M2B | Verified market evidence and research | **In progress** | Fresh live quote, signed receipt and six-call AI consumption validated. Research agents and full source verification still pending |
 | M3 | Portfolio Manager and simulated accounting | **Planned** | Positions, cash, FX, fees, fills, reconciliation and aggregate risk limits |
 | M4 | Independent authorization and paper execution | **Planned; locked** | Isolated executor, signed permits, kill switch, exposure reservations and execution failure tests |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
@@ -39,9 +39,9 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 
 | Task | Status | Acceptance condition |
 | --- | --- | --- |
-| E01 · Fresh SPY quote | **Waiting for live data** | Collector receives a fresh bid/ask observation, validates the contract and writes a signed receipt |
-| E02 · Quote-fed AI cycle | **Waiting on E01** | CEO, both risk reviewers and all three voters complete while evidence remains fresh; audit and costs persist |
-| E03 · PR #3 review readiness | **Waiting on E01–E02** | Live acceptance recorded, tests green, limitations documented; change draft to ready for review |
+| E01 · Fresh SPY quote | **Validated · 12 Oct** | Fresh paper BidAsk observation received; exact pin, unique contract, signature and expiry verified |
+| E02 · Quote-fed AI cycle | **Validated · 12 Oct** | Six role calls completed while evidence remained fresh; one quote citation; memory and settled costs persisted |
+| E03 · PR #3 review readiness | **Ready for review** | Live acceptance recorded; implementation tests pass; execution remains disabled |
 | E04 · Research agents and approved sources | **Planned** | Collect opportunities and source material with bounded access; agents cannot self-certify evidence |
 | E05 · Research verification | **Planned** | Verify retrieval, timestamps, claim support and contradictions; reject fabricated citations, spoofing, injection and unsafe source access |
 | S01 · Independent broker ingress restriction | **Open** | Verify VM/cloud enforcement prevents remote API access; Gateway was observed bound to a wildcard socket |
@@ -51,18 +51,19 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | P01 · Simulated ledger and Portfolio Manager | **Planned after evidence work** | Reconcile the $5,000 portfolio, fees and proposals; independently enforce aggregate exposure and drawdown limits |
 | X01 · Authorization and executor | **Locked until M4 acceptance** | Forged, stale and replayed permits; duplicate/partial fills; restarts and account mismatch all fail safely |
 
-## Next validation session
+## Market-open validation session — completed
 
-**Suggested window:** Monday, **12 October 2026, 15:35 Stockholm / 09:35 New York**,
-shortly after the scheduled regular US equity open. [NYSE calendar and trading hours](https://www.nyse.com/trade/hours-calendars).
-This is a proposed manual session, not a scheduled automation.
+The manual session on **Monday, 12 October 2026** passed the quote and AI consumption
+gates during the regular US equity session. The originally suggested window was
+15:35 Stockholm / 09:35 New York. [NYSE calendar and trading hours](https://www.nyse.com/trade/hours-calendars).
+No scheduled automation was created.
 
-- [ ] Owner reconnects Gateway using **IB API → Paper Trading** and confirms connected.
-- [ ] Collect one fresh SPY quote; inspect data permissions if no usable quote arrives.
-- [ ] Verify receipt signature, pinned account, contract and event-time expiry.
-- [ ] Run one six-role AI cycle within the existing persistent API budget.
-- [ ] Confirm citations, six role records, durable memory, settled costs and execution denial.
-- [ ] Record results here and in the milestone register; make PR #3 ready only after acceptance.
+- [x] Owner reconnects Gateway using **IB API → Paper Trading** and confirms connected.
+- [x] Collect one fresh SPY quote.
+- [x] Verify receipt signature, pinned account, contract and event-time expiry.
+- [x] Run one six-role AI cycle within the existing persistent API budget.
+- [x] Confirm citations, six role records, durable memory, settled costs and execution denial.
+- [x] Record live acceptance here and in the milestone register.
 
 No fresh data means no verified receipt and no claim that this gate passed.
 Quote verification validates an observation; full investment research still requires E04–E05.
@@ -80,6 +81,10 @@ Quote verification validates an observation; full investment research still requ
 | 11 Oct 2026 | Wrong-pin test | `account_mismatch` rejected before a summary request |
 | 11 Oct 2026 | Contract and quote trial | Protocol 178; one SPY SMART/USD contract resolved; live BidAsk subscription reached; no fresh tick within 15 seconds; no receipt issued |
 | 11 Oct 2026 | Reconnection | Some earlier sessions disconnected before identity; later spaced checks passed; reliability remains open |
+| 12 Oct 2026 | VNC/Gateway recovery | Restored localhost SSH tunnel and verified VNC protocol banner; owner reauthenticated paper Gateway after the timed trial ended |
+| 12 Oct 2026 | Fresh live SPY quote | Protocol 178; pinned account; unique contract; fresh BidAsk observation and signed receipt verified |
+| 12 Oct 2026 | Quote-fed AI cycle | Run `0b5996e0-3d11-48da-8cd2-84eab52123f3`; six calls, two risk reviews, three votes; CEO chose `investigate` and cited one evidence item; execution false |
+| 12 Oct 2026 | Costs and memory | Cycle estimate **$0.00196425**; cumulative **$0.00276285** across 12 calls; zero unsettled reservations; completed run persisted after reopening SQLite |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
@@ -91,7 +96,7 @@ No investment return has been measured.
 | --- | --- | --- |
 | [#1](https://github.com/mithunkurian/NexyDAO/pull/1) | Foundation, hierarchy, AI deliberation, records, memory, costs and safeguards | **Merged** |
 | [#2](https://github.com/mithunkurian/NexyDAO/pull/2) | Read-only paper-account probe and milestone marker | **Merged** |
-| [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Draft — live quote acceptance pending** |
+| [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Ready for review — live acceptance passed** |
 
 Development branch: `codex/verified-market-evidence`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).

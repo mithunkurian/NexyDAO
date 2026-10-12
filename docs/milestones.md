@@ -16,7 +16,7 @@ The historical Git marker remains unchanged; subsequent validation is recorded b
 | --- | --- | --- |
 | M1: Architecture and auditable AI deliberation | VM AI cycle validated | Six paid role calls completed, cost reservations settled and memory persisted after reopening SQLite. |
 | M2A: Read-only IBKR paper connectivity | Validated; PR #2 merged | Four summary fields retrieved; exact pin matched; deliberate wrong pin rejected before summary; private snapshot saved; connection closed. |
-| M2B: Verified market evidence and research | Quote adapter implemented; operational acceptance pending | Signed receipts, unique contract resolution, freshness and tampering tests. Live fresh quote/AI consumption, research agents and full source verification remain pending. |
+| M2B: Verified market evidence and research | Quote component validated; research pending | Fresh live SPY quote, signed receipt and quote-fed six-call AI cycle passed. Research agents and full source verification remain pending. |
 | M3: Portfolio Manager and simulated accounting | Not implemented | $5,000 ledger, positions, cash/FX/fees, reconciliation, aggregate exposure and drawdown controls. |
 | M4: Independent authorization and paper execution | Not implemented; execution disabled | Executor isolation, signed permits, kill switch, exposure reservations, replay/idempotency and partial-fill tests. |
 | M5: Autonomous paper operations | Not implemented | Scheduling, recovery, alerts, outcome learning, sustained paper evaluation and net performance reporting. |
@@ -44,9 +44,8 @@ in size and operational risk. The company is not yet autonomously investing.
 
 1. Verify independent VM/cloud ingress restrictions: Gateway's API socket was observed
    bound to a wildcard address despite the localhost connection setting.
-2. Consume a fresh signed quote in a paid cycle; the no-quote baseline is validated below.
-3. Complete M2B research and source verification; account balances alone are not investment evidence.
-4. Test Gateway reconnection, daily/weekly authentication requirements, recovery and
+2. Complete M2B research and source verification; a quote alone does not verify an investment thesis.
+3. Test Gateway reconnection, daily/weekly authentication requirements, recovery and
    sustained memory/swap behavior before unattended operation.
 
 The $5,000 simulated capital and 15% annual net return objective remain unchanged.
@@ -90,3 +89,23 @@ Some earlier connections disconnected before account identity; later spaced chec
 passed. Reconnection reliability remains an open operational gate. PR #3 remains a
 draft pending a fresh live receipt and an AI cycle consuming it. Execution remained
 disabled throughout; the checks made no additional OpenAI calls.
+
+## Live quote and AI acceptance, 2026-10-12
+
+Implementation `abde107` successfully collected a fresh live SPY BidAsk observation
+from the pinned paper account and verified the signed receipt before AI initialization.
+The 60-second event-time expiry remained enforced before every role call and before
+completion. Run `0b5996e0-3d11-48da-8cd2-84eab52123f3` completed six OpenAI calls,
+two risk reviews and three committee votes. The CEO chose `investigate` and cited one
+quote evidence item. Execution remained false; no order capability was added.
+
+Estimated cycle token cost was **$0.00196425**. The persistent database now records
+**$0.00276285** cumulative estimated costs across 12 calls, with zero unsettled
+reservations, under the unchanged $0.10 lifetime budget. The completed run persisted
+in memory after reopening SQLite. No credentials or account identifiers were output.
+
+This passes PR #3's fresh-quote and quote-fed deliberation gates; it does not complete
+M2B research, establish investment performance or approve execution. Earlier connection
+attempts still disconnected before collection; a subsequent controlled check succeeded.
+Gateway authentication and the private VNC tunnel required manual recovery after the
+timed trial ended. Unattended recovery and sustained operation remain unvalidated.
