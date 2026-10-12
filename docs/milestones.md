@@ -218,3 +218,42 @@ unchanged. USD summary coverage was incomplete; no negative summary values were
 observed. This establishes the initial authenticated summary slice only, not USD
 funding, complete reconciliation, reliable reconnection or execution readiness.
 No OpenAI calls or orders were made in this trial.
+
+## Per-currency cash and position comparison, 2026-10-12
+
+PR #7 merged as `d59cd06`. Release `0ff1b3a` passed all 123 tests locally, on the
+Ubuntu VM and in CI. The new operator-only collector uses account-specific updates,
+exact paper pinning, separate cash/position completion markers, bounded data and
+signed receipts expiring 60 seconds after collection starts. Comparison uses exact
+contract/currency/quantity identities and internal simulation replay, without
+importing any broker balances or positions. No OpenAI calls or orders were made.
+
+Gateway discovery showed `$LEDGER-` currency cash tags and `SettledCashByDate`.
+The exact ledger prefix is supported; the undocumented settlement schedule is marked
+unparsed, never treated as current settled cash. A single global 2100 acknowledgement
+is accepted only after the collector's completed cash subscription was cancelled,
+including its documented optional empty advanced-error field. Active-subscription
+errors, repeated acknowledgements and nonempty rejection details still stop collection.
+AccountReady false, racing cash, duplicates and incomplete observations fail safely.
+
+Initial live probes exposed unsupported field/acknowledgement layouts and failed
+without issuing receipts. The corrected trial encountered an expired Gateway timer;
+owner authentication and completed fresh paper receipt validation are pending.
+Per-currency settled cash, orders/reservations, fills/fees/transfers, capital allocation,
+FX and a stable snapshot protocol remain explicit open gates. Full broker
+reconciliation, funding verification and execution remain false. See `reconciliation.md`.
+
+After owner reauthentication, a spaced client 95 trial on `0ff1b3a` completed both
+downloads: six cash rows across three currencies, zero broker positions. Receipt
+signature/freshness/pin and the consumer comparison passed; wrong-account and exact
+expiry checks failed. Private receipt mode was 0600, host protection verified, and
+simulation state/revision and API cost accounting were unchanged. No OpenAI requests
+or orders occurred. The initial post-login disconnect remains evidence that recovery
+reliability is unfinished; no unattended recovery acceptance is claimed.
+
+Broker and simulation both had zero positions; positive-position comparisons remain
+offline tested only. Explicit per-currency SettledCash was absent, settlement schedule
+unparsed, and a negative currency cash observation was flagged. Its cause must be
+resolved before future funding approval; no borrowing/funding conclusion is inferred
+from incomplete observations. No balances were converted/imported or altered. This
+passes only the initial cash/position comparison slice, leaving full M3/M4 open.

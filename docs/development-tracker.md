@@ -3,7 +3,7 @@
 Updated: **12 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Review/merge PR #7; then per-currency settled cash, positions/orders/fills reconciliation and executor isolation.
+**Next checkpoint:** Review/merge PR #8; resolve per-currency settlement/negative-cash observations, then orders/fills, funding/FX and executor isolation.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -52,6 +52,8 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | P01 · Simulated ledger and Portfolio Manager | **USD slice validated; 92 tests locally/VM/CI** | Seven paid calls completed with safe quote-free abstention; persistent $5,000 funding unchanged. Positive quote-backed plans/nine-call combination tested offline; broader/live allocation coverage pending |
 | X01 · Authorization and executor | **Locked until M4 acceptance** | Forged, stale and replayed permits; duplicate/partial fills; restarts and account mismatch all fail safely |
 | A01 · Authenticated account summaries | **Initial summary slice validated; 104 tests locally/VM/CI** | Fresh four-tag receipt and consumer verified exact pin/HMAC; wrong pin and expiry rejected. USD summary incomplete; settled cash/positions/orders/fills and funding reconciliation remain open |
+| A02 · Per-currency cash and contract positions | **Initial comparison slice validated; 123 tests locally/VM/CI** | Fresh signed six cash rows/three currencies and completed zero positions. Missing explicit SettledCash and negative currency observation flagged; full reconciliation/funding remain false |
+| A03 · Settlement and currency funding | **Open; funding locked** | Verify the observed settlement schedule from supported semantics, explain/resolve negative currency cash, define capital allocation and FX accounting; no borrowing or inferred funds |
 
 ## Market-open validation session — completed
 
@@ -102,6 +104,10 @@ Quote verification validates an observation; full investment research still requ
 | 12 Oct 2026 | VNC recovery | Owner reported 10061; local tunnel had stopped. Restored localhost forwarding and verified VNC banner at `127.0.0.1:15901`; Gateway authentication and fresh account audit pending |
 | 12 Oct 2026 | Fresh signed paper summary | Owner reauthenticated Gateway. Initial probes rejected notification 10141; spaced client 95 trial passed with no safeguard changes. Four summary tags and fresh HMAC receipt/consumer validated; USD rows incomplete, no negative values observed |
 | 12 Oct 2026 | Account-audit safety checks | Wrong pin and exact 60-second expiry boundary rejected; private receipt mode 0600. Simulation cash/unsettled cash/revision unchanged; no balance import, no OpenAI calls, no execution |
+| 12 Oct 2026 | Cash/position collector tests | `0ff1b3a`: 123 tests passed locally/Ubuntu VM/CI. Live metadata established exact `$LEDGER-` cash prefix and unparsed `SettledCashByDate`; narrowly scoped cancellation acknowledgement compatibility tested |
+| 12 Oct 2026 | Cash/position trial status | Initial unsupported fields/acknowledgement stopped collection; corrected final trial could not connect after the 30-minute Gateway timer expired. Reopened login window; completed fresh receipt pending. No orders/OpenAI calls |
+| 12 Oct 2026 | Fresh cash/position acceptance | `0ff1b3a`: owner reauthenticated; initial post-login disconnect, then spaced client 95 trial passed. Six cash rows/three currencies and completed zero positions; receipt and comparison validated; wrong pin/expiry rejected |
+| 12 Oct 2026 | Funding observations and isolation | Explicit USD SettledCash absent, schedule unparsed, negative currency cash observed. Funding/full reconciliation remain false. Receipt 0600; ledger/revision/API costs unchanged; host guard verified; zero OpenAI calls/orders |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
@@ -117,9 +123,10 @@ No investment return has been measured.
 | [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Merged — `6a4b604`** |
 | [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Merged — `a0ea0b6`** |
 | [#6](https://github.com/mithunkurian/NexyDAO/pull/6) | USD ledger and advisory Portfolio Manager | **Merged — `268f364`; limited USD slice, execution disabled** |
-| [#7](https://github.com/mithunkurian/NexyDAO/pull/7) | Host ingress guard and authenticated account summaries | **Ready for review — host protection and fresh summary validated; full reconciliation pending** |
+| [#7](https://github.com/mithunkurian/NexyDAO/pull/7) | Host ingress guard and authenticated account summaries | **Merged — `d59cd06`; full reconciliation pending** |
+| [#8](https://github.com/mithunkurian/NexyDAO/pull/8) | Per-currency cash and contract position comparison | **Ready for review — initial comparison validated; settlement and funding gates remain open** |
 
-Development branch: `codex/broker-access-audit`.
+Development branch: `codex/cash-position-reconciliation`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
 Merged baseline `b435b10` and quote implementation `abde107` were tested in isolated
 VM release directories. The existing VM repository and credential files were preserved.
