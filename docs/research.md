@@ -27,7 +27,11 @@ integrity is not an SEC signature, an external audit or independent economic tru
 Researchers receive the same facts and prior memory, without each other's report.
 Every candidate requires known evidence IDs, a matching issuer and exact numeric value
 bindings. Fabricated structured claims stop before the CEO; incurred costs remain
-recorded. Reports retain `thesis_verification: unverified`: prose, forecasts, valuation,
+recorded. The model schema also restricts symbols/IDs to the verified dataset, bounds
+candidate count to issuer count and requires at least one claim per candidate. Multiple
+ideas or risks for one issuer belong in a single candidate; local uniqueness checks
+remain enforced independently of the schema. Reports retain
+`thesis_verification: unverified`: prose, forecasts, valuation,
 interpretations and extrapolated numbers are **not** certified. Risk and committee
 review challenge conclusions; prior memory remains unverified. Agents may abstain.
 

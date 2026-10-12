@@ -126,3 +126,12 @@ All 65 tests also passed on the 1 GB Ubuntu VM in an isolated release; the offli
 demo denied execution and GitHub Actions passed. [PR #4](https://github.com/mithunkurian/NexyDAO/pull/4)
 is a draft pending live SEC retrieval and paid eight-call acceptance. The VM check made
 no SEC or OpenAI requests and did not alter the persistent application cost database.
+
+Live SEC retrieval then passed with the operator contact stored privately: one issuer
+and two signed typed observations were verified. The first paid research attempt
+stopped on invalid candidate structure before CEO review after two settled calls.
+Cumulative estimated cost became $0.00396210 over 14 calls, with no unsettled entries.
+This is safety rejection, not a completed eight-call acceptance. The report schema now
+bounds candidates to the available issuers, restricts symbol/reference enums to the
+verified dataset and requires nonempty claims. All 66 local tests passed; live retest
+is required. No contact identifier was committed or included in model context.

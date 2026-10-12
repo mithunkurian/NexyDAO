@@ -42,7 +42,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | E01 · Fresh SPY quote | **Validated · 12 Oct** | Fresh paper BidAsk observation received; exact pin, unique contract, signature and expiry verified |
 | E02 · Quote-fed AI cycle | **Validated · 12 Oct** | Six role calls completed while evidence remained fresh; one quote citation; memory and settled costs persisted |
 | E03 · PR #3 | **Merged** | Merge commit `bf94f8a`; local main synced; execution remains disabled |
-| E04 · Research agents and approved sources | **Implemented; live acceptance pending** | Two independent reports, fixed SEC paths, one to three issuers; eight-call cycle. Live test needs local SEC contact identification |
+| E04 · Research agents and approved sources | **Live source passed; AI acceptance pending** | Private contact provisioned; two live SEC observations verified. Initial paid research stopped on invalid structure; tightened schema retest pending |
 | E05 · Research verification | **Partial; offline tested** | Typed numeric claim binding, source identity, signatures, freshness and contradictions. Prose/forecasts and cross-publisher corroboration remain unverified |
 | S01 · Independent broker ingress restriction | **Open** | Verify VM/cloud enforcement prevents remote API access; Gateway was observed bound to a wildcard socket |
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
@@ -87,6 +87,9 @@ Quote verification validates an observation; full investment research still requ
 | 12 Oct 2026 | Costs and memory | Cycle estimate **$0.00196425**; cumulative **$0.00276285** across 12 calls; zero unsettled reservations; completed run persisted after reopening SQLite |
 | 12 Oct 2026 | Research implementation | 65 offline tests passed locally; eight-call workflow, independent contexts, claim rejection, source bounds and mocked costs. Not paid/live acceptance |
 | 12 Oct 2026 | Research VM/CI | All 65 tests passed on Ubuntu/Python 3.12 in isolated release `184ed13`; offline demo denied execution; CI passed. No SEC or paid API requests |
+| 12 Oct 2026 | Live SEC source | Private contact configured; MSFT ticker/CIK and two typed filing observations retrieved, signed and verified; contact excluded from prompts/Git |
+| 12 Oct 2026 | Research safety stop | Initial attempt stopped before CEO on invalid candidate structure after two calls; cumulative **$0.00396210**, 14 calls, zero unsettled reservations. Not a completed research acceptance run |
+| 12 Oct 2026 | Schema correction | Dataset-specific issuer/reference enums, candidate bounds and required nonempty claims added; 66 local tests passed; live retest pending |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.

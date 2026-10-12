@@ -18,7 +18,8 @@ from nexydao.provider import OpenAIProvider
 from decimal import Decimal
 from nexydao.market import canonical
 from nexydao.records import PROPOSAL
-from nexydao.research import REPORT, validate_claims
+from nexydao.research import REPORT, validate_claims, report_schema
+from nexydao.records import validate
 from nexydao.sec import (ResearchConfig, SourceError, PublicTLS, MAX_BYTES, CONCEPTS, collect,
                         decode, extract, fetch, load_research_evidence, run_source_check, source_path)
 from nexydao.store import Store
@@ -245,7 +246,7 @@ class ResearchTests(unittest.TestCase):
             if mutation == 'symbol': candidate['symbol'] = 'OTHER'
             if mutation == 'duplicate': candidate['claims'] *= 2
             if mutation == 'empty': candidate['claims'] = []
-            with self.assertRaises(SourceError):
+            with self.assertRaises((SourceError, ValueError)):
                 validate_claims(report, evidence)
 
     def provider(self, evidence, mutate=None):
@@ -255,7 +256,7 @@ class ResearchTests(unittest.TestCase):
             def __init__(self): self.calls = []
             def decide(self, run, role, instructions, context, schema):
                 self.calls.append((role, copy.deepcopy(context)))
-                if schema == REPORT:
+                if 'candidates' in schema['properties']:
                     report = parent.report(evidence)
                     if mutate: mutate(report)
                     return report
@@ -329,6 +330,21 @@ class ResearchTests(unittest.TestCase):
             with self.assertRaises(SystemExit): main()
             store.assert_not_called()
             provider.assert_not_called()
+
+    def test_dataset_schema_requires_claims_and_bounds_candidates_to_issuers(self):
+        evidence = self.receipt()
+        spec = report_schema(evidence)
+        report = self.report(evidence)
+        validate(report, spec)
+        for mutation in ('empty_claims', 'duplicate_issuer', 'unknown_symbol', 'unknown_id'):
+            changed = copy.deepcopy(report)
+            candidate = changed['candidates'][0]
+            if mutation == 'empty_claims': candidate['claims'] = []
+            if mutation == 'duplicate_issuer': changed['candidates'] *= 2
+            if mutation == 'unknown_symbol': candidate['symbol'] = 'OTHER'
+            if mutation == 'unknown_id': candidate['claims'][0]['evidence_id'] = 'fake'
+            with self.assertRaises(ValueError):
+                validate(changed, spec)
 
 
 if __name__ == '__main__':

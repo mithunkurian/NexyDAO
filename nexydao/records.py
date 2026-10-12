@@ -2,7 +2,7 @@
 import math
 
 SCHEMA_VERSION = 1
-PROMPT_VERSION = 4
+PROMPT_VERSION = 5
 
 
 def schema(properties):
@@ -41,7 +41,7 @@ def validate(value, spec):
         for key, child in spec["properties"].items():
             validate(value[key], child)
     if kind in ("string", "array"):
-        lower = spec.get("minLength", 0)
+        lower = spec.get("minLength", spec.get("minItems", 0))
         upper = spec.get("maxLength", spec.get("maxItems", 3000))
         if not lower <= len(value) <= upper:
             raise ValueError("Decision field exceeds length bounds")
