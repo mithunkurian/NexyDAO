@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 from pathlib import Path
 
 from .config import Config
@@ -28,7 +29,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "broker-audit", "broker-audit-report", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -62,6 +63,21 @@ def main():
         if args.command == "broker-check":
             from .ibkr import BrokerConfig, run_check
             print(json.dumps(run_check(BrokerConfig.from_env()), indent=2))
+            return
+        if args.command == 'broker-access-check':
+            from .access import run_access_check
+            result = run_access_check()
+            print(json.dumps(result, indent=2))
+            if not result['non_loopback_tcp_ingress_denied']: parser.exit(1)
+            return
+        if args.command in {'broker-audit', 'broker-audit-report'}:
+            from .account_audit import collect_audit, load_audit
+            from .ibkr import BrokerConfig
+            key = os.environ.get('NEXYDAO_EVIDENCE_KEY_FILE', '')
+            if not key: raise ValueError('Private evidence key required')
+            path = Path(os.environ.get('NEXYDAO_ACCOUNT_AUDIT_SNAPSHOT', 'data/account-audit.json'))
+            function = collect_audit if args.command == 'broker-audit' else load_audit
+            print(json.dumps(function(BrokerConfig.from_env(), Path(key), path), indent=2))
             return
         if args.command == "market-check":
             from .market import MarketConfig, run_market_check

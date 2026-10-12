@@ -1,0 +1,12 @@
+[Unit]
+Description=NexyDAO broker and VNC non-loopback ingress guard
+After=network-pre.target nftables.service
+Before=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nexydao-firewall
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

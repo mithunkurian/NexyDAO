@@ -150,12 +150,16 @@ def probe(config, connector=socket.create_connection):
                     if len(fields) != 7 or fields[2] != "9101" or fields[3] != account:
                         raise ProbeError("unexpected_summary_account_or_request")
                     tag, value, currency = fields[4:]
+                    if not re.fullmatch(r'-?[0-9]{1,16}(?:\.[0-9]{1,12})?', value):
+                        raise ProbeError("invalid_account_value")
                     number = Decimal(value)
                     if tag not in TAGS or not number.is_finite() or not re.fullmatch(r"[A-Z]{3}", currency):
                         raise ProbeError("invalid_account_value")
                     key = (tag, currency)
                     if key in values:
                         raise ProbeError("duplicate_account_value")
+                    if len(values) >= 40:
+                        raise ProbeError("account_summary_size_limit")
                     values[key] = value
                 elif fields[0] == "64":
                     if fields != ["64", "1", "9101"]:
