@@ -3,7 +3,7 @@
 Updated: **12 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; M2B quote collection and quote-fed AI cycle validated.
-**Next checkpoint:** Review/merge PR #3, then research agents and source verification.
+**Next checkpoint:** Review/merge PR #4; extend evidence coverage and build simulated portfolio accounting.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -16,8 +16,8 @@ Updated: **12 October 2026 · Europe/Stockholm**
 | Owner | Provides capital, controls access and intervenes when needed |
 | CEO | Routine mandate, strategy, investment/research proposals, budget planning and performance oversight within enforced limits |
 | Infrastructure | Ubuntu 24.04 VM, Python 3.12, 1 GB RAM + 1 GB swap; sustained operation still needs testing |
-| Current AI roles | Six sequential calls: CEO, two Risk Officers, three committee voters |
-| Autonomy | Scheduling, research discovery, portfolio management and execution are not yet operational |
+| Current AI roles | Six-call core review; opt-in research adds opportunity and countercase agents for eight calls |
+| Autonomy | Bounded SEC research and eight-call review validated; scheduling, portfolio management and execution remain pending |
 
 ## Milestone board
 
@@ -27,7 +27,7 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | --- | --- | --- | --- |
 | M1 | Architecture and auditable AI deliberation | **Validated** | Real six-call VM cycle; strict records; persistent memory; settled costs; execution denial |
 | M2A | Read-only IBKR paper connectivity | **Validated** | Exact account pin matched; four summary fields; deliberate wrong pin rejected before summary |
-| M2B | Verified market evidence and research | **In progress** | Fresh live quote, signed receipt and six-call AI consumption validated. Research agents and full source verification still pending |
+| M2B | Verified market evidence and research | **In progress** | Quote component, typed SEC source checks and two-researcher cycle validated. Wider narrative/cross-publisher corroboration remains pending |
 | M3 | Portfolio Manager and simulated accounting | **Planned** | Positions, cash, FX, fees, fills, reconciliation and aggregate risk limits |
 | M4 | Independent authorization and paper execution | **Planned; locked** | Isolated executor, signed permits, kill switch, exposure reservations and execution failure tests |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
@@ -41,9 +41,9 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | --- | --- | --- |
 | E01 · Fresh SPY quote | **Validated · 12 Oct** | Fresh paper BidAsk observation received; exact pin, unique contract, signature and expiry verified |
 | E02 · Quote-fed AI cycle | **Validated · 12 Oct** | Six role calls completed while evidence remained fresh; one quote citation; memory and settled costs persisted |
-| E03 · PR #3 review readiness | **Ready for review** | Live acceptance recorded; implementation tests pass; execution remains disabled |
-| E04 · Research agents and approved sources | **Planned** | Collect opportunities and source material with bounded access; agents cannot self-certify evidence |
-| E05 · Research verification | **Planned** | Verify retrieval, timestamps, claim support and contradictions; reject fabricated citations, spoofing, injection and unsafe source access |
+| E03 · PR #3 | **Merged** | Merge commit `bf94f8a`; local main synced; execution remains disabled |
+| E04 · Research agents and approved sources | **Validated · 12 Oct** | Two live SEC observations and independent reports; eight-call cycle completed with tightened schema; initial safety rejection retained in audit |
+| E05 · Research verification | **Partial; offline tested** | Typed numeric claim binding, source identity, signatures, freshness and contradictions. Prose/forecasts and cross-publisher corroboration remain unverified |
 | S01 · Independent broker ingress restriction | **Open** | Verify VM/cloud enforcement prevents remote API access; Gateway was observed bound to a wildcard socket |
 | S02 · Gateway reconnection reliability | **Open** | Repeated controlled reconnects, authentication/restart behavior and failure recovery tested |
 | S03 · Sustained 1 GB trial | **Open** | Observe memory/swap under repeated workloads and recovery; one successful short trial is insufficient |
@@ -85,6 +85,13 @@ Quote verification validates an observation; full investment research still requ
 | 12 Oct 2026 | Fresh live SPY quote | Protocol 178; pinned account; unique contract; fresh BidAsk observation and signed receipt verified |
 | 12 Oct 2026 | Quote-fed AI cycle | Run `0b5996e0-3d11-48da-8cd2-84eab52123f3`; six calls, two risk reviews, three votes; CEO chose `investigate` and cited one evidence item; execution false |
 | 12 Oct 2026 | Costs and memory | Cycle estimate **$0.00196425**; cumulative **$0.00276285** across 12 calls; zero unsettled reservations; completed run persisted after reopening SQLite |
+| 12 Oct 2026 | Research implementation | 65 offline tests passed locally; eight-call workflow, independent contexts, claim rejection, source bounds and mocked costs. Not paid/live acceptance |
+| 12 Oct 2026 | Research VM/CI | All 65 tests passed on Ubuntu/Python 3.12 in isolated release `184ed13`; offline demo denied execution; CI passed. No SEC or paid API requests |
+| 12 Oct 2026 | Live SEC source | Private contact configured; MSFT ticker/CIK and two typed filing observations retrieved, signed and verified; contact excluded from prompts/Git |
+| 12 Oct 2026 | Research safety stop | Initial attempt stopped before CEO on invalid candidate structure after two calls; cumulative **$0.00396210**, 14 calls, zero unsettled reservations. Not a completed research acceptance run |
+| 12 Oct 2026 | Schema correction | Dataset-specific issuer/reference enums, candidate bounds and required nonempty claims added; 66 local tests passed; live retest pending |
+| 12 Oct 2026 | Live research retest | Implementation `c21c998`; all 66 VM tests/CI passed. Run `01ad46d4-0ba0-4d8f-ba55-d392a518df60`: eight calls, two independent reports with one candidate each, two risk reviews, three votes; CEO chose `investigate`; execution false |
+| 12 Oct 2026 | Research costs and memory | Successful cycle **$0.00530400**; cumulative **$0.00926610** over 22 calls including the failed attempt; zero unsettled reservations. Memory persisted after reopening |
 
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
@@ -96,9 +103,10 @@ No investment return has been measured.
 | --- | --- | --- |
 | [#1](https://github.com/mithunkurian/NexyDAO/pull/1) | Foundation, hierarchy, AI deliberation, records, memory, costs and safeguards | **Merged** |
 | [#2](https://github.com/mithunkurian/NexyDAO/pull/2) | Read-only paper-account probe and milestone marker | **Merged** |
-| [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Ready for review — live acceptance passed** |
+| [#3](https://github.com/mithunkurian/NexyDAO/pull/3) | Quote integrity/freshness adapter, tests and operational records | **Merged** |
+| [#4](https://github.com/mithunkurian/NexyDAO/pull/4) | SEC observations, numeric claim verification and two research agents | **Ready for review — live acceptance passed** |
 
-Development branch: `codex/verified-market-evidence`.
+Development branch: `codex/research-verification`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
 Merged baseline `b435b10` and quote implementation `abde107` were tested in isolated
 VM release directories. The existing VM repository and credential files were preserved.
@@ -123,4 +131,4 @@ refresh its budget. This page is a maintained snapshot, not a background monitor
 an automatically synchronized ChatGPT Page.
 
 Details: [milestone evidence](milestones.md) · [roadmap](roadmap.md) ·
-[architecture](architecture.md) · [quote trial](market-evidence.md) · [deployment](deployment.md).
+[architecture](architecture.md) · [quote trial](market-evidence.md) · [research trial](research.md) · [deployment](deployment.md).

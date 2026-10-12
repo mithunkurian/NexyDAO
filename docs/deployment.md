@@ -7,6 +7,8 @@ account check; see [paper Gateway trial instructions](ibkr-paper.md). The 1 GB
 trial is experimental and requires sustained memory/operational testing.
 The optional [market quote trial](market-evidence.md) requires a private receipt key,
 exact account pin and fresh market data; neither command enables execution.
+The opt-in [research trial](research.md) uses the same persistent database, private
+receipt key and API budget. Configure source access and SEC identification locally.
 
 ## Install and verify
 

@@ -20,8 +20,10 @@ The first read-only account probe is implemented in `broker-check` (see
 `ibkr-paper.md`): bounded account lookup/summary, local private snapshots, account
 namespace/pin checks and offline safety tests. The quote adapter now implements
 unique contract resolution, signed receipts and freshness enforcement; a fresh live
-quote and its six-role AI consumption passed on 2026-10-12. Research and broker/executor OS
-isolation remain unfinished.
+quote and its six-role AI consumption passed on 2026-10-12. The initial SEC research
+adapter and two-agent workflow passed live eight-call acceptance after a schema
+correction. Broader source verification and broker/executor OS isolation remain unfinished.
+See [research scope and operation](research.md).
 
 Read-only IBKR paper data adapter and approved public-source adapters. Verify paper
 account identity rather than assuming it from port. Record contract IDs, bid/ask,

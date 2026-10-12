@@ -11,7 +11,7 @@ These safeguards are not trading signals or buy/sell strategies.
 |---|---|---|
 | Human owner | Invests capital into NexyDAO, controls access, intervenes when needed | All |
 | AI CEO | Mandate, strategy, operating budgets, performance oversight and investment/research proposals | 1; fuller operations 3–5 |
-| Research agents | Opportunity discovery and source collection | 2 |
+| Research agents: opportunity, countercase | Independent ideas/challenges from typed filing facts; no direct source/network authority | Initial slice 2; eight-call live workflow validated |
 | Portfolio Manager | Allocation proposals, alternatives, aggregate exposures | 3 |
 | Risk Officer: capital | Independent loss, sizing and liquidity challenges | 1 |
 | Risk Officer: evidence | Independent provenance and security challenges | 1 |
@@ -48,7 +48,8 @@ decision rationale; budget management and performance accounting are not yet imp
 
 ## Decision workflow
 
-1. Controller loads bounded operator snapshots and three recent completed records.
+1. Controller verifies signed quote/SEC receipts or labels manual input unverified, and loads three recent completed records.
+   Opt-in research runs two independent reports first; application code checks numeric claim bindings.
 2. CEO proposes a decision, rationale, risks, citations and invalidation conditions.
 3. Two risk officers independently pass, challenge or veto.
 4. Three committee members independently approve, revise or reject.
@@ -70,6 +71,9 @@ repeat all reviews. Abstaining or asking for research is a valid outcome.
 - `store`: SQLite WAL audit, bounded memory, transactional lifetime budget reservations.
 - `safety`: static capital envelope and unconditional execution denial.
 - `cli`: offline demo fixture, real AI deliberation, cost inspection.
+- `ibkr` / `market`: bounded read-only paper snapshots/quotes, local integrity and freshness checks.
+- `sec`: fixed public filing endpoints, typed source observations and signed receipts.
+- `research`: two independent reports, strict schemas and application-enforced numeric bindings.
 
 Models receive serialized data only. They have no credentials, shell, database,
 filesystem or broker tools. An injected instruction may influence prose but cannot
@@ -79,8 +83,9 @@ OS administrator. Separate executor identity and external audit are future work.
 
 ## Evidence and capital
 
-Snapshots are always unverified. URLs, timestamps and summaries are operator assertions;
-the application does not retrieve sources or establish freshness and claim support.
+Manual snapshots are unverified. Signed quote/SEC observations have narrowly scoped
+source/integrity/freshness checks; researchers' structured numeric claims must match
+typed facts. Prose, interpretations and forecasts remain unverified. See `research.md`.
 An investment proposal always fails the evidence gate, even with unanimous approval.
 No browser tools are enabled. Empty evidence should lead AI to hold or request research.
 The offline demo is a labeled plumbing fixture, never an investment strategy.
@@ -105,5 +110,6 @@ billing before any operator adjustment.
 
 A process crash may leave a run `running`; it is excluded from memory and never resumed
 or executed. Review abandoned runs operationally. Audit history grows on disk; memory
-sent to models is bounded. PaperBroker is a denial stub, not an IBKR adapter. No broker
-credentials, socket calls or order submission capabilities exist in this milestone.
+sent to models is bounded. PaperBroker remains an execution-denial stub. Operator
+commands have narrowly scoped read-only socket/source access; agents do not have
+broker tools or order submission capability. The separate executor is future work.
