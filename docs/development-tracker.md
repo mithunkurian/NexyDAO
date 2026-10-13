@@ -3,7 +3,7 @@
 Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Validate cash receipt scope and the explicit settled-summary query on the VM. Full currency settlement and order/fee reservation coverage remain open. The owner excluded further investigation of prior transactions.
+**Next checkpoint:** Establish a supported source of current per-currency settled cash and complete order/fee reservation coverage. Ledger-scope acceptance passed; the explicit summary query returned no SettledCash row. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -151,19 +151,26 @@ No investment return has been measured.
 | [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Merged — `09a974c`; documentation only** |
 | [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Merged — `c2482e7`; fresh denial review persisted** |
 | [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Merged — `27053ee`; fresh scoped query and denial persisted** |
-| [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Merged — `84d79f8`; 170 tests passed locally/VM/CI; fresh broker acceptance pending** |
+| [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Merged — `84d79f8`; 170 tests passed locally/VM/CI; fresh ledger scope validated, settled-summary field absent** |
 
-Development branch: `codex/settlement-validation` (post-merge broker acceptance pending).
+Development branch: `codex/settlement-validation` (post-merge acceptance records).
 
 Settlement-scope slice: v3 receipts preserve per-currency ledger-prefix provenance;
 legacy/bare aggregate rows cannot establish spendable USD. `settlement-check`
 queries the explicit summary tag but never imports its account aggregate as ledger
 cash. Implementation `11e632f` passed all 170 tests locally, on Ubuntu and in CI
 (run 90). The previous Gateway trial expired; launcher restarted on VNC display 1.
-After the owner's completion message, Gateway was running but paper port 4002
-remained closed on two checks; all other standard broker API ports were also closed.
-No new broker receipt or allocation review was generated. Current Gateway login/
-API connection state needs clarification before the fresh trial. Reservation amounts
+Initial post-merge checks found Gateway running with all API ports closed. The owner
+confirmed it had logged out and logged back in. Port 4002 then opened. The first
+probe disconnected; a spaced retry completed the explicit summary request but
+returned no SettledCash row, failing safely without saving a summary receipt.
+A separate fresh v3 cash/order trial validated per-currency ledger scope: six cash
+rows, zero positions and zero API-visible order activity frames. Review
+`2bf4799a-3b22-42cf-bcc1-dd17a3412b22` persisted after SQLite reopening. Cash receipt
+mode 0600 and host guard verified; ledger/revision/API costs unchanged. USD settled
+cash still absent and SEK negative, so capacity/funding/execution remained zero/denied.
+No OpenAI calls, broker writes or historical transaction investigation occurred.
+Reservation amounts
 remain unverified; no funding or execution permission is introduced.
 
 Open-order slice: `broker-orders` performs one nonbinding API-visible query and

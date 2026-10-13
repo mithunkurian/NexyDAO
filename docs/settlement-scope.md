@@ -61,10 +61,21 @@ All 170 tests pass locally. Scope tests cover bare USD aggregates, legacy receip
 late scope changes and false flag types. Settlement-query tests cover fixed messages,
 identity, request/tag/end validation, duplicates and safe redaction/preservation.
 Implementation `11e632f` passed all 170 tests on Ubuntu and in CI (run 90).
-The previous Gateway trial expired; launcher restarted. After the owner's completion
-message, Gateway was running but no standard API port was listening. No fresh
-settlement receipt or allocation review was generated; Gateway connection state
-must be resolved before acceptance. No safeguards were relaxed.
+The previous Gateway trial expired; launcher restarted. Initial post-merge checks
+found all API ports closed. The owner confirmed Gateway had logged out and logged
+back in. Port 4002 opened; the first probe disconnected, then a spaced retry completed
+the explicit summary request with no SettledCash row. The collector failed safely
+with `explicit_settled_cash_not_returned` and saved no new summary receipt. This
+does not mean zero settled cash; the requested field was absent from the response.
+
+A separate fresh v3 cash/order trial validated ledger-prefix scope, with six cash
+rows, zero positions and zero API-visible order activity frames. Independent review
+`2bf4799a-3b22-42cf-bcc1-dd17a3412b22` persisted after SQLite reopening. The host guard
+verified, cash receipt mode was 0600, and ledger/revision/API costs were unchanged.
+Explicit USD settled cash remained absent and negative SEK remained observed;
+capacity/funding/execution stayed zero/denied. No OpenAI calls or broker writes.
+Ledger-scope acceptance is complete; usable current currency settlement is not.
+No safeguards were relaxed and no previous owner transaction was investigated.
 Monetary reservation accounting
 requires verified currency cash and complete order/fee coverage before it can reserve
 funds safely. Those gates, settlement serialization, stable observations and executor
