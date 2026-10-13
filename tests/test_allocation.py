@@ -10,14 +10,44 @@ from nexydao.ibkr import ProbeError
 from nexydao.owner_policy import OwnerPolicyError
 from nexydao.store import Store
 import test_funding as funding_fixtures
+from nexydao.orders import SOURCE as ORDERS_SOURCE, SCOPE
 
 
 class AllocationTests(unittest.TestCase):
-    setUp = funding_fixtures.FundingTests.setUp
+    def setUp(self):
+        funding_fixtures.FundingTests.setUp(self)
+        now=time.time()
+        self.orders={'schema_version':1,'source':ORDERS_SOURCE,'protocol_version':178,
+                     'account_sha256':self.payload['account_sha256'],'started_at':now,
+                     'received_at':now,'expires_at':now+60,'query_complete':True,'scope':SCOPE,
+                     'manual_order_coverage_verified':False,'reservation_amounts_verified':False,
+                     'activity_frame_digests':[]}
 
     def evaluate(self, payload=None, settings=None):
         return evaluate_allocation(payload or self.payload, self.config, self.ledger,
-                                   self.policy, settings or AllocationConfig())
+                                   self.policy, settings or AllocationConfig(),orders=self.orders)
+
+    def test_missing_or_nonempty_order_evidence_blocks_planning(self):
+        result=evaluate_allocation(self.payload,self.config,self.ledger,self.policy,AllocationConfig())
+        self.assertEqual(result['planning_ceiling_after_reserves_usd'],'0')
+        self.assertIn('api_open_order_observation_missing',result['blocking_reasons'])
+        self.orders['activity_frame_digests']=['a'*64]
+        result=self.evaluate()
+        self.assertEqual(result['planning_ceiling_after_reserves_usd'],'0')
+        self.assertIn('api_order_activity_requires_reconciliation',result['blocking_reasons'])
+
+    def test_empty_api_query_never_clears_manual_scope_or_reservations(self):
+        result=self.evaluate()
+        self.assertTrue(result['api_order_query_complete'])
+        self.assertFalse(result['manual_order_coverage_verified'])
+        self.assertIn('open_orders_and_reservations',result['blocking_reasons'])
+        self.assertFalse(result['funding_authorized'])
+
+    def test_stale_order_evidence_rolls_back_even_if_cash_is_fresh(self):
+        with patch('nexydao.allocation.validate_orders',side_effect=[self.orders,ProbeError('expired')]):
+            with self.assertRaises(ProbeError):
+                record_allocation_review(self.payload,self.config,self.ledger,self.policy,AllocationConfig(),orders=self.orders)
+        self.assertEqual(self.store.db.execute('SELECT count(*) FROM allocation_reviews').fetchone()[0],0)
 
     def test_larger_broker_balance_does_not_enlarge_allocation_or_authorize(self):
         for row in self.payload['cash']: row['value'] = '1000000'

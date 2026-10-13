@@ -16,11 +16,13 @@ those files. The application does not automatically source `.env` files.
 export NEXYDAO_ALLOCATION_USD=5000
 export NEXYDAO_FEE_RESERVE_USD=50
 python3 -m nexydao broker-access-check
+export NEXYDAO_ORDERS_SNAPSHOT=/private/runtime/broker-orders.json
+python3 -m nexydao broker-orders
 python3 -m nexydao broker-state
 python3 -m nexydao allocation-check
 ```
 
-Run the last two commands consecutively: the signed cash/position receipt expires
+Run the last three commands consecutively: each signed order and cash/position receipt expires
 60 seconds after collection starts. Missing, expired, wrong-account or tampered
 evidence fails before recording a review. A fresh collection requires an owner
 authenticated IB API paper Gateway on localhost port 4002 and a verified host guard.
@@ -36,6 +38,8 @@ amounts, charged currencies and reserves for other currencies still need validat
 
 Coverage requires all three explicit USD observations: CashBalance,
 TotalCashBalance and SettledCash. The lowest value must cover the allocation.
+It also requires a fresh empty API-visible order receipt; missing or nonempty
+order evidence forces zero planning capacity. See `open-orders.md` for scope limits.
 BASE aggregates, other currency balances, buying power and unparsed settlement
 schedules cannot supply missing USD cash. Cash-field disagreement or negative
 cash in any currency forces the planning ceiling to zero. Existing simulated
