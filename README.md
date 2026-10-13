@@ -18,6 +18,8 @@ See [broker ingress and authenticated account audits](docs/broker-access.md) for
 host guard and read-only reconciliation prerequisites.
 The [cash and position comparison](docs/reconciliation.md) adds separate per-currency
 observations and contract-based checks; complete broker reconciliation remains pending.
+The [funding diagnostic](docs/funding-diagnostics.md) preserves private settlement
+observations and records independent funding denials without importing broker funds.
 
 The human owner invests capital into NexyDAO, controls access and intervenes when
 needed. The CEO owns mandate, strategy, operating budget planning and performance

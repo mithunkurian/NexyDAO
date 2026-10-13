@@ -257,3 +257,24 @@ unparsed, and a negative currency cash observation was flagged. Its cause must b
 resolved before future funding approval; no borrowing/funding conclusion is inferred
 from incomplete observations. No balances were converted/imported or altered. This
 passes only the initial cash/position comparison slice, leaving full M3/M4 open.
+
+## Settlement evidence and funding denials, 2026-10-13
+
+PR #8 merged as `c501db3`. Release `d923b13` passed all 135 tests locally, on the
+Ubuntu VM and in CI. Version 2 receipts preserve bounded raw settlement observations
+privately without inferring spendable cash; version 1 remains valid within original
+expiry. The independent operator funding review binds evidence/policy hashes,
+expiry and ledger revision, stores only redacted diagnostic data, and denies funding
+even when hypothetical balances match. It cannot issue an execution permit.
+
+The fresh paper trial collected six cash rows, zero positions and four settlement
+observations, then verified the receipt and recorded denial case
+`5129c425-4901-48df-a042-171000c404d6`, which survived reopening SQLite. SEK remained
+negative in cash observations; cash fields agreed by currency and the cause remained
+unresolved. The owner confirmed no saved statement is available. Numeric-prefix
+schedule shapes were observed, not certified as current settlement evidence.
+Ledger/revision and API costs remained unchanged; receipt mode 0600 and host guard
+verification passed; no OpenAI calls, funding imports, FX conversions or orders occurred.
+The initial startup disconnect and successful spaced trial do not prove sustained
+reconnection reliability. Statement evidence, settlement semantics, full broker
+reconciliation and M3/M4 execution prerequisites remain open. See `funding-diagnostics.md`.

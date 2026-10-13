@@ -71,6 +71,14 @@ class ReconciliationTests(unittest.TestCase):
         self.assertTrue(result['settled_cash_schedule_unparsed'])
         self.assertFalse(result['usd_settled_cash_observed'])
         self.assertIn('per_currency_settled_cash',result['missing_checks'])
+        self.assertEqual(payload['settlement_observations'],[{'currency':'USD','raw_value':'unsupported schedule'}])
+
+    def test_duplicate_oversized_or_changed_schedule_fails(self):
+        cash=self.cash()+self.cash('SettledCashByDate','schedule')
+        for kwargs in ({'cash':cash+self.cash('SettledCashByDate','schedule')},
+                       {'cash':self.cash()+self.cash('SettledCashByDate','x'*4097)},
+                       {'cash':cash,'late':self.cash('SettledCashByDate','changed')}):
+            with self.assertRaises(ProbeError):self.payload(**kwargs)
 
     def test_own_cancellation_notice_only_in_completed_unsubscribed_phase(self):
         notice=frame(4,2,-1,2100,'Account subscription cancelled')
@@ -185,4 +193,15 @@ class ReconciliationTests(unittest.TestCase):
         self.path.write_text('previous')
         with patch('nexydao.reconciliation.collect_state',side_effect=ProbeError('broker_timeout')):
             with self.assertRaises(ProbeError): save_state(self.config,self.key,self.path)
+        self.assertEqual(self.path.read_text(),'previous')
+
+    def test_oversized_signed_schedule_receipt_preserves_last_file(self):
+        payload=self.payload()
+        payload['settled_cash_schedule_unparsed']=True
+        payload['settlement_observations']=[{'currency':f'A{chr(65+i//26)}{chr(65+i%26)}','raw_value':'x'*4096}
+                                             for i in range(40)]
+        validate_state(payload,'DU123',self.now)
+        self.path.write_text('previous')
+        with patch('nexydao.reconciliation.collect_state',return_value=payload):
+            with self.assertRaises(ProbeError):save_state(self.config,self.key,self.path)
         self.assertEqual(self.path.read_text(),'previous')
