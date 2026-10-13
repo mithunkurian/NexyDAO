@@ -23,7 +23,8 @@ class FundingTests(unittest.TestCase):
         self.store=Store(self.root/'db.sqlite');self.addCleanup(self.store.close)
         self.ledger=Portfolio(self.store);self.config=BrokerConfig(expected_account='DU123')
         self.policy=load_policy();now=time.time()
-        self.payload={'schema_version':2,'source':SOURCE,'protocol_version':178,
+        self.payload={'schema_version':3,'source':SOURCE,'protocol_version':178,
+                      'per_currency_scope_verified':True,
                       'account_sha256':hashlib.sha256(b'DU123').hexdigest(),
                       'started_at':now,'received_at':now,'expires_at':now+60,
                       'cash_download_complete':True,'positions_download_complete':True,
@@ -67,7 +68,7 @@ class FundingTests(unittest.TestCase):
         self.assertEqual(settlement_shape('20261013:123.45'),'N:N.N')
 
     def test_receipt_v1_still_valid_but_cannot_recover_missing_raw_schedule(self):
-        legacy=copy.deepcopy(self.payload);legacy['schema_version']=1;del legacy['settlement_observations']
+        legacy=copy.deepcopy(self.payload);legacy['schema_version']=1;del legacy['settlement_observations'];del legacy['per_currency_scope_verified']
         legacy['settled_cash_schedule_unparsed']=True
         validate_state(legacy,'DU123')
         result=evaluate_funding(legacy,self.config,self.ledger,self.policy)

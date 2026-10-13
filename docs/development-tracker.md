@@ -3,7 +3,7 @@
 Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Review/merge PR #12; establish full current order/reservation coverage and authoritative settlement evidence. The owner excluded further investigation of prior transactions.
+**Next checkpoint:** Validate cash receipt scope and the explicit settled-summary query on the VM. Full currency settlement and order/fee reservation coverage remain open. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -150,9 +150,15 @@ No investment return has been measured.
 | [#9](https://github.com/mithunkurian/NexyDAO/pull/9) | Settlement evidence preservation and funding denial cases | **Merged — `694241b`; funding blockers remain unresolved** |
 | [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Merged — `09a974c`; documentation only** |
 | [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Merged — `c2482e7`; fresh denial review persisted** |
-| [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Ready for review — 160 tests passed locally/VM/CI; fresh scoped query and denial persisted** |
+| [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Merged — `27053ee`; fresh scoped query and denial persisted** |
 
-Development branch: `codex/read-only-open-orders`.
+Development branch: `codex/settlement-scope-verification`.
+
+Settlement-scope slice: v3 receipts preserve per-currency ledger-prefix provenance;
+legacy/bare aggregate rows cannot establish spendable USD. `settlement-check`
+queries the explicit summary tag but never imports its account aggregate as ledger
+cash. All 170 tests pass locally; VM/CI/fresh trial pending. Reservation amounts
+remain unverified; no funding or execution permission is introduced.
 
 Open-order slice: `broker-orders` performs one nonbinding API-visible query and
 preserves bounded activity digests in a fresh signed receipt. Allocation reviews

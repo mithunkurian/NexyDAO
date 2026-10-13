@@ -70,6 +70,8 @@ def readonly_message(command, client_id=91):
         "accounts": (17, 1),
         "summary": (62, 1, 9101, "All", ",".join(TAGS)),
         "cancel_summary": (63, 1, 9101),
+        "settled_summary": (62, 1, 9103, "All", "SettledCash"),
+        "cancel_settled_summary": (63, 1, 9103),
     }
     if command not in messages:
         raise PermissionError("Broker mutation commands are unavailable")

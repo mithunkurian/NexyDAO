@@ -38,6 +38,8 @@ amounts, charged currencies and reserves for other currencies still need validat
 
 Coverage requires all three explicit USD observations: CashBalance,
 TotalCashBalance and SettledCash. The lowest value must cover the allocation.
+Version 3 ledger-prefix provenance must establish per-currency scope; bare values,
+legacy receipts and account-summary aggregates cannot satisfy this requirement.
 It also requires a fresh empty API-visible order receipt; missing or nonempty
 order evidence forces zero planning capacity. See `open-orders.md` for scope limits.
 BASE aggregates, other currency balances, buying power and unparsed settlement

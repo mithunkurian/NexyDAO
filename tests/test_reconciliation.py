@@ -40,7 +40,7 @@ class ReconciliationTests(unittest.TestCase):
         return frame(61,3,account,conid,'SPY',kind,'',0,'','','SMART','USD','SPY','SPY',quantity,'100')
 
     def session(self, account='DU123', cash=None, positions=b'', cash_end=True, position_end=True, late=b''):
-        cash = self.cash()+self.cash('SettledCash') if cash is None else cash
+        cash = self.cash('$LEDGER-CashBalance')+self.cash('$LEDGER-SettledCash') if cash is None else cash
         return Socket(frame(178,'time')+frame(15,1,account)+cash+
                       (frame(54,1,account) if cash_end else b'')+late+positions+
                       (frame(62,1) if position_end else b''))
@@ -155,6 +155,28 @@ class ReconciliationTests(unittest.TestCase):
         self.assertFalse(result['positions_match_simulation'])
         self.store.db.execute('UPDATE simulated_positions SET con_id=123'); self.store.db.commit()
         self.assertTrue(reconcile_state(self.payload(positions=self.holding()),self.config,self.ledger,self.now)['positions_match_simulation'])
+
+    def test_bare_currency_label_is_not_verified_ledger_cash(self):
+        payload=self.payload(cash=self.cash()+self.cash('SettledCash'))
+        self.assertFalse(payload['per_currency_scope_verified'])
+        result=reconcile_state(payload,self.config,self.ledger,self.now)
+        self.assertFalse(result['usd_settled_cash_observed'])
+        self.assertIn('per_currency_cash_scope',result['missing_checks'])
+
+    def test_legacy_receipts_remain_readable_but_cannot_prove_scope(self):
+        for version in (1,2):
+            payload=self.payload();payload['schema_version']=version
+            del payload['per_currency_scope_verified']
+            if version==1:del payload['settlement_observations']
+            validate_state(payload,'DU123',self.now)
+            self.assertFalse(reconcile_state(payload,self.config,self.ledger,self.now)['usd_settled_cash_observed'])
+
+    def test_aggregate_appearing_late_invalidates_ledger_scope(self):
+        with self.assertRaises(ProbeError):self.payload(late=self.cash())
+
+    def test_scope_flag_requires_boolean(self):
+        payload=self.payload();payload['per_currency_scope_verified']=1
+        with self.assertRaises(ProbeError):validate_state(payload,'DU123',self.now)
 
     def test_wrong_quantity_and_extra_positions_mismatch(self):
         result=reconcile_state(self.payload(positions=self.holding(quantity='2')),self.config,self.ledger,self.now)
