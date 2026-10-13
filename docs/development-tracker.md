@@ -3,7 +3,7 @@
 Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Validate current USD allocation diagnostics on the VM; collect open orders and establish current settlement semantics before funding approval. The owner excluded further investigation of prior transactions.
+**Next checkpoint:** Review/merge PR #11; collect open orders and establish current settlement semantics before funding approval. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -149,15 +149,21 @@ No investment return has been measured.
 | [#8](https://github.com/mithunkurian/NexyDAO/pull/8) | Per-currency cash and contract position comparison | **Merged — `c501db3`; settlement and funding gates remain open** |
 | [#9](https://github.com/mithunkurian/NexyDAO/pull/9) | Settlement evidence preservation and funding denial cases | **Merged — `694241b`; funding blockers remain unresolved** |
 | [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Merged — `09a974c`; documentation only** |
-| [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Draft — 147 tests passed locally/VM/CI; fresh broker trial pending** |
+| [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Ready for review — 147 tests passed locally/VM/CI; fresh denial review persisted** |
 
 Development branch: `codex/current-capital-allocation`.
 
 Current allocation slice: `allocation-check` keeps the USD cap separate from
 whole-account balances, subtracts API estimates and a configurable planning fee
 buffer, and persists an independent denial review. Final implementation `09cc513`
-passed all 147 tests locally, on Ubuntu and in CI (run 78). Gateway was stopped at
-validation time; fresh broker acceptance is pending owner authentication.
+passed all 147 tests locally, on Ubuntu and in CI (run 78). After owner paper login,
+the first probe disconnected; one spaced retry collected six cash rows and zero
+positions. Review `b699051f-7ba2-4839-8d7e-19f1933d4bb9` persisted after reopening
+SQLite. Explicit USD cash remained incomplete and SEK remained negative, so the
+planning ceiling was zero and funding/execution were denied. The $5,000 cap and
+$50 planning fee buffer were recorded; neither reserves broker funds. Receipt mode
+was 0600, host guard verified, and ledger/revision/API costs were unchanged.
+No OpenAI calls or broker writes occurred. Sustained connection recovery remains open.
 No original statement download or review of past transactions is required by this
 slice. Current negative cash is still independently blocked. Open orders,
 settlement semantics and actual allocation reservation remain future gates.

@@ -71,6 +71,15 @@ run the same offline suite there, then supply the existing private runtime paths
 for a bounded paper trial. Preserve the original VM checkout and credential files.
 There is no scheduler or service change in this milestone.
 
+Implementation `09cc513` passed all 147 tests locally, on Ubuntu VM and in GitHub
+CI. The 13 October paper trial collected six cash rows and zero positions after
+an initial disconnect and one spaced retry. The independent review persisted
+after reopening SQLite, with incomplete explicit USD cash and negative SEK cash
+correctly producing a zero planning ceiling and funding/execution denial. The
+receipt was mode 0600; host guard verified; ledger/revision/API costs were unchanged.
+No paid API calls or broker writes occurred. This validates denial behavior, not
+broker funding readiness or sustained connection reliability.
+
 Open orders and reservation collection, authoritative current settlement semantics,
 full multi-currency fee accounting, allocation ownership, stable account observations
 and independent execution permits remain open. M3/M4 are incomplete; execution
