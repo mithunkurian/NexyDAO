@@ -151,9 +151,9 @@ No investment return has been measured.
 | [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Merged — `09a974c`; documentation only** |
 | [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Merged — `c2482e7`; fresh denial review persisted** |
 | [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Merged — `27053ee`; fresh scoped query and denial persisted** |
-| [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Draft — 170 tests passed locally/VM/CI; fresh paper login pending** |
+| [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Merged — `84d79f8`; 170 tests passed locally/VM/CI; fresh broker acceptance pending** |
 
-Development branch: `codex/settlement-scope-verification`.
+Development branch: `codex/settlement-validation` (post-merge broker acceptance pending).
 
 Settlement-scope slice: v3 receipts preserve per-currency ledger-prefix provenance;
 legacy/bare aggregate rows cannot establish spendable USD. `settlement-check`
