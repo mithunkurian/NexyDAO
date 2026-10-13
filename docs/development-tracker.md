@@ -35,6 +35,12 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 No overall completion percentage is assigned: milestones differ substantially in scope.
 Passing M2A does not mean NexyDAO is autonomously investing.
 
+Remaining implementation estimate: **8 substantial PR packages to autonomous paper
+operation**, followed by **3 separately authorized live-readiness packages**.
+Compatibility/security fixes may add PRs; observation periods require real elapsed
+time. See the [remaining-work checklist](remaining-work.md) for scope, dependencies
+and acceptance criteria. Small documentation updates accompany those packages.
+
 ## Current work queue
 
 | Task | Status | Acceptance condition |
@@ -152,7 +158,7 @@ No investment return has been measured.
 | [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Merged — `c2482e7`; fresh denial review persisted** |
 | [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Merged — `27053ee`; fresh scoped query and denial persisted** |
 | [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Merged — `84d79f8`; 170 tests passed locally/VM/CI; fresh ledger scope validated, settled-summary field absent** |
-| [#14](https://github.com/mithunkurian/NexyDAO/pull/14) | Post-merge broker acceptance records | **Open — documentation only; ledger scope validated, settlement evidence still incomplete** |
+| [#14](https://github.com/mithunkurian/NexyDAO/pull/14) | Post-merge broker acceptance records | **Merged — e467a91; ledger scope validated, settlement evidence still incomplete** |
 
 Development branch: `codex/settlement-validation` (post-merge acceptance records).
 
