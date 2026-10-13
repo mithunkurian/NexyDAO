@@ -49,6 +49,16 @@ class AllocationTests(unittest.TestCase):
                 record_allocation_review(self.payload,self.config,self.ledger,self.policy,AllocationConfig(),orders=self.orders)
         self.assertEqual(self.store.db.execute('SELECT count(*) FROM allocation_reviews').fetchone()[0],0)
 
+    def test_legacy_or_aggregate_usd_cannot_cover_allocation(self):
+        for row in self.payload['cash']:row['value']='1000000'
+        for version in (2,3):
+            payload=copy.deepcopy(self.payload);payload['schema_version']=version
+            if version==2:del payload['per_currency_scope_verified']
+            else:payload['per_currency_scope_verified']=False
+            result=self.evaluate(payload)
+            self.assertFalse(result['usd_cash_covers_allocation'])
+            self.assertEqual(result['planning_ceiling_after_reserves_usd'],'0')
+
     def test_larger_broker_balance_does_not_enlarge_allocation_or_authorize(self):
         for row in self.payload['cash']: row['value'] = '1000000'
         result = self.evaluate()

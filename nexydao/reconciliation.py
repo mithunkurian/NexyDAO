@@ -64,6 +64,7 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
     deadline = time.monotonic() + config.timeout
     cash, holdings = {}, {}
     schedule_unparsed = False
+    scope_verified = True
     schedules = {}
     with connector((config.host, config.port), timeout=config.timeout) as sock:
         sock.sendall(b'API\0' + struct.pack('!I', 9) + b'v100..178')
@@ -110,9 +111,11 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
                         if denomination in schedules: raise ProbeError('duplicate_settlement_observation')
                         if len(schedules) >= 40: raise ProbeError('settlement_currency_limit')
                         schedules[denomination] = value
+                    ledger_prefixed = tag.startswith('$LEDGER-')
                     tag = cash_tag(tag)
                     if tag not in CASH_TAGS or denomination == 'BASE': continue
                     if not currency(denomination): raise ProbeError('invalid_cash_currency')
+                    if not ledger_prefixed: scope_verified = False
                     number(value)
                     key = tag, denomination
                     if key in cash: raise ProbeError('duplicate_cash_observation')
@@ -151,6 +154,8 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
                         raise ProbeError('settlement_changed_during_positions')
                     tag = cash_tag(fields[2])
                     if tag in CASH_TAGS and fields[4] != 'BASE':
+                        if scope_verified and not fields[2].startswith('$LEDGER-'):
+                            raise ProbeError('cash_scope_changed_during_positions')
                         if cash.get((tag, fields[4])) != fields[3]: raise ProbeError('cash_changed_during_positions')
                 elif fields[0] == '61':
                     item = position(fields, account)
@@ -165,10 +170,11 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
         finally:
             try: send('cancel_positions')
             except (OSError, ProbeError): pass
-    payload = {'schema_version': 2, 'source': SOURCE, 'protocol_version': 178,
+    payload = {'schema_version': 3, 'source': SOURCE, 'protocol_version': 178,
                'account_sha256': hashlib.sha256(account.encode()).hexdigest(),
                'started_at': started, 'received_at': clock(), 'expires_at': started + TTL,
                'cash_download_complete': True, 'positions_download_complete': True,
+               'per_currency_scope_verified':scope_verified,
                'settled_cash_schedule_unparsed': schedule_unparsed,
                'settlement_observations': [{'currency':c,'raw_value':v} for c,v in sorted(schedules.items())],
                'cash': [{'tag': t, 'currency': c, 'value': v} for (t,c),v in sorted(cash.items())],
@@ -183,9 +189,10 @@ def validate_state(payload, expected_account, now=None):
             'received_at','expires_at','cash_download_complete','positions_download_complete',
             'settled_cash_schedule_unparsed','cash','positions'}
     version = payload.get('schema_version') if isinstance(payload,dict) else None
-    if type(version) is int and version == 2: keys.add('settlement_observations')
+    if type(version) is int and version in (2,3): keys.add('settlement_observations')
+    if type(version) is int and version == 3: keys.add('per_currency_scope_verified')
     if not isinstance(payload, dict) or set(payload) != keys: raise ProbeError('invalid_state_schema')
-    if (type(payload['schema_version']) is not int or payload['schema_version'] not in (1,2)
+    if (type(payload['schema_version']) is not int or payload['schema_version'] not in (1,2,3)
             or payload['source'] != SOURCE or type(payload['protocol_version']) is not int or payload['protocol_version'] != 178
             or not expected_account or payload['account_sha256'] != hashlib.sha256(expected_account.encode()).hexdigest()
             or payload['cash_download_complete'] is not True or payload['positions_download_complete'] is not True
@@ -195,7 +202,9 @@ def validate_state(payload, expected_account, now=None):
     if any(type(t) not in (int,float) or not 0 < t < 1e12 for t in times): raise ProbeError('invalid_state_time')
     start, received, expiry = times
     if not start <= received <= now < expiry or expiry != start + TTL: raise ProbeError('state_expired_or_future')
-    if version == 2:
+    if version == 3 and type(payload['per_currency_scope_verified']) is not bool:
+        raise ProbeError('invalid_cash_scope_flag')
+    if version in (2,3):
         schedules = payload['settlement_observations']
         if not isinstance(schedules,list) or len(schedules) > 40: raise ProbeError('invalid_settlement_observation')
         seen = set()
@@ -266,8 +275,9 @@ def reconcile_state(payload, config, ledger, now=None):
     snapshot = ledger.snapshot()
     cash = {(r['tag'],r['currency']):number(r['value']) for r in payload['cash']}
     currencies = {c for _,c in cash}
-    complete = all(('CashBalance',c) in cash and ('SettledCash',c) in cash for c in currencies)
-    usd = cash.get(('SettledCash','USD'))
+    scope = payload.get('per_currency_scope_verified',False)
+    complete = scope and all(('CashBalance',c) in cash and ('SettledCash',c) in cash for c in currencies)
+    usd = cash.get(('SettledCash','USD')) if scope else None
     cash_comparison = 'USD_not_observed' if usd is None else ('match' if usd == Decimal(snapshot['settled_cash_usd']) else 'differs')
     observed = {(p['contract_id'],p['currency']):number(p['quantity']) for p in payload['positions'] if number(p['quantity']) != 0}
     expected = {(p['contract_id'],'USD'):Decimal(p['quantity']) for p in snapshot['positions']}
@@ -275,6 +285,7 @@ def reconcile_state(payload, config, ledger, now=None):
     matched = identified and observed == expected
     return {'status':'partial_cash_position_comparison', 'internal_simulation_reconciliation':True,
             'cash_currency_count':len(currencies), 'per_currency_cash_pairs_complete':complete,
+            'per_currency_scope_verified':scope,
             'settled_cash_schedule_unparsed':payload['settled_cash_schedule_unparsed'],
             'usd_settled_cash_observed':usd is not None, 'simulated_cash_comparison':cash_comparison,
             'negative_currency_cash_observed':any(v<0 for v in cash.values()),
@@ -285,6 +296,6 @@ def reconcile_state(payload, config, ledger, now=None):
             'ledger_revision':snapshot['revision'], 'broker_reconciliation':False,
             'broker_funding_verified':False, 'broker_balances_imported':False,
             'observation_atomic':False, 'fx_conversion_performed':False,
-            'missing_checks': ([] if complete else ['per_currency_settled_cash']) + ['open_orders_and_reservations','fills_fees_and_external_transfers',
+            'missing_checks': ([] if complete else ['per_currency_settled_cash']) + ([] if scope else ['per_currency_cash_scope']) + ['open_orders_and_reservations','fills_fees_and_external_transfers',
                               'funding_allocation_and_fx','atomic_or_stable_account_state'],
             'execution_authorized':False}

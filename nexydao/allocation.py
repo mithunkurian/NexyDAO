@@ -43,7 +43,8 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, o
     capital, reserve = map(Decimal, (settings['capital_usd'], settings['fee_reserve_usd']))
     costs = Decimal(snapshot['api_expense_estimate_or_reserved_usd'])
     cash = {r['tag']: number(r['value']) for r in payload['cash'] if r['currency'] == 'USD'}
-    complete = set(cash) == {'CashBalance', 'TotalCashBalance', 'SettledCash'}
+    scope = payload.get('per_currency_scope_verified',False)
+    complete = scope and set(cash) == {'CashBalance', 'TotalCashBalance', 'SettledCash'}
     reasons = set(diagnostic['blocking_reasons'])
     # Whole-account equality is inappropriate for a separately capped allocation.
     # This diagnostic does not remove that block from the existing funding review.
@@ -81,6 +82,7 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, o
             'owner_policy_sha256': policy.digest, 'ledger_revision': snapshot['revision'],
             'observed_at': payload['received_at'], 'evidence_expires_at': payload['expires_at'],
             'evaluated_at': now, 'explicit_usd_cash_complete': complete,
+            'per_currency_scope_verified':scope,
             'usd_cash_covers_allocation': covered,
             'api_expense_estimate_or_reserved_usd': str(costs),
             'planning_ceiling_after_reserves_usd': str(ceiling),
