@@ -159,8 +159,11 @@ Settlement-scope slice: v3 receipts preserve per-currency ledger-prefix provenan
 legacy/bare aggregate rows cannot establish spendable USD. `settlement-check`
 queries the explicit summary tag but never imports its account aggregate as ledger
 cash. Implementation `11e632f` passed all 170 tests locally, on Ubuntu and in CI
-(run 90). The previous Gateway trial expired; launcher restarted on VNC display 1,
-and fresh paper login is pending. Reservation amounts
+(run 90). The previous Gateway trial expired; launcher restarted on VNC display 1.
+After the owner's completion message, Gateway was running but paper port 4002
+remained closed on two checks; all other standard broker API ports were also closed.
+No new broker receipt or allocation review was generated. Current Gateway login/
+API connection state needs clarification before the fresh trial. Reservation amounts
 remain unverified; no funding or execution permission is introduced.
 
 Open-order slice: `broker-orders` performs one nonbinding API-visible query and

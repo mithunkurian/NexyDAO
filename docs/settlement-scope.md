@@ -61,7 +61,10 @@ All 170 tests pass locally. Scope tests cover bare USD aggregates, legacy receip
 late scope changes and false flag types. Settlement-query tests cover fixed messages,
 identity, request/tag/end validation, duplicates and safe redaction/preservation.
 Implementation `11e632f` passed all 170 tests on Ubuntu and in CI (run 90).
-The previous Gateway trial expired; launcher restarted, fresh paper login pending.
+The previous Gateway trial expired; launcher restarted. After the owner's completion
+message, Gateway was running but no standard API port was listening. No fresh
+settlement receipt or allocation review was generated; Gateway connection state
+must be resolved before acceptance. No safeguards were relaxed.
 Monetary reservation accounting
 requires verified currency cash and complete order/fee coverage before it can reserve
 funds safely. Those gates, settlement serialization, stable observations and executor
