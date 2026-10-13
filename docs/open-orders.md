@@ -60,6 +60,13 @@ replace explicit USD settled cash. No past owner transaction investigation is ad
 All 160 tests pass locally, including request allowlists, identity-before-query,
 scope/completion, frame bounds, signatures/duplicate JSON, expiry, stale-order
 rollback and missing/nonempty order denial. An initial unrelated account-audit
-fixture hit a clock boundary; the unchanged suite passed on rerun. VM/CI and fresh
-paper acceptance are pending. Full order/reservation coverage, settlement semantics
+fixture hit a clock boundary; the unchanged suite passed on rerun. Implementation
+`c896f75` also passed all 160 tests on Ubuntu and in CI (run 85). The 13 October
+paper trial completed the API query with zero activity frames, then collected six
+cash rows and zero positions. A combined allocation review persisted after SQLite
+reopening, with both receipts fresh at review. Host guard verified, order receipt
+0600, ledger/revision/API costs unchanged; no OpenAI calls or broker writes.
+An initial probe disconnected; one spaced retry passed. Scope/reservation/atomic
+flags remained false and incomplete USD/negative SEK evidence retained funding
+denial. Full order/reservation coverage, settlement semantics, sustained recovery
 and executor authorization remain open; M3/M4 are incomplete.

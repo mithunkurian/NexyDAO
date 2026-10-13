@@ -3,7 +3,7 @@
 Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Validate API-visible open orders and the combined allocation review on the VM. Full order/reservation coverage and settlement semantics remain open. The owner excluded further investigation of prior transactions.
+**Next checkpoint:** Review/merge PR #12; establish full current order/reservation coverage and authoritative settlement evidence. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -150,6 +150,7 @@ No investment return has been measured.
 | [#9](https://github.com/mithunkurian/NexyDAO/pull/9) | Settlement evidence preservation and funding denial cases | **Merged — `694241b`; funding blockers remain unresolved** |
 | [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Merged — `09a974c`; documentation only** |
 | [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Merged — `c2482e7`; fresh denial review persisted** |
+| [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Ready for review — 160 tests passed locally/VM/CI; fresh scoped query and denial persisted** |
 
 Development branch: `codex/read-only-open-orders`.
 
@@ -157,8 +158,16 @@ Open-order slice: `broker-orders` performs one nonbinding API-visible query and
 preserves bounded activity digests in a fresh signed receipt. Allocation reviews
 bind this evidence; missing, stale or nonempty observations force zero planning
 capacity. Empty API scope does not clear manual orders or reservations. All 160
-tests pass locally; VM/CI/fresh paper trial are pending. Settlement serialization
-remains unverified and unparsed. No historical transaction investigation is added.
+tests passed locally, on Ubuntu and in CI (implementation `c896f75`, CI run 85).
+Fresh trial: first probe disconnected; one spaced retry completed the API query
+with zero activity frames, then collected six cash rows and zero positions.
+Combined review `ba38fecc-50ea-42e2-b0eb-e32e65b96cb0` persisted after reopening;
+both receipts were fresh at review. Order receipt mode 0600 and host guard verified;
+ledger/revision/API costs unchanged; no OpenAI calls or broker writes.
+Manual-order coverage, monetary reservations and atomic state remain false.
+Settlement serialization remains unverified and unparsed; USD cash incomplete and
+SEK negative, so capacity/funding/execution remained zero/denied. No historical
+transaction investigation is added. Connection recovery remains an open gate.
 
 Current allocation slice: `allocation-check` keeps the USD cap separate from
 whole-account balances, subtracts API estimates and a configurable planning fee
