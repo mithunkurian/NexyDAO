@@ -60,7 +60,9 @@ is separate diagnostic evidence, never an allocation input. No paid API calls oc
 All 170 tests pass locally. Scope tests cover bare USD aggregates, legacy receipts,
 late scope changes and false flag types. Settlement-query tests cover fixed messages,
 identity, request/tag/end validation, duplicates and safe redaction/preservation.
-Ubuntu/CI and fresh broker acceptance are pending. Monetary reservation accounting
+Implementation `11e632f` passed all 170 tests on Ubuntu and in CI (run 90).
+The previous Gateway trial expired; launcher restarted, fresh paper login pending.
+Monetary reservation accounting
 requires verified currency cash and complete order/fee coverage before it can reserve
 funds safely. Those gates, settlement serialization, stable observations and executor
 authorization remain open. M3/M4 are incomplete; execution remains disabled.

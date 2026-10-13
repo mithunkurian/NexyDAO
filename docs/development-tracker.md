@@ -151,13 +151,16 @@ No investment return has been measured.
 | [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Merged — `09a974c`; documentation only** |
 | [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Merged — `c2482e7`; fresh denial review persisted** |
 | [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Merged — `27053ee`; fresh scoped query and denial persisted** |
+| [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Draft — 170 tests passed locally/VM/CI; fresh paper login pending** |
 
 Development branch: `codex/settlement-scope-verification`.
 
 Settlement-scope slice: v3 receipts preserve per-currency ledger-prefix provenance;
 legacy/bare aggregate rows cannot establish spendable USD. `settlement-check`
 queries the explicit summary tag but never imports its account aggregate as ledger
-cash. All 170 tests pass locally; VM/CI/fresh trial pending. Reservation amounts
+cash. Implementation `11e632f` passed all 170 tests locally, on Ubuntu and in CI
+(run 90). The previous Gateway trial expired; launcher restarted on VNC display 1,
+and fresh paper login is pending. Reservation amounts
 remain unverified; no funding or execution permission is introduced.
 
 Open-order slice: `broker-orders` performs one nonbinding API-visible query and
