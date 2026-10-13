@@ -63,9 +63,17 @@ account or document the Gateway `SettledCashByDate` serialization.
 
 ## Acceptance and open gates
 
-135 local tests pass, including negative currency isolation, matching-but-denied
+Release `d923b13` passed all 135 tests locally, on Ubuntu VM and in CI, including negative currency isolation, matching-but-denied
 funding, unknown schedule text, bounded preservation, owner changes, stale receipts,
-backward compatibility and durable reports without ledger/cost mutation. VM/CI and
-fresh version 2 collection are pending. Negative-cash cause, supported settlement
+backward compatibility and durable reports without ledger/cost mutation. The fresh
+13 October paper trial collected six cash rows, zero positions and four raw settlement
+observations (three currencies plus BASE). The signed consumer and persisted denial
+case passed; the case survived reopening SQLite. SEK negative cash remained observed,
+CashBalance/TotalCashBalance agreed by currency, and the cause remained unresolved.
+Schedule shapes resembled numeric-prefix/amount pairs, but their semantics were not
+certified. The owner confirmed no statement is saved on the VM.
+Ledger/revision and API costs were unchanged; receipt mode was 0600 and the host guard
+verified. No OpenAI calls or broker writes occurred. An initial startup probe disconnected;
+a spaced trial passed, leaving reliability open. Negative-cash cause, supported settlement
 semantics, open orders/fills/fees/transfers, capital allocation/FX, stable account
 observations and executor isolation remain open. This does not complete M3/M4.
