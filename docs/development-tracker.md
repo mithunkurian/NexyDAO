@@ -148,6 +148,7 @@ No investment return has been measured.
 | [#7](https://github.com/mithunkurian/NexyDAO/pull/7) | Host ingress guard and authenticated account summaries | **Merged — `d59cd06`; full reconciliation pending** |
 | [#8](https://github.com/mithunkurian/NexyDAO/pull/8) | Per-currency cash and contract position comparison | **Merged — `c501db3`; settlement and funding gates remain open** |
 | [#9](https://github.com/mithunkurian/NexyDAO/pull/9) | Settlement evidence preservation and funding denial cases | **Merged — `694241b`; funding blockers remain unresolved** |
+| [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Open — documentation only; original export and funding validation pending** |
 
 Development branch: `codex/paper-statement-findings` (documentation only).
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
