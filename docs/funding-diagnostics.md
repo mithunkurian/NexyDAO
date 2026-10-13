@@ -63,6 +63,37 @@ account or document the Gateway `SettledCashByDate` serialization.
 
 ## Acceptance and open gates
 
+### Subsequent statement observation · 13 October
+
+After PR #9 merged (`694241b`), the owner signed into the paper reporting portal.
+The displayed Activity Statement for 16 April–12 October was checked against
+the private VM account pin. Its SEK Cash Report starts at zero and attributes
+the entire ending debit to commissions. Two EUR/USD trades on 13 and 14
+September carry those commissions in SEK; the trade total agrees with the cash
+movement. The October-only statement carries the same debit forward unchanged.
+This establishes a historical explanation from displayed broker evidence,
+without claiming who initiated the trades or importing them into NexyDAO.
+
+The statement reports margin capabilities and earlier USD debit interest. The
+origin of the USD opening debit is not established. The broker's pre-existing
+paper portfolio is separate from NexyDAO's $5,000 simulation ledger.
+
+A manual browser-observation record, clearly labelled as a transcription, was
+saved under the private VM runtime statements directory with mode 0600. The
+HTML and CSV export attempts returned no downloadable file. No original export
+has been archived, no statement importer has been implemented, and this note
+does not change `negative_cash_cause` in previously recorded funding cases.
+Historical ending settled cash does not resolve the fresh Gateway settlement
+serialization or make current funding eligible. No API calls, orders, cash
+conversions, balance resets or account-setting changes were performed.
+
+The next gate must validate bounded statement input, account/period/currency
+identity and cash arithmetic independently, retain private source provenance,
+and account for fees in their charged currency before any funding permission.
+The debit explanation alone does not resolve the debit or authorize execution.
+
+### Original diagnostic acceptance
+
 Release `d923b13` passed all 135 tests locally, on Ubuntu VM and in CI, including negative currency isolation, matching-but-denied
 funding, unknown schedule text, bounded preservation, owner changes, stale receipts,
 backward compatibility and durable reports without ledger/cost mutation. The fresh
