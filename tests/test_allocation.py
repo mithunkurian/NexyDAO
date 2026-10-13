@@ -54,6 +54,13 @@ class AllocationTests(unittest.TestCase):
         self.assertFalse(result['usd_cash_covers_allocation'])
         self.assertIn('usd_cash_below_allocation', result['blocking_reasons'])
 
+    def test_unallocated_broker_position_cannot_supply_planning_capacity(self):
+        self.payload['positions'] = [{'contract_id':123,'symbol':'SPY','security_type':'STK',
+                                     'currency':'USD','quantity':'1','average_cost':'100'}]
+        result = self.evaluate()
+        self.assertEqual(result['planning_ceiling_after_reserves_usd'], '0')
+        self.assertIn('positions_mismatch_or_unidentified', result['blocking_reasons'])
+
     def test_api_costs_and_reserves_are_inside_allocation(self):
         with patch.object(self.store, 'costs', return_value={'estimated_or_reserved_usd':'12.50'}):
             self.assertEqual(self.evaluate()['planning_ceiling_after_reserves_usd'], '4937.50')

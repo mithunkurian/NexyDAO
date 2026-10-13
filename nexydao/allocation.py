@@ -63,6 +63,8 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None):
     ceiling = max(Decimal(0), min(capital, simulation_cash) - costs - reserve)
     if (not covered or diagnostic['negative_cash_currencies']
             or diagnostic['cash_fields_differ_currencies']
+            or not diagnostic['comparison']['positions_match_simulation']
+            or policy.document()['additional_rules']
             or snapshot['positions'] or Decimal(snapshot['unsettled_cash_usd']) != 0):
         ceiling = Decimal(0)
     return {'status': 'allocation_diagnostic_only', 'funding_authorized': False,

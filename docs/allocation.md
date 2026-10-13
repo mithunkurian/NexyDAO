@@ -41,6 +41,8 @@ schedules cannot supply missing USD cash. Cash-field disagreement or negative
 cash in any currency forces the planning ceiling to zero. Existing simulated
 positions or unsettled proceeds require broader allocation accounting and also
 force zero in this initial slice.
+Unallocated broker positions and additional owner rules awaiting enforcement also
+force zero; external holdings are never assigned to NexyDAO automatically.
 
 The allocation-side planning ceiling is the smaller of the cap and simulation
 settled cash, minus retained API cost estimates/reservations and the fee buffer.

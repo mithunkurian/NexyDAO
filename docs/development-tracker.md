@@ -155,7 +155,9 @@ Development branch: `codex/current-capital-allocation`.
 Current allocation slice: `allocation-check` keeps the USD cap separate from
 whole-account balances, subtracts API estimates and a configurable planning fee
 buffer, and persists an independent denial review. All 146 offline tests pass
-locally. Gateway was stopped at validation time; fresh VM acceptance is pending.
+locally and on the Ubuntu VM for `3509ea6`. A subsequent position-mismatch guard
+adds one test; that updated release is being verified. Gateway was stopped at
+validation time; fresh broker acceptance is pending owner authentication.
 No original statement download or review of past transactions is required by this
 slice. Current negative cash is still independently blocked. Open orders,
 settlement semantics and actual allocation reservation remain future gates.
