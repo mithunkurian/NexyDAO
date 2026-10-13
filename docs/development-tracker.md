@@ -3,7 +3,7 @@
 Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Review/merge PR #9; obtain statement evidence for the SEK debit and authoritative settlement semantics before any funding approval.
+**Next checkpoint:** Preserve an original paper statement export and implement validated statement ingestion; establish authoritative settlement semantics before any funding approval. PR #9 is merged.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -112,6 +112,25 @@ Quote verification validates an observation; full investment research still requ
 | 13 Oct 2026 | Fresh funding review | Six cash rows, zero positions, four settlement observations; signed v2 consumer passed. Case `5129c425-4901-48df-a042-171000c404d6` persisted after reopening. Negative SEK observed, cash fields agreed, cause unresolved; no saved statement available |
 | 13 Oct 2026 | Safeguards and state | Funding/execution denied; ledger/revision/API costs unchanged; private receipt 0600; host guard verified; zero OpenAI calls/orders. Initial probe disconnected; spaced trial passed; sustained recovery remains open |
 
+### Paper statement investigation · 13 October
+
+The authenticated paper Activity Statement for 16 April–12 October was reviewed
+in the portal. Its account matched the VM's exact private pin. The SEK Cash Report
+starts at zero, reports commissions, and ends with a debit equal to the two
+EUR/USD trade commissions on 13 and 14 September. This explains the historical
+SEK debit; it does not authorize funding or change a diagnostic case.
+
+A manually transcribed observation was saved privately on the VM with mode 0600.
+HTML and CSV download attempts returned no downloadable artifact; an original
+statement export has **not** been archived or authenticated by application code.
+The account reports margin capabilities and earlier USD debit interest; the
+origin of that earlier USD debit remains outside the available history.
+Historical ending settled cash does not establish fresh spendable cash today.
+The ledger, costs, account settings and unconditional execution denial were not
+changed. The next implementation gate is bounded, exact-account statement
+validation and independent funding reconciliation, including commissions by
+their charged currency. M3/M4 remain incomplete.
+
 Account identifiers, balances, credentials and receipt keys stay outside this tracker and Git.
 No additional OpenAI calls were made by the read-only broker/quote checks.
 No investment return has been measured.
@@ -128,9 +147,9 @@ No investment return has been measured.
 | [#6](https://github.com/mithunkurian/NexyDAO/pull/6) | USD ledger and advisory Portfolio Manager | **Merged — `268f364`; limited USD slice, execution disabled** |
 | [#7](https://github.com/mithunkurian/NexyDAO/pull/7) | Host ingress guard and authenticated account summaries | **Merged — `d59cd06`; full reconciliation pending** |
 | [#8](https://github.com/mithunkurian/NexyDAO/pull/8) | Per-currency cash and contract position comparison | **Merged — `c501db3`; settlement and funding gates remain open** |
-| [#9](https://github.com/mithunkurian/NexyDAO/pull/9) | Settlement evidence preservation and funding denial cases | **Ready for review — diagnostic acceptance validated; underlying funding blockers unresolved** |
+| [#9](https://github.com/mithunkurian/NexyDAO/pull/9) | Settlement evidence preservation and funding denial cases | **Merged — `694241b`; funding blockers remain unresolved** |
 
-Development branch: `codex/settlement-funding-diagnostics`.
+Development branch: `codex/paper-statement-findings` (documentation only).
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
 Merged baseline `b435b10` and quote implementation `abde107` were tested in isolated
 VM release directories. The existing VM repository and credential files were preserved.
