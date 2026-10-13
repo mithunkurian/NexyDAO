@@ -152,6 +152,7 @@ No investment return has been measured.
 | [#11](https://github.com/mithunkurian/NexyDAO/pull/11) | Current-state capped USD allocation diagnostics | **Merged — `c2482e7`; fresh denial review persisted** |
 | [#12](https://github.com/mithunkurian/NexyDAO/pull/12) | Nonbinding API-visible orders and combined allocation evidence | **Merged — `27053ee`; fresh scoped query and denial persisted** |
 | [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Merged — `84d79f8`; 170 tests passed locally/VM/CI; fresh ledger scope validated, settled-summary field absent** |
+| [#14](https://github.com/mithunkurian/NexyDAO/pull/14) | Post-merge broker acceptance records | **Open — documentation only; ledger scope validated, settlement evidence still incomplete** |
 
 Development branch: `codex/settlement-validation` (post-merge acceptance records).
 
