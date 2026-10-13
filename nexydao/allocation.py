@@ -11,6 +11,7 @@ from .funding import evaluate_funding
 from .market import canonical
 from .portfolio import INITIAL
 from .reconciliation import number, validate_state
+from .orders import validate_orders
 
 
 @dataclass(frozen=True)
@@ -32,11 +33,12 @@ class AllocationConfig:
         return value
 
 
-def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None):
+def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, orders=None):
     """Compare a bounded allocation with explicit USD cash; never infer FX cash."""
     now = time.time() if now is None else now
     settings = allocation.document()
     diagnostic = evaluate_funding(payload, broker, ledger, policy, now)
+    if orders is not None: validate_orders(orders,broker.expected_account,now)
     snapshot = ledger.snapshot(now)
     capital, reserve = map(Decimal, (settings['capital_usd'], settings['fee_reserve_usd']))
     costs = Decimal(snapshot['api_expense_estimate_or_reserved_usd'])
@@ -47,6 +49,9 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None):
     # This diagnostic does not remove that block from the existing funding review.
     reasons.discard('simulation_cash_not_reconciled')
     reasons.update({'broker_allocation_not_reserved', 'fee_currency_and_schedule_unverified'})
+    reasons.add('manual_order_visibility_and_reservations_unverified')
+    if orders is None: reasons.add('api_open_order_observation_missing')
+    elif orders['activity_frame_digests']: reasons.add('api_order_activity_requires_reconciliation')
     if not complete:
         reasons.add('explicit_usd_cash_fields_incomplete')
     if snapshot['positions'] or Decimal(snapshot['unsettled_cash_usd']) != 0:
@@ -65,6 +70,7 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None):
             or diagnostic['cash_fields_differ_currencies']
             or not diagnostic['comparison']['positions_match_simulation']
             or policy.document()['additional_rules']
+            or orders is None or orders['activity_frame_digests']
             or snapshot['positions'] or Decimal(snapshot['unsettled_cash_usd']) != 0):
         ceiling = Decimal(0)
     return {'status': 'allocation_diagnostic_only', 'funding_authorized': False,
@@ -80,18 +86,25 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None):
             'planning_ceiling_after_reserves_usd': str(ceiling),
             'planning_ceiling_is_execution_permission': False,
             'negative_cash_currencies': diagnostic['negative_cash_currencies'],
-            'blocking_reasons': sorted(reasons), 'historical_transaction_review_required': False}
+            'blocking_reasons': sorted(reasons), 'historical_transaction_review_required': False,
+            'api_order_query_complete': orders is not None,
+            'api_order_activity_observed': bool(orders['activity_frame_digests']) if orders is not None else None,
+            'orders_payload_sha256': hashlib.sha256(canonical(orders)).hexdigest() if orders is not None else None,
+            'orders_evidence_expires_at': orders['expires_at'] if orders is not None else None,
+            'manual_order_coverage_verified':False, 'reservation_amounts_verified':False,
+            'account_observation_atomic':False}
 
 
-def record_allocation_review(payload, broker, ledger, policy, allocation):
+def record_allocation_review(payload, broker, ledger, policy, allocation, orders=None):
     db = ledger.db
     db.execute('CREATE TABLE IF NOT EXISTS allocation_reviews '
                '(id TEXT PRIMARY KEY, created REAL NOT NULL, report TEXT NOT NULL)')
     db.commit()
     db.execute('BEGIN IMMEDIATE')
     try:
-        result = evaluate_allocation(payload, broker, ledger, policy, allocation)
+        result = evaluate_allocation(payload, broker, ledger, policy, allocation, orders=orders)
         validate_state(payload, broker.expected_account)
+        if orders is not None: validate_orders(orders,broker.expected_account)
         policy.assert_current()
         ledger.assert_revision(result['ledger_revision'])
         identifier = str(uuid.uuid4())

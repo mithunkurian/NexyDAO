@@ -29,7 +29,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -79,7 +79,7 @@ def main():
             function = collect_audit if args.command == 'broker-audit' else load_audit
             print(json.dumps(function(BrokerConfig.from_env(), Path(key), path), indent=2))
             return
-        if args.command in {'broker-state', 'broker-reconcile', 'funding-check', 'allocation-check'}:
+        if args.command in {'broker-state', 'broker-reconcile', 'funding-check', 'allocation-check', 'broker-orders'}:
             from .reconciliation import save_state, load_state, reconcile_state
             from .ibkr import BrokerConfig
             from .portfolio import Portfolio
@@ -87,17 +87,23 @@ def main():
             if not key: raise ValueError('Private evidence key required')
             broker = BrokerConfig.from_env()
             path = Path(os.environ.get('NEXYDAO_BROKER_STATE_SNAPSHOT', 'data/broker-state.json'))
-            if args.command == 'broker-state':
+            if args.command in {'broker-state','broker-orders'}:
                 from .access import run_access_check
                 if not run_access_check()['non_loopback_tcp_ingress_denied']:
                     raise ProbeError('host_guard_unverified')
-                result = save_state(broker, Path(key), path)
+                if args.command=='broker-orders':
+                    from .orders import save_orders
+                    result=save_orders(broker,Path(key),Path(os.environ.get('NEXYDAO_ORDERS_SNAPSHOT','data/broker-orders.json')))
+                else: result = save_state(broker, Path(key), path)
             else:
                 payload = load_state(broker, Path(key), path)
                 store = Store(config.db)
                 if args.command=='allocation-check':
                     from .allocation import AllocationConfig, record_allocation_review
-                    result=record_allocation_review(payload,broker,Portfolio(store),owner_policy,AllocationConfig.from_env())
+                    from .orders import load_orders
+                    orders_path=os.environ.get('NEXYDAO_ORDERS_SNAPSHOT','')
+                    orders=load_orders(broker,Path(key),Path(orders_path)) if orders_path else None
+                    result=record_allocation_review(payload,broker,Portfolio(store),owner_policy,AllocationConfig.from_env(),orders=orders)
                 elif args.command=='funding-check':
                     from .funding import record_funding_review
                     result=record_funding_review(payload,broker,Portfolio(store),owner_policy)
