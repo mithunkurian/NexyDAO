@@ -64,6 +64,7 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
     deadline = time.monotonic() + config.timeout
     cash, holdings = {}, {}
     schedule_unparsed = False
+    schedules = {}
     with connector((config.host, config.port), timeout=config.timeout) as sock:
         sock.sendall(b'API\0' + struct.pack('!I', 9) + b'v100..178')
         wire = Wire(sock, deadline)
@@ -102,7 +103,13 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
                         raise ProbeError('invalid_cash_update_account_or_layout')
                     tag, value, denomination = fields[2:5]
                     if tag == 'AccountReady' and value != 'true': raise ProbeError('broker_account_not_ready')
-                    if tag == 'SettledCashByDate': schedule_unparsed = True
+                    if tag == 'SettledCashByDate':
+                        schedule_unparsed = True
+                        if not (currency(denomination) or denomination == 'BASE') or len(value) > 4096:
+                            raise ProbeError('invalid_settlement_observation')
+                        if denomination in schedules: raise ProbeError('duplicate_settlement_observation')
+                        if len(schedules) >= 40: raise ProbeError('settlement_currency_limit')
+                        schedules[denomination] = value
                     tag = cash_tag(tag)
                     if tag not in CASH_TAGS or denomination == 'BASE': continue
                     if not currency(denomination): raise ProbeError('invalid_cash_currency')
@@ -140,6 +147,8 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
                 if fields[0] == '6':
                     if len(fields) != 6 or fields[1] != '2' or fields[5] != account: raise ProbeError('invalid_cash_update_account_or_layout')
                     if fields[2] == 'AccountReady' and fields[3] != 'true': raise ProbeError('broker_account_not_ready')
+                    if fields[2] == 'SettledCashByDate' and schedules.get(fields[4]) != fields[3]:
+                        raise ProbeError('settlement_changed_during_positions')
                     tag = cash_tag(fields[2])
                     if tag in CASH_TAGS and fields[4] != 'BASE':
                         if cash.get((tag, fields[4])) != fields[3]: raise ProbeError('cash_changed_during_positions')
@@ -156,11 +165,12 @@ def collect_state(config, connector=socket.create_connection, clock=time.time):
         finally:
             try: send('cancel_positions')
             except (OSError, ProbeError): pass
-    payload = {'schema_version': 1, 'source': SOURCE, 'protocol_version': 178,
+    payload = {'schema_version': 2, 'source': SOURCE, 'protocol_version': 178,
                'account_sha256': hashlib.sha256(account.encode()).hexdigest(),
                'started_at': started, 'received_at': clock(), 'expires_at': started + TTL,
                'cash_download_complete': True, 'positions_download_complete': True,
                'settled_cash_schedule_unparsed': schedule_unparsed,
+               'settlement_observations': [{'currency':c,'raw_value':v} for c,v in sorted(schedules.items())],
                'cash': [{'tag': t, 'currency': c, 'value': v} for (t,c),v in sorted(cash.items())],
                'positions': [holdings[k] for k in sorted(holdings)]}
     validate_state(payload, config.expected_account, clock())
@@ -172,8 +182,10 @@ def validate_state(payload, expected_account, now=None):
     keys = {'schema_version','source','protocol_version','account_sha256','started_at',
             'received_at','expires_at','cash_download_complete','positions_download_complete',
             'settled_cash_schedule_unparsed','cash','positions'}
+    version = payload.get('schema_version') if isinstance(payload,dict) else None
+    if type(version) is int and version == 2: keys.add('settlement_observations')
     if not isinstance(payload, dict) or set(payload) != keys: raise ProbeError('invalid_state_schema')
-    if (type(payload['schema_version']) is not int or payload['schema_version'] != 1
+    if (type(payload['schema_version']) is not int or payload['schema_version'] not in (1,2)
             or payload['source'] != SOURCE or type(payload['protocol_version']) is not int or payload['protocol_version'] != 178
             or not expected_account or payload['account_sha256'] != hashlib.sha256(expected_account.encode()).hexdigest()
             or payload['cash_download_complete'] is not True or payload['positions_download_complete'] is not True
@@ -183,6 +195,18 @@ def validate_state(payload, expected_account, now=None):
     if any(type(t) not in (int,float) or not 0 < t < 1e12 for t in times): raise ProbeError('invalid_state_time')
     start, received, expiry = times
     if not start <= received <= now < expiry or expiry != start + TTL: raise ProbeError('state_expired_or_future')
+    if version == 2:
+        schedules = payload['settlement_observations']
+        if not isinstance(schedules,list) or len(schedules) > 40: raise ProbeError('invalid_settlement_observation')
+        seen = set()
+        for row in schedules:
+            if (not isinstance(row,dict) or set(row) != {'currency','raw_value'}
+                    or not (currency(row['currency']) or row['currency']=='BASE')
+                    or not isinstance(row['raw_value'],str) or len(row['raw_value']) > 4096
+                    or any(ord(c)<32 for c in row['raw_value'])): raise ProbeError('invalid_settlement_observation')
+            if row['currency'] in seen: raise ProbeError('duplicate_settlement_observation')
+            seen.add(row['currency'])
+        if bool(schedules) != payload['settled_cash_schedule_unparsed']: raise ProbeError('invalid_settlement_presence_flag')
     cash, holdings = payload['cash'], payload['positions']
     if not isinstance(cash,list) or not 1 <= len(cash) <= 120: raise ProbeError('invalid_state_cash')
     if not isinstance(holdings,list) or len(holdings) > 200: raise ProbeError('invalid_state_positions')
@@ -211,7 +235,10 @@ def validate_state(payload, expected_account, now=None):
 def save_state(config, key_path, path):
     key = read_key(key_path)
     payload = collect_state(config)
-    digest = save_snapshot(path, {'payload':payload, 'signature':hmac.new(key,canonical(payload),hashlib.sha256).hexdigest()})
+    receipt = {'payload':payload, 'signature':hmac.new(key,canonical(payload),hashlib.sha256).hexdigest()}
+    if len(json.dumps(receipt,sort_keys=True,indent=2).encode()) > 131072:
+        raise ProbeError('state_receipt_size_limit')
+    digest = save_snapshot(path, receipt)
     return {'status':'cash_positions_collected', 'receipt_sha256':digest,
             'cash_rows':len(payload['cash']), 'position_rows':len(payload['positions']), 'execution_authorized':False}
 

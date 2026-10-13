@@ -1,9 +1,9 @@
 # NexyDAO — Development tracker
 
-Updated: **12 October 2026 · Europe/Stockholm**
+Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Review/merge PR #8; resolve per-currency settlement/negative-cash observations, then orders/fills, funding/FX and executor isolation.
+**Next checkpoint:** Validate preserved settlement evidence and persistent funding denials; obtain transaction evidence for the negative SEK cause.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -53,7 +53,7 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 | X01 · Authorization and executor | **Locked until M4 acceptance** | Forged, stale and replayed permits; duplicate/partial fills; restarts and account mismatch all fail safely |
 | A01 · Authenticated account summaries | **Initial summary slice validated; 104 tests locally/VM/CI** | Fresh four-tag receipt and consumer verified exact pin/HMAC; wrong pin and expiry rejected. USD summary incomplete; settled cash/positions/orders/fills and funding reconciliation remain open |
 | A02 · Per-currency cash and contract positions | **Initial comparison slice validated; 123 tests locally/VM/CI** | Fresh signed six cash rows/three currencies and completed zero positions. Missing explicit SettledCash and negative currency observation flagged; full reconciliation/funding remain false |
-| A03 · Settlement and currency funding | **Open; funding locked** | Verify the observed settlement schedule from supported semantics, explain/resolve negative currency cash, define capital allocation and FX accounting; no borrowing or inferred funds |
+| A03 · Settlement and currency funding | **Diagnostics implemented; 135 local tests; funding locked** | Version 2 preserves raw schedules privately, persistent denial codes, negative SEK observations localized. Schedule semantics and transaction-level cause remain unverified |
 
 ## Market-open validation session — completed
 
@@ -124,9 +124,9 @@ No investment return has been measured.
 | [#5](https://github.com/mithunkurian/NexyDAO/pull/5) | Binding owner constraints above all agents | **Merged — `a0ea0b6`** |
 | [#6](https://github.com/mithunkurian/NexyDAO/pull/6) | USD ledger and advisory Portfolio Manager | **Merged — `268f364`; limited USD slice, execution disabled** |
 | [#7](https://github.com/mithunkurian/NexyDAO/pull/7) | Host ingress guard and authenticated account summaries | **Merged — `d59cd06`; full reconciliation pending** |
-| [#8](https://github.com/mithunkurian/NexyDAO/pull/8) | Per-currency cash and contract position comparison | **Ready for review — initial comparison validated; settlement and funding gates remain open** |
+| [#8](https://github.com/mithunkurian/NexyDAO/pull/8) | Per-currency cash and contract position comparison | **Merged — `c501db3`; settlement and funding gates remain open** |
 
-Development branch: `codex/cash-position-reconciliation`.
+Development branch: `codex/settlement-funding-diagnostics`.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
 Merged baseline `b435b10` and quote implementation `abde107` were tested in isolated
 VM release directories. The existing VM repository and credential files were preserved.
