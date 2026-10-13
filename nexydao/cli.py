@@ -29,7 +29,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -79,7 +79,7 @@ def main():
             function = collect_audit if args.command == 'broker-audit' else load_audit
             print(json.dumps(function(BrokerConfig.from_env(), Path(key), path), indent=2))
             return
-        if args.command in {'broker-state', 'broker-reconcile', 'funding-check'}:
+        if args.command in {'broker-state', 'broker-reconcile', 'funding-check', 'allocation-check'}:
             from .reconciliation import save_state, load_state, reconcile_state
             from .ibkr import BrokerConfig
             from .portfolio import Portfolio
@@ -95,7 +95,10 @@ def main():
             else:
                 payload = load_state(broker, Path(key), path)
                 store = Store(config.db)
-                if args.command=='funding-check':
+                if args.command=='allocation-check':
+                    from .allocation import AllocationConfig, record_allocation_review
+                    result=record_allocation_review(payload,broker,Portfolio(store),owner_policy,AllocationConfig.from_env())
+                elif args.command=='funding-check':
                     from .funding import record_funding_review
                     result=record_funding_review(payload,broker,Portfolio(store),owner_policy)
                 else: result = reconcile_state(payload, broker, Portfolio(store))

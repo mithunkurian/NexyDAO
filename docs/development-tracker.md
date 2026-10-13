@@ -3,7 +3,7 @@
 Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Preserve an original paper statement export and implement validated statement ingestion; establish authoritative settlement semantics before any funding approval. PR #9 is merged.
+**Next checkpoint:** Validate current USD allocation diagnostics on the VM; collect open orders and establish current settlement semantics before funding approval. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -148,9 +148,17 @@ No investment return has been measured.
 | [#7](https://github.com/mithunkurian/NexyDAO/pull/7) | Host ingress guard and authenticated account summaries | **Merged — `d59cd06`; full reconciliation pending** |
 | [#8](https://github.com/mithunkurian/NexyDAO/pull/8) | Per-currency cash and contract position comparison | **Merged — `c501db3`; settlement and funding gates remain open** |
 | [#9](https://github.com/mithunkurian/NexyDAO/pull/9) | Settlement evidence preservation and funding denial cases | **Merged — `694241b`; funding blockers remain unresolved** |
-| [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Open — documentation only; original export and funding validation pending** |
+| [#10](https://github.com/mithunkurian/NexyDAO/pull/10) | Redacted paper statement findings and tracker update | **Merged — `09a974c`; documentation only** |
 
-Development branch: `codex/paper-statement-findings` (documentation only).
+Development branch: `codex/current-capital-allocation`.
+
+Current allocation slice: `allocation-check` keeps the USD cap separate from
+whole-account balances, subtracts API estimates and a configurable planning fee
+buffer, and persists an independent denial review. All 146 offline tests pass
+locally. Gateway was stopped at validation time; fresh VM acceptance is pending.
+No original statement download or review of past transactions is required by this
+slice. Current negative cash is still independently blocked. Open orders,
+settlement semantics and actual allocation reservation remain future gates.
 Historical Git marker: `milestone-2a-paper-connectivity` (unchanged).
 Merged baseline `b435b10` and quote implementation `abde107` were tested in isolated
 VM release directories. The existing VM repository and credential files were preserved.
