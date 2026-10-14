@@ -21,7 +21,8 @@ class WebLedgerTests(unittest.TestCase):
     def web(self):return WebConfig('DU123',self.key)
 
     def collect(self,data=None,mode=2,accounts=None):
-        now=int(time.time())
+        # Keep mocked receipt time behind real consumer time, even early in a second.
+        now=int(time.time())-1
         values={'USD':{'acctcode':'DU123','currency':'USD','cashbalance':5000,'settledcash':5000,'timestamp':now}} if data is None else data
         self.calls=[]
         def read(config,path,timeout):
