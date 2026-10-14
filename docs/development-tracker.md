@@ -97,6 +97,13 @@ Implementation `1d97512` also passed 203 tests on the isolated Ubuntu release an
 in CI (run 112). Host guard verified, execution false. Identified SSO validation
 returned 401; paper reauthentication and actual ledger acceptance remain pending.
 PR #16 is draft; P1 is not struck off.
+Subsequent owner paper login returned to the form without error or confirmation.
+Browser inspection confirmed paper mode; captured warning/error console was empty.
+Safe categorized Web log checks found no diagnostic failure markers; a spaced SSO
+GET still returned 401. Cause remains unestablished. Only the uniquely identified
+Web Gateway was restarted for one clean 45-minute trial with the existing TLS files
+and memory limits; no TWS termination, credentials, permissions or trust changes.
+One fresh root-page paper login was requested; repeated blind retries are excluded.
 
 | Date | Check | Recorded result |
 | --- | --- | --- |
