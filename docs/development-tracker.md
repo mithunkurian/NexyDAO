@@ -104,6 +104,15 @@ GET still returned 401. Cause remains unestablished. Only the uniquely identifie
 Web Gateway was restarted for one clean 45-minute trial with the existing TLS files
 and memory limits; no TWS termination, credentials, permissions or trust changes.
 One fresh root-page paper login was requested; repeated blind retries are excluded.
+The clean Web trial also returned the owner to the login form. Non-secret proxy,
+environment and credential-CORS settings matched vendor defaults; the origin is
+restricted to the laptop tunnel URL. No configuration weakening was performed.
+An Edge InPrivate comparison was requested to isolate browser session handling,
+which remains a hypothesis. The separate TWS process was absent; its launcher has
+a 30-minute limit, consistent with the owner's shutdown screenshot. Current VM
+MemAvailable was 597 MiB and swap free 928 MiB, not evidence of memory at shutdown.
+The existing bounded TWS launcher was restarted on VNC display :1; owner login is
+deferred during the Web comparison. Authentication/settled-cash acceptance stays open.
 
 | Date | Check | Recorded result |
 | --- | --- | --- |
