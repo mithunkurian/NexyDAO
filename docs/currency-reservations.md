@@ -164,4 +164,10 @@ included in errors. The documented `success.value` SSO envelope is accepted only
 when unambiguous; flat legacy identity remains supported. Neither format may omit
 paper mode, expiry or a successful validation.
 
-All 203 offline tests pass locally. Ubuntu and authenticated acceptance are pending.
+Implementation `1d97512` passed all 203 offline tests locally, on the Ubuntu VM
+and in CI (run 112). The isolated VM release is `releases/web-1d97512`; existing
+credentials, owner policy, capital ledger and API-budget database were retained.
+The verified host guard still blocks non-loopback Gateway ports for IPv4/IPv6.
+A spaced identified SSO diagnostic also returned HTTP 401. The owner has been
+asked to refresh and authenticate the paper session. Authenticated acceptance is
+pending; no receipt, funding permission or execution permission is claimed.

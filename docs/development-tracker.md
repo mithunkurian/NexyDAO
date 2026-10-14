@@ -93,6 +93,10 @@ preserving dual identity checks and 60-second cash freshness. Fixed GET diagnost
 observed 403 HTML without the header and 401 on an accounts request with it; the
 sole cause is unproven and paper API acceptance remains open. No paid API calls,
 broker writes, prior-transaction review or funding permission occurred.
+Implementation `1d97512` also passed 203 tests on the isolated Ubuntu release and
+in CI (run 112). Host guard verified, execution false. Identified SSO validation
+returned 401; paper reauthentication and actual ledger acceptance remain pending.
+PR #16 is draft; P1 is not struck off.
 
 | Date | Check | Recorded result |
 | --- | --- | --- |
