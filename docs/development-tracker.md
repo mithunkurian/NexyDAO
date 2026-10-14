@@ -1,6 +1,6 @@
 # NexyDAO — Development tracker
 
-Updated: **13 October 2026 · Europe/Stockholm**
+Updated: **14 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
 **Next checkpoint:** Validate Item 1's Web API currency-ledger reader and independent simulation hold accounting. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
@@ -166,8 +166,18 @@ Item 1 is **in progress**. The Web API's documented currency ledger is implement
 with mandatory TLS, fixed GET paths, paper/session/account checks, native freshness
 and independent cross-source matching. Atomic USD simulation planning holds reduce
 capacity and survive restarts without spending broker cash; foreign fees fail closed.
-All 196 tests pass locally; VM/CI/authenticated Web trial are pending. The official
-gateway bundle is staged privately; no new broker session has been authenticated.
+Implementation `d229ac3` passed all 196 tests locally, on Ubuntu and in CI (run 103).
+The Web receipt fixture now anchors mock time behind the real consumer clock;
+production freshness enforcement is unchanged. The VM host guard now independently
+protects port 5000 for IPv4/IPv6. Ubuntu Java 17 was installed for the official
+Client Portal Gateway. A bounded 45-minute trial is running with a 160 MB heap cap,
+private local TLS files and restricted worker pools. Certificate/hostname validation
+passed. The vendor listener binds 0.0.0.0; the verified kernel rule denies all
+non-loopback TCP ingress. No local certificate was added to system trust.
+The laptop tunnel exposes only 127.0.0.1:15000 and forwards to VM localhost:5000.
+The API is unauthenticated; owner paper login is pending. No real Web ledger receipt
+or broker funding acceptance exists yet. Tests used isolated databases; persistent
+capital/API accounting was not reset or replaced. Item 1 stays in progress.
 No package is struck off merely because a component merges. See
 [Item 1 scope](currency-reservations.md) and [remaining checklist](remaining-work.md).
 
