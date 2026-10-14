@@ -6,6 +6,11 @@ Updated: **14 October 2026 · Europe/Stockholm**
 **Next checkpoint:** Validate Item 1's Web API currency-ledger reader and independent simulation hold accounting. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
+Human access/maintenance procedures: [owner maintenance SOP](owner-maintenance-sop.md).
+It records what to do, why and when, including daily Web login while in use,
+incident-triggered tunnel recovery and the current certificate renewal deadline.
+It does not create a reminder or maintenance automation.
+
 ## Company brief
 
 | Item | Current position |
