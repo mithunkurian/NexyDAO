@@ -113,6 +113,13 @@ a 30-minute limit, consistent with the owner's shutdown screenshot. Current VM
 MemAvailable was 597 MiB and swap free 928 MiB, not evidence of memory at shutdown.
 The existing bounded TWS launcher was restarted on VNC display :1; owner login is
 deferred during the Web comparison. Authentication/settled-cash acceptance stays open.
+Edge InPrivate also returned to the login form, so an in-app-browser-only cause is
+not established. The installed main Web Gateway jar matched the current official
+IBKR distribution over verified HTTPS. No software replacement, trust change or
+new authentication attempt followed that comparison. A credential-free
+[API support report](web-gateway-authentication-incident.md) records reproduction,
+configuration and questions about callback/origin/session binding and eligibility.
+It has not been sent. PR #16 stays draft; real Web ledger acceptance remains blocked.
 
 | Date | Check | Recorded result |
 | --- | --- | --- |
