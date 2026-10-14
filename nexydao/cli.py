@@ -29,18 +29,24 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "settlement-check", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
     parser.add_argument('--fill',type=Path)
     parser.add_argument('--settlement-id')
+    parser.add_argument('--reservation',type=Path)
+    parser.add_argument('--reservation-id')
     parser.add_argument('--with-research',action='store_true')
     args = parser.parse_args()
     store = None
     try:
         config = Config.from_env()
         owner_policy = owner_policy_from_env()
+        if args.reservation and args.command!='sim-reserve' or args.reservation_id and args.command!='sim-release':
+            raise ValueError('Reservation arguments apply only to simulation planning holds')
+        if args.command=='sim-reserve' and not args.reservation or args.command=='sim-release' and not args.reservation_id:
+            raise ValueError('Explicit simulation reservation input required')
         if args.fill and args.command!='sim-fill' or args.settlement_id and args.command!='sim-settle':
             raise ValueError('Simulation arguments apply only to their accounting commands')
         if args.with_research and args.command!='portfolio': raise ValueError('Research modifier requires portfolio command')
@@ -58,15 +64,24 @@ def main():
             from .sec import ResearchConfig, run_source_check
             print(json.dumps(run_source_check(ResearchConfig.from_env()), indent=2))
             return
+        if args.command=='web-ledger-check':
+            from .access import run_access_check
+            from .web_ledger import WebConfig,save_web_ledger
+            key=os.environ.get('NEXYDAO_EVIDENCE_KEY_FILE','')
+            if not key:raise ValueError('Private evidence key required')
+            if not run_access_check(web=True)['non_loopback_tcp_ingress_denied']:
+                raise ProbeError('web_host_guard_unverified')
+            result=save_web_ledger(WebConfig.from_env(),Path(key),Path(os.environ.get('NEXYDAO_WEB_LEDGER_SNAPSHOT','data/web-ledger.json')))
+            print(json.dumps(result,indent=2));return
         if (args.command == 'research' or args.with_research) and (not args.research_evidence or args.market_evidence):
             raise ValueError('Research requires a signed filing receipt; run it before collecting short-lived quotes')
         if args.command == "broker-check":
             from .ibkr import BrokerConfig, run_check
             print(json.dumps(run_check(BrokerConfig.from_env()), indent=2))
             return
-        if args.command == 'broker-access-check':
+        if args.command in {'broker-access-check','web-access-check'}:
             from .access import run_access_check
-            result = run_access_check()
+            result = run_access_check(web=args.command=='web-access-check')
             print(json.dumps(result, indent=2))
             if not result['non_loopback_tcp_ingress_denied']: parser.exit(1)
             return
@@ -106,7 +121,12 @@ def main():
                     from .orders import load_orders
                     orders_path=os.environ.get('NEXYDAO_ORDERS_SNAPSHOT','')
                     orders=load_orders(broker,Path(key),Path(orders_path)) if orders_path else None
-                    result=record_allocation_review(payload,broker,Portfolio(store),owner_policy,AllocationConfig.from_env(),orders=orders)
+                    web_path=os.environ.get('NEXYDAO_WEB_LEDGER_SNAPSHOT','')
+                    if web_path:
+                        from .web_ledger import WebConfig,load_web_ledger
+                        web=load_web_ledger(WebConfig.from_env(),Path(key),Path(web_path))
+                    else:web=None
+                    result=record_allocation_review(payload,broker,Portfolio(store),owner_policy,AllocationConfig.from_env(),orders=orders,web_ledger=web)
                 elif args.command=='funding-check':
                     from .funding import record_funding_review
                     result=record_funding_review(payload,broker,Portfolio(store),owner_policy)
@@ -127,6 +147,18 @@ def main():
         if len(evidence) > 10 or len({item['id'] for item in evidence}) != len(evidence):
             raise ValueError("Combined evidence must have at most ten unique IDs")
         store = Store(config.db)
+        if args.command in {'sim-reserve','sim-release'}:
+            from .portfolio import Portfolio
+            from .reservations import Reservations
+            from .allocation import AllocationConfig
+            from .web_ledger import unique
+            book=Reservations(Portfolio(store))
+            if args.command=='sim-reserve':
+                with args.reservation.open('rb') as stream:body=stream.read(4001)
+                if len(body)>4000:raise ValueError('Simulation reservation input size limit')
+                result=book.reserve(json.loads(body,object_pairs_hook=unique),owner_policy,AllocationConfig.from_env())
+            else:result=book.release(args.reservation_id,owner_policy)
+            print(json.dumps(result,indent=2));return
         if args.command in {'portfolio-report','sim-fill','sim-settle','portfolio-mark'}:
             from .portfolio import Portfolio
             ledger=Portfolio(store)

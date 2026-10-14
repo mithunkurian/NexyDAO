@@ -3,9 +3,10 @@ import json
 import subprocess
 
 PORTS = {4001, 4002, 5901, 7496, 7497}
+WEB_PORTS = PORTS | {5000}
 
 
-def validate_guard(document):
+def validate_guard(document,web=False):
     """Recognize our exact drop rule; unknown shapes cannot establish protection."""
     if not isinstance(document, dict) or set(document) != {'nftables'}:
         return False
@@ -31,18 +32,20 @@ def validate_guard(document):
         {'match': {'op': '==', 'left': {'payload': {'protocol': 'tcp', 'field': 'dport'}},
                    'right': {'set': sorted(PORTS)}}},
         {'drop': None}]
-    return rule.get('expr') == expected
+    if not web and rule.get('expr')==expected:return True
+    expected[1]['match']['right']['set']=sorted(WEB_PORTS)
+    return rule.get('expr')==expected
 
 
-def run_access_check():
+def run_access_check(web=False):
     # Fixed argv; no shell, no arbitrary sudo command, no raw output in logs.
     try:
         result = subprocess.run(['/usr/bin/sudo', '-n', '/usr/sbin/nft', '-j', 'list', 'table',
                                  'inet', 'nexydao_guard'], capture_output=True, timeout=5, check=True)
-        protected = len(result.stdout) <= 32768 and validate_guard(json.loads(result.stdout))
+        protected = len(result.stdout) <= 32768 and validate_guard(json.loads(result.stdout),web=web)
     except (OSError, subprocess.SubprocessError, ValueError):
         protected = False
     return {'status': 'host_guard_verified' if protected else 'host_guard_unverified',
-            'non_loopback_tcp_ingress_denied': protected, 'protected_ports': sorted(PORTS),
+            'non_loopback_tcp_ingress_denied': protected, 'protected_ports': sorted(WEB_PORTS if web else PORTS),
             'ipv4_and_ipv6': protected, 'cloud_firewall_verified': False,
             'collector_agent_os_separation_verified': False, 'execution_authorized': False}

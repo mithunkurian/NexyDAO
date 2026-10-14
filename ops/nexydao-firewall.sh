@@ -11,7 +11,7 @@ cat >> "$rules" <<'NFT'
 table inet nexydao_guard {
     chain input {
         type filter hook input priority -20; policy accept;
-        iifname != "lo" tcp dport { 4001, 4002, 5901, 7496, 7497 } drop
+        iifname != "lo" tcp dport { 4001, 4002, 5000, 5901, 7496, 7497 } drop
     }
 }
 NFT
