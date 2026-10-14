@@ -59,6 +59,9 @@ a separate acceptance gate. `reserve_broker` is unconditionally unavailable.
 
 ## Installation, testing and Google Cloud trial
 
+Owner login, tunnel recovery and certificate approval procedures are maintained in
+the [owner maintenance SOP](owner-maintenance-sop.md).
+
 Python 3.12 and the standard library suffice. Use `deployment.md` and retain the
 existing private DB, owner policy, exact paper pin and receipt key. Never commit
 actual configuration, broker credentials or certificates/private keys.
