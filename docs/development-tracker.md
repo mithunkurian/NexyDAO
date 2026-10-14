@@ -173,7 +173,12 @@ protects port 5000 for IPv4/IPv6. Ubuntu Java 17 was installed for the official
 Client Portal Gateway. A bounded 45-minute trial is running with a 160 MB heap cap,
 private local TLS files and restricted worker pools. Certificate/hostname validation
 passed. The vendor listener binds 0.0.0.0; the verified kernel rule denies all
-non-loopback TCP ingress. No local certificate was added to system trust.
+non-loopback TCP ingress. The VM's system trust store was not changed. With explicit
+owner approval, the exact localhost certificate was added to the laptop's Windows
+current-user trust store; public certificate only, no private key imported. A default
+Windows-root TLS check passed and matched the approved fingerprint with hostname
+verification enabled. The expired Web trial and laptop tunnel were restored using
+the same certificate. Browser refresh and owner paper login remain pending.
 The laptop tunnel exposes only 127.0.0.1:15000 and forwards to VM localhost:5000.
 The API is unauthenticated; owner paper login is pending. No real Web ledger receipt
 or broker funding acceptance exists yet. Tests used isolated databases; persistent

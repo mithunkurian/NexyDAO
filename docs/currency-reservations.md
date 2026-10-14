@@ -116,8 +116,12 @@ Gateway runs as a bounded 45-minute trial with a 160 MB maximum heap, restricted
 worker pools and protected local TLS configuration/key files. Certificate and
 hostname verification passed with the explicit private certificate file.
 The vendor listener binds 0.0.0.0, so the verified root kernel drop rule remains
-mandatory. No local certificate was added to the system trust store. Browser
-certificate warnings, if present, and paper authentication require owner action.
+mandatory. The VM system trust store was not changed. The owner explicitly approved
+adding the exact localhost public certificate to the Windows current-user trust
+store. No private key was imported. Default Windows-root TLS validation and hostname
+checks passed, matching the approved fingerprint. The expired Gateway trial and
+SSH tunnel were restored with the existing certificate. Browser refresh and paper
+authentication require owner action.
 Laptop access is an SSH tunnel on 127.0.0.1:15000 to VM localhost:5000.
 The API is currently unauthenticated; real Web API ledger acceptance is pending.
 No actual capital/fee reservation or live permission has been granted.
