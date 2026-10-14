@@ -4,7 +4,7 @@ import subprocess
 import unittest
 from unittest.mock import patch
 
-from nexydao.access import PORTS, run_access_check, validate_guard
+from nexydao.access import PORTS, WEB_PORTS, run_access_check, validate_guard
 
 
 def guard():
@@ -21,6 +21,13 @@ def guard():
 
 
 class AccessTests(unittest.TestCase):
+    def test_web_gateway_requires_additional_port_guard(self):
+        self.assertFalse(validate_guard(guard(),web=True))
+        document=guard()
+        document['nftables'][3]['rule']['expr'][1]['match']['right']['set']=sorted(WEB_PORTS)
+        self.assertTrue(validate_guard(document,web=True))
+        self.assertTrue(validate_guard(document))
+
     def test_exact_ipv4_ipv6_guard(self):
         self.assertTrue(validate_guard(guard()))
 

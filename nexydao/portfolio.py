@@ -80,10 +80,16 @@ class Portfolio:
                               'mark_status': 'fresh_verified_bid' if fresh else 'missing_or_expired',
                               'mark_expires_at': expiry, 'mark_digest': digest})
         api = Decimal(self.store.costs()['estimated_or_reserved_usd'])
+        from .reservations import active_holds
+        holds=active_holds(self.db)
+        reserved=sum((Decimal(h['total_usd']) for h in holds),Decimal(0))
+        by_symbol={}
+        for hold in holds:by_symbol[hold['symbol']]=str(Decimal(by_symbol.get(hold['symbol'],'0'))+Decimal(hold['total_usd']))
         equity = cash+unsettled+value-api if complete else None
         drawdown = max(Decimal(0), (peak-equity)/peak) if equity is not None else None
         return {'simulated_capital_usd': 5000, 'currency': 'USD', 'settled_cash_usd': str(cash),
-                'unsettled_cash_usd': str(unsettled), 'available_cash_after_api_estimate_usd': str(max(Decimal(0),cash-api)),
+                'unsettled_cash_usd': str(unsettled), 'available_cash_after_api_estimate_usd': str(max(Decimal(0),cash-api-reserved)),
+                'simulation_planning_reserved_usd':str(reserved),'simulation_planning_reserved_by_symbol':by_symbol,
                 'positions': positions, 'realized_pnl_usd': str(realized), 'simulation_fees_usd': str(fees),
                 'api_expense_estimate_or_reserved_usd': str(api), 'valuation_complete': complete,
                 'net_equity_estimate_usd': str(equity) if equity is not None else None,
@@ -259,8 +265,10 @@ def allocation_reasons(snapshot, allocations, policy):
     document=policy.document()
     reasons=[]
     total=Decimal(0)
-    gross=Decimal(snapshot['gross_risk_exposure_usd'])
+    gross=Decimal(snapshot['gross_risk_exposure_usd'])+Decimal(snapshot.get('simulation_planning_reserved_usd','0'))
     held={p['symbol']:max(Decimal(p['cost_basis_usd']),Decimal(p['market_value_usd'] or '0')) for p in snapshot['positions']}
+    for symbol,value in snapshot.get('simulation_planning_reserved_by_symbol',{}).items():
+        held[symbol]=held.get(symbol,Decimal(0))+Decimal(value)
     seen=set()
     for allocation in allocations:
         symbol=allocation['symbol']

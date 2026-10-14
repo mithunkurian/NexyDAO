@@ -3,7 +3,7 @@
 Updated: **13 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Establish a supported source of current per-currency settled cash and complete order/fee reservation coverage. Ledger-scope acceptance passed; the explicit summary query returned no SettledCash row. The owner excluded further investigation of prior transactions.
+**Next checkpoint:** Validate Item 1's Web API currency-ledger reader and independent simulation hold accounting. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 ## Company brief
@@ -160,7 +160,16 @@ No investment return has been measured.
 | [#13](https://github.com/mithunkurian/NexyDAO/pull/13) | Ledger cash scope and explicit settled summaries | **Merged — `84d79f8`; 170 tests passed locally/VM/CI; fresh ledger scope validated, settled-summary field absent** |
 | [#14](https://github.com/mithunkurian/NexyDAO/pull/14) | Post-merge broker acceptance records | **Merged — e467a91; ledger scope validated, settlement evidence still incomplete** |
 
-Development branch: `codex/settlement-validation` (post-merge acceptance records).
+Development branch: `codex/currency-funding-reservations`.
+
+Item 1 is **in progress**. The Web API's documented currency ledger is implemented
+with mandatory TLS, fixed GET paths, paper/session/account checks, native freshness
+and independent cross-source matching. Atomic USD simulation planning holds reduce
+capacity and survive restarts without spending broker cash; foreign fees fail closed.
+All 196 tests pass locally; VM/CI/authenticated Web trial are pending. The official
+gateway bundle is staged privately; no new broker session has been authenticated.
+No package is struck off merely because a component merges. See
+[Item 1 scope](currency-reservations.md) and [remaining checklist](remaining-work.md).
 
 Settlement-scope slice: v3 receipts preserve per-currency ledger-prefix provenance;
 legacy/bare aggregate rows cannot establish spendable USD. `settlement-check`

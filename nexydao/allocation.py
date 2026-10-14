@@ -12,6 +12,7 @@ from .market import canonical
 from .portfolio import INITIAL
 from .reconciliation import number, validate_state
 from .orders import validate_orders
+from .web_ledger import validate_web_ledger
 
 
 @dataclass(frozen=True)
@@ -33,19 +34,39 @@ class AllocationConfig:
         return value
 
 
-def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, orders=None):
+def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, orders=None, web_ledger=None):
     """Compare a bounded allocation with explicit USD cash; never infer FX cash."""
     now = time.time() if now is None else now
     settings = allocation.document()
     diagnostic = evaluate_funding(payload, broker, ledger, policy, now)
     if orders is not None: validate_orders(orders,broker.expected_account,now)
+    if web_ledger is not None:validate_web_ledger(web_ledger,broker.expected_account,now)
     snapshot = ledger.snapshot(now)
     capital, reserve = map(Decimal, (settings['capital_usd'], settings['fee_reserve_usd']))
     costs = Decimal(snapshot['api_expense_estimate_or_reserved_usd'])
     cash = {r['tag']: number(r['value']) for r in payload['cash'] if r['currency'] == 'USD'}
     scope = payload.get('per_currency_scope_verified',False)
+    negative=set(diagnostic['negative_cash_currencies'])
+    currency_set={r['currency'] for r in payload['cash']}
+    web_rows={r['currency']:r for r in web_ledger['cash']} if web_ledger is not None else {}
+    disagreement=False
+    if web_rows:
+        negative.update(c for c,r in web_rows.items() if min(number(r['cash_balance']),number(r['settled_cash']))<0)
+        disagreement=set(web_rows)!=currency_set or not scope
+        for row in payload['cash']:
+            counterpart=web_rows.get(row['currency'])
+            if counterpart is None:disagreement=True;continue
+            value=counterpart['settled_cash'] if row['tag']=='SettledCash' else counterpart['cash_balance']
+            if number(row['value'])!=number(value):disagreement=True
+        if not disagreement and 'USD' in web_rows:
+            cash['SettledCash']=number(web_rows['USD']['settled_cash'])
     complete = scope and set(cash) == {'CashBalance', 'TotalCashBalance', 'SettledCash'}
     reasons = set(diagnostic['blocking_reasons'])
+    if negative:reasons.add('negative_currency_cash_requires_resolution')
+    if web_rows and not disagreement:
+        reasons.discard('settlement_schedule_semantics_unverified')
+        reasons.discard('per_currency_settled_cash')
+    if disagreement:reasons.add('cross_source_currency_cash_disagreement')
     # Whole-account equality is inappropriate for a separately capped allocation.
     # This diagnostic does not remove that block from the existing funding review.
     reasons.discard('simulation_cash_not_reconciled')
@@ -66,8 +87,9 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, o
         if not covered: reasons.add('usd_cash_below_allocation')
     if costs + reserve >= capital: reasons.add('costs_and_reserve_exhaust_allocation')
     # Report an allocation-side planning ceiling only, never a spendable broker balance.
-    ceiling = max(Decimal(0), min(capital, simulation_cash) - costs - reserve)
-    if (not covered or diagnostic['negative_cash_currencies']
+    committed=Decimal(snapshot['simulation_planning_reserved_usd'])
+    ceiling = max(Decimal(0), min(capital, simulation_cash) - costs - reserve - committed)
+    if (not covered or negative or disagreement
             or diagnostic['cash_fields_differ_currencies']
             or not diagnostic['comparison']['positions_match_simulation']
             or policy.document()['additional_rules']
@@ -85,9 +107,13 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, o
             'per_currency_scope_verified':scope,
             'usd_cash_covers_allocation': covered,
             'api_expense_estimate_or_reserved_usd': str(costs),
+            'simulation_planning_reserved_usd':str(committed),
             'planning_ceiling_after_reserves_usd': str(ceiling),
             'planning_ceiling_is_execution_permission': False,
-            'negative_cash_currencies': diagnostic['negative_cash_currencies'],
+            'negative_cash_currencies': sorted(negative),
+            'web_ledger_settlement_matched':bool(web_rows) and not disagreement,
+            'web_ledger_payload_sha256':hashlib.sha256(canonical(web_ledger)).hexdigest() if web_ledger is not None else None,
+            'web_ledger_expires_at':web_ledger['expires_at'] if web_ledger is not None else None,
             'blocking_reasons': sorted(reasons), 'historical_transaction_review_required': False,
             'api_order_query_complete': orders is not None,
             'api_order_activity_observed': bool(orders['activity_frame_digests']) if orders is not None else None,
@@ -97,16 +123,17 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, o
             'account_observation_atomic':False}
 
 
-def record_allocation_review(payload, broker, ledger, policy, allocation, orders=None):
+def record_allocation_review(payload, broker, ledger, policy, allocation, orders=None, web_ledger=None):
     db = ledger.db
     db.execute('CREATE TABLE IF NOT EXISTS allocation_reviews '
                '(id TEXT PRIMARY KEY, created REAL NOT NULL, report TEXT NOT NULL)')
     db.commit()
     db.execute('BEGIN IMMEDIATE')
     try:
-        result = evaluate_allocation(payload, broker, ledger, policy, allocation, orders=orders)
+        result = evaluate_allocation(payload, broker, ledger, policy, allocation, orders=orders,web_ledger=web_ledger)
         validate_state(payload, broker.expected_account)
         if orders is not None: validate_orders(orders,broker.expected_account)
+        if web_ledger is not None:validate_web_ledger(web_ledger,broker.expected_account)
         policy.assert_current()
         ledger.assert_revision(result['ledger_revision'])
         identifier = str(uuid.uuid4())

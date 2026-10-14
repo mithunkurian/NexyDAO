@@ -11,6 +11,15 @@ PR #14 documents completed acceptance and is separate from this future estimate.
 
 ## Autonomous paper operation: eight packages
 
+Checklist status: **P1 in progress**; P2–P8 planned (existing partial components
+remain recorded in the development tracker). No package is struck off yet. After
+each merge, link the PR and strike a package only when all its acceptance gates pass.
+
+P1 foundations in this branch: supported per-currency Web API reader, cross-source
+cash matching, and atomic USD simulation planning holds. Real Web API acceptance,
+current debit/fee funding, allocation ownership and broker monetary reservations
+remain open. See [Item 1 implementation and acceptance](currency-reservations.md).
+
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |
 | P1 · Current cash and reservations | Supported per-currency settled-cash source; fee currencies/buffers; allocation ownership; current negative-cash handling; atomic capital/fee reservations and release rules | Evidence is fresh, exact-account and scoped; USD/other currencies never offset unknown debits; missing evidence and concurrent overspending fail closed; no automatic FX conversion or debt repayment |

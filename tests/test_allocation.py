@@ -11,6 +11,7 @@ from nexydao.owner_policy import OwnerPolicyError
 from nexydao.store import Store
 import test_funding as funding_fixtures
 from nexydao.orders import SOURCE as ORDERS_SOURCE, SCOPE
+from nexydao.web_ledger import SOURCE as WEB_SOURCE
 
 
 class AllocationTests(unittest.TestCase):
@@ -58,6 +59,45 @@ class AllocationTests(unittest.TestCase):
             result=self.evaluate(payload)
             self.assertFalse(result['usd_cash_covers_allocation'])
             self.assertEqual(result['planning_ceiling_after_reserves_usd'],'0')
+
+    def web(self,value='5000',settled='5000'):
+        now=int(time.time())
+        return {'schema_version':1,'source':WEB_SOURCE,'scope':'per_currency_ledger',
+                'account_sha256':self.payload['account_sha256'],'paper_session_verified':True,
+                'started_at':now,'received_at':now,'expires_at':now+60,
+                'cash':[{'currency':'USD','cash_balance':value,'settled_cash':settled,'observed_at':now}]}
+
+    def with_web(self,web):
+        return evaluate_allocation(self.payload,self.config,self.ledger,self.policy,AllocationConfig(),orders=self.orders,web_ledger=web)
+
+    def test_matching_secondary_ledger_can_establish_missing_usd_settlement_not_permission(self):
+        self.payload['cash']=[r for r in self.payload['cash'] if r['tag']!='SettledCash']
+        result=self.with_web(self.web())
+        self.assertTrue(result['usd_cash_covers_allocation'])
+        self.assertTrue(result['web_ledger_settlement_matched'])
+        self.assertFalse(result['funding_authorized']);self.assertFalse(result['execution_authorized'])
+        self.assertIn('open_orders_and_reservations',result['blocking_reasons'])
+
+    def test_cross_source_differences_or_extra_currency_force_zero(self):
+        for web in (self.web('4999'),self.web('5000','4999')):
+            result=self.with_web(web)
+            self.assertEqual(result['planning_ceiling_after_reserves_usd'],'0')
+            self.assertIn('cross_source_currency_cash_disagreement',result['blocking_reasons'])
+        web=self.web();web['cash'].append(dict(web['cash'][0],currency='SEK'))
+        self.assertFalse(self.with_web(web)['web_ledger_settlement_matched'])
+
+    def test_negative_secondary_settled_cash_never_offsets_positive_cash(self):
+        self.payload['cash']=[r for r in self.payload['cash'] if r['tag']!='SettledCash']
+        result=self.with_web(self.web(settled='-1'))
+        self.assertEqual(result['negative_cash_currencies'],['USD'])
+        self.assertEqual(result['planning_ceiling_after_reserves_usd'],'0')
+        self.assertIn('negative_currency_cash_requires_resolution',result['blocking_reasons'])
+
+    def test_expired_web_ledger_rolls_back_before_commit(self):
+        web=self.web()
+        with patch('nexydao.allocation.validate_web_ledger',side_effect=[web,ProbeError('expired')]):
+            with self.assertRaises(ProbeError):record_allocation_review(self.payload,self.config,self.ledger,self.policy,AllocationConfig(),orders=self.orders,web_ledger=web)
+        self.assertEqual(self.store.db.execute('SELECT count(*) FROM allocation_reviews').fetchone()[0],0)
 
     def test_larger_broker_balance_does_not_enlarge_allocation_or_authorize(self):
         for row in self.payload['cash']: row['value'] = '1000000'
