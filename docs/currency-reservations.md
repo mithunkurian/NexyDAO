@@ -108,8 +108,19 @@ That is an operations constraint, not a completed autonomy feature.
 All 196 tests pass locally, including concurrent holds, restart persistence, explicit
 release, fee-currency rejection, policy rollback, fill isolation, audit corruption,
 fixed verified-TLS GETs, identity/freshness checks and cross-source disagreement.
-Ubuntu/CI and authenticated Web API acceptance are pending. The official gateway
-bundle has been staged privately on the VM; no new broker session is authenticated.
+Implementation `d229ac3` also passed all 196 tests on Ubuntu and in CI (run 103).
+The mock receipt clock was corrected; production expiry checks remain strict.
+On 14 October, the VM host guard was updated and verified to protect port 5000
+for IPv4/IPv6. Ubuntu headless Java 17 was installed. The official Client Portal
+Gateway runs as a bounded 45-minute trial with a 160 MB maximum heap, restricted
+worker pools and protected local TLS configuration/key files. Certificate and
+hostname verification passed with the explicit private certificate file.
+The vendor listener binds 0.0.0.0, so the verified root kernel drop rule remains
+mandatory. No local certificate was added to the system trust store. Browser
+certificate warnings, if present, and paper authentication require owner action.
+Laptop access is an SSH tunnel on 127.0.0.1:15000 to VM localhost:5000.
+The API is currently unauthenticated; real Web API ledger acceptance is pending.
+No actual capital/fee reservation or live permission has been granted.
 
 Item 1 stays **in progress** until real current currency settlement is verified,
 allocation ownership/fees and current debits are resolved, and actual monetary
