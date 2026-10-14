@@ -85,6 +85,15 @@ Quote verification validates an observation; full investment research still requ
 
 ## Validation log
 
+14 October: PR #15 merged (`f97d6c1`), including simulation holds, initial Web
+reader and owner maintenance SOP. P1 remains in progress. Follow-up reader changes
+passed 203 offline tests locally: honest identifying header, safe HTTP status
+errors, strict documented SSO envelope, persisted CLI pacing and bounded waits
+preserving dual identity checks and 60-second cash freshness. Fixed GET diagnostics
+observed 403 HTML without the header and 401 on an accounts request with it; the
+sole cause is unproven and paper API acceptance remains open. No paid API calls,
+broker writes, prior-transaction review or funding permission occurred.
+
 | Date | Check | Recorded result |
 | --- | --- | --- |
 | 11 Oct 2026 | Real CEO/risk/committee cycle on VM | Six OpenAI calls completed; CEO chose `investigate`; no orders |

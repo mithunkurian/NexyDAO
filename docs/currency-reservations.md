@@ -126,10 +126,42 @@ checks passed, matching the approved fingerprint. The expired Gateway trial and
 SSH tunnel were restored with the existing certificate. Browser refresh and paper
 authentication require owner action.
 Laptop access is an SSH tunnel on 127.0.0.1:15000 to VM localhost:5000.
-The API is currently unauthenticated; real Web API ledger acceptance is pending.
+The owner subsequently reported browser login success. Fixed API GETs returned
+HTML HTTP 403; one honest NexyDAO User-Agent accounts diagnostic returned HTTP 401.
+These observations do not establish the sole cause of 403 or verified API access.
+Real Web API ledger acceptance is pending.
 No actual capital/fee reservation or live permission has been granted.
 
 Item 1 stays **in progress** until real current currency settlement is verified,
 allocation ownership/fees and current debits are resolved, and actual monetary
 reservation/release acceptance is complete. Simulation holds and a code merge do
 not satisfy those remaining gates. No prior owner transaction investigation is added.
+
+## Post-merge reader compatibility work
+
+PR #15 is merged. The next implementation retains both paper-session and account
+checks, but spaces SSO validation by 61 seconds and account queries by at least
+5.1 seconds, respecting [IBKR's documented pacing limits](https://www.interactivebrokers.com/campus/ibkr-api-page/webapi-doc/).
+The collection timeout is now 90 seconds (configurable 70–120); each HTTPS request
+is capped at 15 seconds. Update a local `NEXYDAO_WEB_TIMEOUT_SECONDS=15` setting to
+90 before using the new collector. It waits before collecting cash; native cash
+and receipt freshness remain 60 seconds. Short sessions and changed identity fail.
+No indefinite retry, login automation or brokerage-session takeover is introduced.
+
+`web-pacing.sqlite3` is created mode 0600 beside the configured CA file. All CLI
+collectors for this Gateway must use the same protected CA directory. Keep this
+database across restarts; attempted requests, including failures, consume pacing
+slots. SQLite coordinates concurrent processes; an early attempt is denied rather
+than retried. Clock rollback also blocks. This is local coordination, not a broker
+reservation or administrator-resistant security boundary; external/browser API
+requests are outside its coverage. Protect the directory and provision Windows
+ACLs separately. The collector never deletes pacing history to bypass a limit.
+
+Requests identify themselves as NexyDAO, without a browser impersonation header.
+HTTP 401 reports `web_authentication_required`; 403 reports `web_access_denied`;
+429 reports `web_rate_limited`. Bodies, cookies and account identifiers are not
+included in errors. The documented `success.value` SSO envelope is accepted only
+when unambiguous; flat legacy identity remains supported. Neither format may omit
+paper mode, expiry or a successful validation.
+
+All 203 offline tests pass locally. Ubuntu and authenticated acceptance are pending.

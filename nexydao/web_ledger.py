@@ -3,9 +3,11 @@ import hashlib
 import hmac
 import http.client
 import json
+import math
 import os
 import re
 import ssl
+import sqlite3
 import time
 from dataclasses import dataclass
 from decimal import Decimal
@@ -17,18 +19,21 @@ from .reconciliation import TTL, currency, number
 
 SOURCE = 'ibkr_paper_web_currency_ledger'
 LIMIT = 65536
+SSO_INTERVAL = 61
+ACCOUNTS_INTERVAL = 5.1
+USER_AGENT = 'NexyDAO/0.1 (paper currency ledger)'
 
 
 @dataclass(frozen=True)
 class WebConfig:
     expected_account: str
     ca_file: Path
-    timeout: int = 15
+    timeout: int = 90
 
     def __post_init__(self):
         BrokerConfig(expected_account=self.expected_account)
         if not self.expected_account: raise ProbeError('exact_account_pin_required')
-        if type(self.timeout) is not int or not 1<=self.timeout<=30: raise ValueError('Invalid web timeout')
+        if type(self.timeout) is not int or not 70<=self.timeout<=120: raise ValueError('Web collection timeout must be 70 to 120 seconds')
         if not self.ca_file.is_file(): raise ValueError('Explicit trusted local CA file required')
 
     @classmethod
@@ -36,7 +41,40 @@ class WebConfig:
         ca=os.environ.get('NEXYDAO_WEB_CA_FILE','')
         if not ca: raise ValueError('Trusted Client Portal CA file required')
         return cls(os.environ.get('NEXYDAO_IBKR_EXPECTED_ACCOUNT',''),Path(ca),
-                   int(os.environ.get('NEXYDAO_WEB_TIMEOUT_SECONDS','15')))
+                   int(os.environ.get('NEXYDAO_WEB_TIMEOUT_SECONDS','90')))
+
+
+def claim_request(config,path,now=None):
+    """Persist attempted request times across CLI processes, including failures.
+
+    This is local pacing coordination, not tamper-resistant authorization. All
+    collectors sharing this Gateway must use the same protected CA directory.
+    """
+    now=time.time() if now is None else now
+    if type(now) not in (int,float) or not math.isfinite(now) or now<=0:
+        raise ProbeError('web_pacing_clock_invalid')
+    endpoint='sso' if path.endswith('/sso/validate') else 'accounts' if path.endswith('/portfolio/accounts') else 'ledger'
+    interval={'sso':SSO_INTERVAL,'accounts':ACCOUNTS_INTERVAL,'ledger':1}[endpoint]
+    path=config.ca_file.parent/'web-pacing.sqlite3'
+    if path.is_symlink(): raise ProbeError('web_pacing_storage_invalid')
+    try:
+        fd=os.open(path,os.O_CREAT|os.O_EXCL|os.O_WRONLY,0o600)
+        os.close(fd)
+    except FileExistsError: pass
+    if os.name=='posix' and path.stat().st_mode & 0o077:
+        raise ProbeError('web_pacing_storage_not_private')
+    connection=sqlite3.connect(path,timeout=1)
+    try:
+        connection.execute('BEGIN IMMEDIATE')
+        connection.execute('CREATE TABLE IF NOT EXISTS requests(endpoint TEXT PRIMARY KEY, attempted REAL NOT NULL)')
+        row=connection.execute('SELECT attempted FROM requests WHERE endpoint=?',(endpoint,)).fetchone()
+        if row and (type(row[0]) not in (int,float) or not math.isfinite(row[0]) or row[0]<=0):
+            raise ProbeError('web_pacing_storage_invalid')
+        if row and now-row[0]<interval: raise ProbeError('web_request_pacing_wait_required')
+        connection.execute('INSERT OR REPLACE INTO requests VALUES (?,?)',(endpoint,now))
+        connection.commit()
+    except sqlite3.Error: raise ProbeError('web_pacing_storage_failed') from None
+    finally: connection.close()
 
 
 def unique(pairs):
@@ -62,11 +100,14 @@ def get_json(config,path,timeout):
     context=ssl.create_default_context(cafile=str(config.ca_file))
     if context.verify_mode!=ssl.CERT_REQUIRED or not context.check_hostname:
         raise ProbeError('web_tls_verification_required')
-    connection=http.client.HTTPSConnection('127.0.0.1',5000,timeout=timeout,context=context)
+    claim_request(config,path)
+    connection=http.client.HTTPSConnection('127.0.0.1',5000,timeout=min(timeout,15),context=context)
     try:
-        connection.request('GET',path,headers={'Accept':'application/json','Accept-Encoding':'identity'})
+        connection.request('GET',path,headers={'Accept':'application/json','Accept-Encoding':'identity','User-Agent':USER_AGENT})
         response=connection.getresponse()
-        if response.status!=200: raise ProbeError('web_request_not_successful')
+        if response.status!=200:
+            error={401:'web_authentication_required',403:'web_access_denied',429:'web_rate_limited'}.get(response.status,'web_request_not_successful')
+            raise ProbeError(error)
         if response.getheader('Content-Type','').split(';')[0].strip().lower()!='application/json':
             raise ProbeError('web_json_content_required')
         if response.getheader('Content-Encoding','identity').lower()!='identity':
@@ -77,6 +118,11 @@ def get_json(config,path,timeout):
 
 
 def session_identity(data):
+    # Current official documentation uses success.value; legacy Gateway is flat.
+    # Never guess recursively or accept conflicting outer identity fields.
+    if isinstance(data,dict) and set(data)=={'success'}:
+        success=data['success']
+        if isinstance(success,dict) and set(success)=={'value'}: data=success['value']
     if not isinstance(data,dict) or data.get('RESULT') is not True: raise ProbeError('web_session_unverified')
     modes=[data[k] for k in ('LOGIN_TYPE','loginType') if k in data]
     if not modes or any(type(x) is not int or x!=2 for x in modes): raise ProbeError('web_paper_session_required')
@@ -102,17 +148,26 @@ def monetary(value):
     return result
 
 
-def collect_web_ledger(config,get=get_json,clock=time.time):
-    started=clock();deadline=time.monotonic()+config.timeout
+def collect_web_ledger(config,get=get_json,clock=time.time,monotonic=time.monotonic,sleep=time.sleep):
+    identity_started=clock();deadline=monotonic()+config.timeout
     def read(path):
-        remaining=deadline-time.monotonic()
+        remaining=deadline-monotonic()
         if remaining<=0: raise ProbeError('web_collection_timeout')
         result=get(config,path,remaining)
-        if time.monotonic()>deadline: raise ProbeError('web_collection_timeout')
+        if monotonic()>deadline: raise ProbeError('web_collection_timeout')
         return result
     auth,remaining=session_identity(read('/v1/api/sso/validate'))
-    session_expiry=started+remaining/1000
+    session_expiry=identity_started+remaining/1000
+    def pause(seconds):
+        if monotonic()+seconds>=deadline or clock()+seconds>=session_expiry:
+            raise ProbeError('web_collection_timeout')
+        sleep(seconds)
+    # Wait before collecting cash so both identity checks respect 1/min while
+    # native cash timestamps and the final receipt retain their 60-second TTL.
+    pause(SSO_INTERVAL)
+    started=clock()
     check_accounts(read('/v1/api/portfolio/accounts'),config.expected_account)
+    accounts_checked=monotonic()
     data=read(f'/v1/api/portfolio/{config.expected_account}/ledger')
     if not isinstance(data,dict) or not 1<=len(data)<=40: raise ProbeError('invalid_web_currency_ledger')
     rows=[]
@@ -128,6 +183,7 @@ def collect_web_ledger(config,get=get_json,clock=time.time):
                      'settled_cash':monetary(row.get('settledcash')),'observed_at':stamp})
     if not rows: raise ProbeError('web_currency_ledger_missing')
     if session_identity(read('/v1/api/sso/validate'))[0]!=auth: raise ProbeError('web_session_changed_during_collection')
+    pause(max(0,ACCOUNTS_INTERVAL-(monotonic()-accounts_checked)))
     check_accounts(read('/v1/api/portfolio/accounts'),config.expected_account)
     received=clock()
     expiry=min(started+TTL,session_expiry,min(r['observed_at']+TTL for r in rows))
