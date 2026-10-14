@@ -57,6 +57,8 @@ automation was created by writing this SOP.
 3. Open **https://127.0.0.1:15000/**, select paper trading, and authenticate yourself.
    Handle MFA personally. Never send credentials, OTPs or session cookies to an agent.
 4. Report only the status: `Client login succeeds`, a sanitized error, or a timeout.
+   Returning to the login form without a success message is an unresolved login
+   failure, not confirmation. Stop repeated attempts and report that specific result.
 5. Operations runs independent API session, exact paper pin, currency scope and
    freshness checks. Browser login success alone does not prove API access.
 6. If the API rejects requests, keep funding denied. Operations investigates the

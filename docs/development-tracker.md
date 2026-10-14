@@ -85,6 +85,42 @@ Quote verification validates an observation; full investment research still requ
 
 ## Validation log
 
+14 October: PR #15 merged (`f97d6c1`), including simulation holds, initial Web
+reader and owner maintenance SOP. P1 remains in progress. Follow-up reader changes
+passed 203 offline tests locally: honest identifying header, safe HTTP status
+errors, strict documented SSO envelope, persisted CLI pacing and bounded waits
+preserving dual identity checks and 60-second cash freshness. Fixed GET diagnostics
+observed 403 HTML without the header and 401 on an accounts request with it; the
+sole cause is unproven and paper API acceptance remains open. No paid API calls,
+broker writes, prior-transaction review or funding permission occurred.
+Implementation `1d97512` also passed 203 tests on the isolated Ubuntu release and
+in CI (run 112). Host guard verified, execution false. Identified SSO validation
+returned 401; paper reauthentication and actual ledger acceptance remain pending.
+PR #16 is draft; P1 is not struck off.
+Subsequent owner paper login returned to the form without error or confirmation.
+Browser inspection confirmed paper mode; captured warning/error console was empty.
+Safe categorized Web log checks found no diagnostic failure markers; a spaced SSO
+GET still returned 401. Cause remains unestablished. Only the uniquely identified
+Web Gateway was restarted for one clean 45-minute trial with the existing TLS files
+and memory limits; no TWS termination, credentials, permissions or trust changes.
+One fresh root-page paper login was requested; repeated blind retries are excluded.
+The clean Web trial also returned the owner to the login form. Non-secret proxy,
+environment and credential-CORS settings matched vendor defaults; the origin is
+restricted to the laptop tunnel URL. No configuration weakening was performed.
+An Edge InPrivate comparison was requested to isolate browser session handling,
+which remains a hypothesis. The separate TWS process was absent; its launcher has
+a 30-minute limit, consistent with the owner's shutdown screenshot. Current VM
+MemAvailable was 597 MiB and swap free 928 MiB, not evidence of memory at shutdown.
+The existing bounded TWS launcher was restarted on VNC display :1; owner login is
+deferred during the Web comparison. Authentication/settled-cash acceptance stays open.
+Edge InPrivate also returned to the login form, so an in-app-browser-only cause is
+not established. The installed main Web Gateway jar matched the current official
+IBKR distribution over verified HTTPS. No software replacement, trust change or
+new authentication attempt followed that comparison. A credential-free
+[API support report](web-gateway-authentication-incident.md) records reproduction,
+configuration and questions about callback/origin/session binding and eligibility.
+It has not been sent. PR #16 stays draft; real Web ledger acceptance remains blocked.
+
 | Date | Check | Recorded result |
 | --- | --- | --- |
 | 11 Oct 2026 | Real CEO/risk/committee cycle on VM | Six OpenAI calls completed; CEO chose `investigate`; no orders |

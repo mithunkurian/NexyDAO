@@ -1,6 +1,6 @@
 # Remaining work and planned PR packages
 
-Planning snapshot: 13 October 2026, Europe/Stockholm.
+Planning snapshot: 14 October 2026, Europe/Stockholm.
 
 Estimate: **8 substantial implementation PR packages to autonomous paper operation**,
 then **3 separate live-readiness packages**. This is a scope estimate, not a promise
@@ -15,10 +15,12 @@ Checklist status: **P1 in progress**; P2–P8 planned (existing partial componen
 remain recorded in the development tracker). No package is struck off yet. After
 each merge, link the PR and strike a package only when all its acceptance gates pass.
 
-P1 foundations in this branch: supported per-currency Web API reader, cross-source
+PR #15 merged: supported per-currency Web API reader, cross-source
 cash matching, and atomic USD simulation planning holds. Real Web API acceptance,
 current debit/fee funding, allocation ownership and broker monetary reservations
 remain open. See [Item 1 implementation and acceptance](currency-reservations.md).
+The merge includes the owner maintenance SOP. It does not close P1. The next
+development branch addresses Web request compatibility, pacing and real acceptance.
 
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |
