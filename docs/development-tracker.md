@@ -1,9 +1,9 @@
 # NexyDAO — Development tracker
 
-Updated: **14 October 2026 · Europe/Stockholm**
+Updated: **28 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Validate Item 1's Web API currency-ledger reader and independent simulation hold accounting. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
+**Next checkpoint:** Advance P3 research evidence and claim-context verification independently of the blocked Web ledger acceptance. PR #16 remains draft; the owner reports the IBKR support ticket was submitted and no reply received. P1 acceptance is deferred, not passed. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 Human access/maintenance procedures: [owner maintenance SOP](owner-maintenance-sop.md).
@@ -47,6 +47,23 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### P3 development slice — 28 October 2026
+
+Branch `codex/research-filing-context` starts from merged `main`, independently of
+draft PR #16. It adds operator-selected approved SEC financial concepts, a signed
+concept manifest and exact metric/unit/period/filing bindings in research claims.
+At most nine filing facts preserve room for one quote. Missing fields, incomplete
+provenance and scope changes fail closed. Legacy receipts retain their original scope.
+
+All **202 offline tests passed locally**, including expanded seven-fact nine-role
+advisory flow and wrong-context rejection before manager/CEO. The nine-role fixture
+uses Portfolio Manager abstention without a quote; it does not validate an allocation.
+Broader public-source retrieval, paid advisory acceptance and VM validation for this
+slice remain pending. Narrative verification, linked proposal revisions and complete
+P3 acceptance remain open. P4 accounting/risk is the next independent workstream.
+Funding and execution stay disabled; no broker requests, paid calls or schedules
+were introduced by this validation.
 
 | Task | Status | Acceptance condition |
 | --- | --- | --- |

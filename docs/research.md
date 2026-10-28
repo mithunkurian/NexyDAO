@@ -9,7 +9,15 @@ No buy/sell indicators, automatic allocations or order commands are introduced.
 ## Scope and trust
 
 The collector reads fixed HTTPS paths on `data.sec.gov`: issuer submissions and
-US-GAAP `Assets` / `NetIncomeLoss` company concepts for one to three configured issuers.
+operator-selected US-GAAP company concepts for one to three configured issuers.
+The default remains `Assets` and `NetIncomeLoss`. The approved set also includes
+`Liabilities`, `StockholdersEquity`,
+`RevenueFromContractWithCustomerExcludingAssessedTax`,
+`NetCashProvidedByUsedInOperatingActivities` and
+`PaymentsToAcquirePropertyPlantAndEquipment`. These are source fields, not signals.
+Missing or unsupported disclosures fail collection; no synonym, zero, custom tag or
+different reporting period is silently substituted. Issuers need not disclose all
+these concepts; select a supported set outside agent control.
 It validates ticker-to-CIK association, taxonomy, concept, USD units, form, accession
 and period dates. These concepts are a small source interface, not an investment
 strategy. Agents reason within this universe; they cannot submit URLs or expand access.
@@ -25,8 +33,10 @@ and arbitrary prose are excluded. SHA256 digests record retrieved bytes. Local H
 integrity is not an SEC signature, an external audit or independent economic truth.
 
 Researchers receive the same facts and prior memory, without each other's report.
-Every candidate requires known evidence IDs, a matching issuer and exact numeric value
-bindings. Fabricated structured claims stop before the CEO; incurred costs remain
+Every candidate requires known evidence IDs, a matching issuer, numeric value
+bindings and exact concept, unit, start/end, filing date, form and accession bindings.
+A correct number attached to a wrong metric or period fails. Fabricated structured
+claims stop before the Portfolio Manager/CEO; incurred costs remain
 recorded. The model schema also restricts symbols/IDs to the verified dataset, bounds
 candidate count to issuer count and requires at least one claim per candidate. Multiple
 ideas or risks for one issuer belong in a single candidate; local uniqueness checks
@@ -49,7 +59,10 @@ a real operator contact locally: the SEC receives it in HTTP headers. It is excl
 from agent context, logs and Git. This creates no account and sends no email.
 Do not use a fictional contact for live testing.
 
-Requests are serial with 0.5-second spacing: three per issuer, at most nine per check.
+Requests are serial with 0.5-second spacing. The default uses three per issuer,
+at most nine per check. Expanded selection allows at most nine issuer/concept facts
+and twelve requests including issuer lookups, leaving one of the controller's ten
+evidence slots for a quote. Additional manual evidence shares that same limit.
 Avoid concurrent collectors; the process limit does not coordinate multiple machines.
 All DNS answers must be public. The connection pins a resolved IP and TLS verifies the
 fixed hostname. Proxies, redirects, custom taxonomies and compressed/non-JSON bodies
@@ -69,6 +82,8 @@ does not execute `.env` scripts. Microsoft is an issuer-mapping example, not a b
 
 ```bash
 export NEXYDAO_RESEARCH_UNIVERSE='[{"symbol":"MSFT","cik":"0000789019"}]'
+# Optional expanded scope; use this exact selection when loading its receipt:
+export NEXYDAO_RESEARCH_CONCEPTS='["Assets","Liabilities","NetIncomeLoss","NetCashProvidedByUsedInOperatingActivities"]'
 # Provision NEXYDAO_SEC_USER_AGENT as NexyDAO/version plus your real contact locally.
 # Set NEXYDAO_EVIDENCE_KEY_FILE to the private key path.
 export NEXYDAO_RESEARCH_SNAPSHOT="$HOME/.local/share/nexydao/sec-research.json"
@@ -82,12 +97,29 @@ Issuer/source settings are access boundaries controlled outside agents. Research
 investment judgment remains with the CEO and agents; scope proposals do not directly
 change the collector. Never delete the cost database to replenish its budget.
 
+New version-2 receipts sign the selected concepts along with facts and provenance.
+Loading requires the same ordered concept selection and issuer configuration.
+Version-1 receipts remain accepted only for the original default concepts within
+their original expiry. They cannot satisfy an expanded selection. The latest fact
+for each concept is selected independently; dates may differ. The verifier does
+not certify period comparability, derived ratios, growth rates or thesis prose.
+Cash-flow periods may be year-to-date rather than quarterly. Prompt version 8
+requires the new claim context fields; existing saved reports remain historical
+records and are not relabelled as having passed the stronger checks.
+
 `research` rejects `--market-evidence` so two extra calls do not consume quote validity.
 Research first, then collect a quote and use `deliberate --market-evidence PATH
 --research-evidence PATH`. Completed research is available in bounded AI memory.
 That second cycle has six calls and cannot execute. Manual `--evidence` stays unverified.
 
 ## Acceptance and deployment
+
+On 28 October 2026, the expanded-concept/context-binding slice passed all 202 offline
+tests locally. Fixtures cover seven selected facts through the nine-role workflow
+with quote-free Portfolio Manager abstention, exact context rejection, legacy scope,
+missing facts/provenance and preserved files on failed collection. Expanded real
+retrieval, paid workflow and VM acceptance remain pending. This slice advances P3
+while PR #16's IBKR authentication acceptance is deferred; it does not complete P3.
 
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
 and mocked HTTP/OpenAI do not establish real retrieval or paid eight-call acceptance.

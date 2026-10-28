@@ -8,6 +8,7 @@ import tempfile
 import time
 import unittest
 from datetime import datetime, timezone, timedelta
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch, Mock
@@ -18,9 +19,10 @@ from nexydao.provider import OpenAIProvider
 from decimal import Decimal
 from nexydao.market import canonical
 from nexydao.records import PROPOSAL
-from nexydao.research import REPORT, validate_claims, report_schema
+from nexydao.research import CLAIM_CONTEXT, REPORT, validate_claims, report_schema
 from nexydao.records import validate
-from nexydao.sec import (ResearchConfig, SourceError, PublicTLS, MAX_BYTES, CONCEPTS, collect,
+from nexydao.sec import (ResearchConfig, SourceError, PublicTLS, MAX_BYTES, CONCEPTS,
+                        APPROVED_CONCEPTS, INSTANT_CONCEPTS, collect,
                         decode, extract, fetch, load_research_evidence, run_source_check, source_path)
 from nexydao.store import Store
 from nexydao.workflow import run_cycle
@@ -48,7 +50,7 @@ class ResearchTests(unittest.TestCase):
     def document(self, concept='Assets', **changes):
         row = {'val': 123456, 'filed': self.filed, 'end': self.end,
                'form': '10-Q', 'accn': '0000000123-26-000001'}
-        if concept != 'Assets':
+        if concept not in INSTANT_CONCEPTS:
             row['start'] = self.start
         row.update(changes)
         return {'cik': 123, 'taxonomy': 'us-gaap', 'tag': concept, 'units': {'USD': [row]},
@@ -74,7 +76,8 @@ class ResearchTests(unittest.TestCase):
         return {'candidates': [{'symbol': 'TEST', 'thesis': 'Investigate reported financials.',
                 'uncertainties': 'Valuation, period comparisons and other sources are missing.',
                 'next_checks': 'Obtain corroboration and liquidity data.',
-                'claims': [{'evidence_id': evidence[0]['id'], 'value_usd': evidence[0]['fact']['value']}]}],
+                'claims': [{'evidence_id': evidence[0]['id'], 'value_usd': evidence[0]['fact']['value'],
+                            **{key: evidence[0]['fact'][key] for key in CLAIM_CONTEXT}}]}],
                 'abstain_reason': ''}
 
     def test_fixed_paths_and_configuration_reject_url_injection(self):
@@ -250,6 +253,88 @@ class ResearchTests(unittest.TestCase):
             with self.assertRaises((SourceError, ValueError)):
                 validate_claims(report, evidence)
 
+    def test_claims_reject_correct_number_with_wrong_metric_period_or_filing(self):
+        evidence = self.receipt()
+        for key in CLAIM_CONTEXT:
+            with self.subTest(key=key):
+                report = self.report(evidence)
+                report['candidates'][0]['claims'][0][key] = 'incorrect-context'
+                with self.assertRaisesRegex(SourceError, 'unsupported_research_claim'):
+                    validate_claims(report, evidence)
+        report = self.report(evidence)
+        del report['candidates'][0]['claims'][0]['start']
+        with self.assertRaises(ValueError):
+            validate_claims(report, evidence)
+        with self.assertRaisesRegex(SourceError, 'duplicate_research_evidence_id'):
+            validate_claims(self.report(evidence), evidence + [evidence[0]])
+
+    def test_expanded_concepts_keep_instant_and_duration_context(self):
+        self.config = replace(self.config, concepts=APPROVED_CONCEPTS)
+        getter = Mock(side_effect=self.getter)
+        payload = collect(self.config, getter, lambda: self.now, lambda _: None)
+        self.assertEqual(getter.call_count, 8)
+        self.assertEqual(payload['schema_version'], 2)
+        self.assertEqual(payload['concepts'], list(APPROVED_CONCEPTS))
+        evidence = self.receipt(payload)
+        self.assertEqual(len(evidence), 7)
+        for item in evidence:
+            fact = item['fact']
+            self.assertEqual(fact['start'], '' if fact['concept'] in INSTANT_CONCEPTS else self.start)
+            validate_claims(self.report([item]), evidence)
+        for concept in INSTANT_CONCEPTS:
+            with self.assertRaisesRegex(SourceError, 'invalid_instant_period'):
+                extract(json.dumps(self.document(concept, start=self.start)).encode(),
+                        self.issuer, concept, self.now)
+        with self.assertRaisesRegex(SourceError, 'invalid_filing_date'):
+            extract(json.dumps(self.document('NetCashProvidedByUsedInOperatingActivities', start='')).encode(),
+                    self.issuer, 'NetCashProvidedByUsedInOperatingActivities', self.now)
+
+    def test_operator_concept_scope_and_total_evidence_bound(self):
+        for concepts in ([], ['Assets', 'Assets'], ['CustomRevenue'], 'Assets', [True]):
+            with self.subTest(concepts=concepts), self.assertRaises(ValueError):
+                replace(self.config, concepts=concepts)
+        issuers = [self.issuer, {'symbol': 'OTHER', 'cik': '0000000456'}]
+        with self.assertRaises(ValueError):
+            replace(self.config, issuers=issuers, concepts=APPROVED_CONCEPTS)
+        env = {'NEXYDAO_EVIDENCE_KEY_FILE': str(self.key),
+               'NEXYDAO_RESEARCH_UNIVERSE': json.dumps([self.issuer]),
+               'NEXYDAO_RESEARCH_CONCEPTS': '["Liabilities","NetIncomeLoss"]'}
+        with patch.dict(os.environ, env, clear=True):
+            self.assertEqual(ResearchConfig.from_env().concepts, ('Liabilities', 'NetIncomeLoss'))
+        self.receipt()
+        changed = replace(self.config, concepts=('Liabilities', 'NetIncomeLoss'))
+        with self.assertRaisesRegex(SourceError, 'research_concept_scope_mismatch'):
+            load_research_evidence(self.config.snapshot, changed, self.now)
+
+    def test_legacy_receipt_cannot_satisfy_expanded_scope(self):
+        payload = self.payload()
+        payload['schema_version'] = 1
+        del payload['concepts']
+        self.assertEqual(len(self.receipt(payload)), 2)
+        changed = replace(self.config, concepts=APPROVED_CONCEPTS)
+        with self.assertRaisesRegex(SourceError, 'research_concept_scope_mismatch'):
+            load_research_evidence(self.config.snapshot, changed, self.now)
+
+    def test_expanded_scope_missing_fact_and_provenance_fail_closed(self):
+        self.config = replace(self.config, concepts=APPROVED_CONCEPTS)
+        for mutation in ('fact', 'source', 'concepts'):
+            payload = self.payload()
+            if mutation == 'fact': payload['facts'].pop()
+            if mutation == 'source': payload['sources'].pop()
+            if mutation == 'concepts': payload['concepts'].pop()
+            with self.subTest(mutation=mutation), self.assertRaises(SourceError):
+                self.receipt(payload)
+        self.config.snapshot.write_text('last-successful-receipt')
+        def unavailable(path, contact):
+            if path.endswith('/Liabilities.json'):
+                raise SourceError('sec_http_not_ok')
+            return self.getter(path, contact)
+        with patch('nexydao.sec.collect', side_effect=lambda config:
+                   collect(config, unavailable, lambda: self.now, lambda _: None)):
+            with self.assertRaisesRegex(SourceError, 'sec_http_not_ok'):
+                run_source_check(self.config)
+        self.assertEqual(self.config.snapshot.read_text(), 'last-successful-receipt')
+
     def provider(self, evidence, mutate=None):
         parent = self
         class FakeResearch(DemoProvider):
@@ -330,6 +415,7 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(store.memory(), [])
 
     def test_nine_call_research_manager_review_preserves_owner_constraints(self):
+        self.config = replace(self.config, concepts=APPROVED_CONCEPTS)
         evidence=self.receipt()
         store=Store(self.root/'nine.sqlite3')
         self.addCleanup(store.close)
@@ -338,7 +424,22 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(len(provider.calls),9)
         self.assertEqual(provider.calls[2][0],'portfolio_manager')
         self.assertEqual(len(provider.calls[2][1]['research_reports']),2)
+        self.assertEqual(len(provider.calls[0][1]['filing_observations']), 7)
+        self.assertEqual(result['research_reports'][0]['claim_context_bindings'],
+                         'matched_source_observations')
         self.assertFalse(result['policy']['execution_authorized'])
+
+    def test_wrong_claim_context_stops_before_manager_and_ceo(self):
+        evidence = self.receipt()
+        store = Store(self.root/'context-failure.sqlite3')
+        self.addCleanup(store.close)
+        provider = self.provider(evidence, lambda r:
+                                 r['candidates'][0]['claims'][0].update(concept='Liabilities'))
+        with self.assertRaisesRegex(SourceError, 'unsupported_research_claim'):
+            run_cycle(store, provider, evidence, research=True, portfolio=True)
+        self.assertEqual([role for role, _ in provider.calls], ['research_opportunity'])
+        self.assertEqual(store.db.execute('SELECT status FROM runs').fetchone()[0], 'failed')
+        self.assertEqual(store.memory(), [])
 
     def test_expired_cli_receipt_prevents_paid_provider_and_db(self):
         self.receipt()
