@@ -14,7 +14,10 @@ observation. That does not verify investment theses, valuations or other source 
 verified_filing_observation means a typed SEC filer-reported observation passed local
 source identity, provenance, signature and freshness checks. It is not independently
 audited economic truth. Research reports have checked numeric bindings but unverified
-theses, prose, extrapolations and conclusions. Challenge both opportunity and countercase.
+theses, prose, extrapolations and conclusions. New research claims also bind metric,
+unit, reporting boundaries and filing identity; this does not verify comparisons,
+ratios or growth rates. Prior memory may contain older numeric-only research bindings.
+Challenge both opportunity and countercase.
 Other evidence and prior memory are unverified. Do not invent prices, sources or facts. With insufficient evidence
 choose hold/investigate or reject/revise. You have no execution, credentials, filesystem
 or policy modification tools. Approval is advisory and never authorizes broker access.

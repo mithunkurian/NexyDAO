@@ -23,6 +23,12 @@ from .market import canonical, read_key
 
 HOST = 'data.sec.gov'
 CONCEPTS = ('Assets', 'NetIncomeLoss')
+INSTANT_CONCEPTS = ('Assets', 'Liabilities', 'StockholdersEquity')
+APPROVED_CONCEPTS = (*INSTANT_CONCEPTS, 'NetIncomeLoss',
+                     'RevenueFromContractWithCustomerExcludingAssessedTax',
+                     'NetCashProvidedByUsedInOperatingActivities',
+                     'PaymentsToAcquirePropertyPlantAndEquipment')
+MAX_FACTS = 9  # Leave one of the controller's ten evidence slots for a quote.
 MAX_BYTES = 1_000_000
 RECEIPT_TTL = 86400
 MAX_FILING_AGE = 180
@@ -55,19 +61,28 @@ class ResearchConfig:
     key_path: Path
     user_agent: str = field(default='', repr=False)
     snapshot: Path = Path('data/sec-research.json')
+    concepts: tuple = CONCEPTS
 
     def __post_init__(self):
         universe(self.issuers)
+        if (not isinstance(self.concepts, (tuple, list)) or not self.concepts
+                or any(not isinstance(c, str) or c not in APPROVED_CONCEPTS for c in self.concepts)
+                or len(set(self.concepts)) != len(self.concepts)
+                or len(self.issuers)*len(self.concepts) > MAX_FACTS):
+            raise ValueError('Unique approved research concepts and at most nine facts required')
         object.__setattr__(self, 'issuers', [dict(i) for i in self.issuers])
+        object.__setattr__(self, 'concepts', tuple(self.concepts))
 
     @classmethod
     def from_env(cls):
         raw = os.environ.get('NEXYDAO_RESEARCH_UNIVERSE', '[]')
         key = os.environ.get('NEXYDAO_EVIDENCE_KEY_FILE', '')
-        if len(raw) > 2048 or not key:
+        concepts = os.environ.get('NEXYDAO_RESEARCH_CONCEPTS', json.dumps(CONCEPTS))
+        if len(raw) > 2048 or len(concepts) > 1024 or not key:
             raise ValueError('Bounded research universe and evidence key required')
         return cls(json.loads(raw), Path(key), os.environ.get('NEXYDAO_SEC_USER_AGENT', ''),
-                   Path(os.environ.get('NEXYDAO_RESEARCH_SNAPSHOT', 'data/sec-research.json')))
+                   Path(os.environ.get('NEXYDAO_RESEARCH_SNAPSHOT', 'data/sec-research.json')),
+                   json.loads(concepts))
 
 
 def source_path(cik, concept=None):
@@ -75,7 +90,7 @@ def source_path(cik, concept=None):
         raise SourceError('invalid_source_identifier')
     if concept is None:
         return f'/submissions/CIK{cik}.json'
-    if concept not in CONCEPTS:
+    if concept not in APPROVED_CONCEPTS:
         raise SourceError('unapproved_concept')
     return f'/api/xbrl/companyconcept/CIK{cik}/us-gaap/{concept}.json'
 
@@ -101,7 +116,8 @@ class PublicTLS(http.client.HTTPSConnection):
 
 
 def fetch(path, user_agent):
-    if not re.fullmatch(r'/submissions/CIK[0-9]{10}\.json|/api/xbrl/companyconcept/CIK[0-9]{10}/us-gaap/(Assets|NetIncomeLoss)\.json', path):
+    approved = '|'.join(re.escape(c) for c in APPROVED_CONCEPTS)
+    if not re.fullmatch(r'/submissions/CIK[0-9]{10}\.json|/api/xbrl/companyconcept/CIK[0-9]{10}/us-gaap/(' + approved + r')\.json', path):
         raise SourceError('unapproved_source_path')
     if (not 10 <= len(user_agent) <= 256 or any(ord(c) < 32 or ord(c) > 126 for c in user_agent)
             or not re.search(r'[A-Za-z0-9._+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}', user_agent)):
@@ -174,7 +190,7 @@ def check_fact(fact, now):
     if not isinstance(fact, dict) or set(fact) != keys:
         raise SourceError('invalid_fact_schema')
     universe([{'symbol': fact['symbol'], 'cik': fact['cik']}])
-    if fact['concept'] not in CONCEPTS or fact['unit'] != 'USD' or fact['form'] not in {'10-K', '10-Q', '10-K/A', '10-Q/A'}:
+    if fact['concept'] not in APPROVED_CONCEPTS or fact['unit'] != 'USD' or fact['form'] not in {'10-K', '10-Q', '10-K/A', '10-Q/A'}:
         raise SourceError('unsupported_filing_fact')
     numeric(fact['value'])
     if not isinstance(fact['accession'], str) or not re.fullmatch(r'[0-9]{10}-[0-9]{2}-[0-9]{6}', fact['accession']):
@@ -186,7 +202,7 @@ def check_fact(fact, now):
             raise SourceError('future_filing_period')
         if not 0 <= (today-filed).days <= MAX_FILING_AGE or (filed-end).days>550:
             raise SourceError('stale_or_future_filing')
-        if fact['concept'] == 'Assets':
+        if fact['concept'] in INSTANT_CONCEPTS:
             if fact['start'] != '':
                 raise SourceError('invalid_instant_period')
         elif not 0 <= (end-date.fromisoformat(fact['start'])).days <= 400:
@@ -252,7 +268,7 @@ def collect(config, getter=fetch, clock=time.time, sleeper=time.sleep):
                 or not isinstance(data.get('tickers'), list) or issuer['symbol'] not in data['tickers']):
             raise SourceError('ticker_cik_mismatch')
         sources.append({'path': path, 'sha256': hashlib.sha256(raw).hexdigest()})
-        for concept in CONCEPTS:
+        for concept in config.concepts:
             sleeper(0.5)  # At most two serial requests/second in this process.
             path = source_path(issuer['cik'], concept)
             raw = get(path)
@@ -262,30 +278,39 @@ def collect(config, getter=fetch, clock=time.time, sleeper=time.sleep):
     received = int(clock())
     if received-started > 180:
         raise SourceError('collection_time_limit')
-    payload = {'schema_version': 1, 'source': 'sec_companyconcept', 'retrieved_at': received,
+    payload = {'schema_version': 2, 'concepts': list(config.concepts),
+               'source': 'sec_companyconcept', 'retrieved_at': received,
                'expires_at': received+RECEIPT_TTL, 'issuers': [dict(i) for i in config.issuers], 'facts': facts, 'sources': sources}
     validate_receipt(payload, config, received)
     return payload
 
 
 def validate_receipt(payload, config, now):
-    if (not isinstance(payload, dict) or set(payload) != {'schema_version', 'source', 'retrieved_at', 'expires_at', 'issuers', 'facts', 'sources'}
-            or type(payload['schema_version']) is not int or payload['schema_version'] != 1
+    if not isinstance(payload, dict):
+        raise SourceError('invalid_research_receipt')
+    version = payload.get('schema_version')
+    keys = {'schema_version', 'source', 'retrieved_at', 'expires_at', 'issuers', 'facts', 'sources'}
+    if version == 2:
+        keys.add('concepts')
+    if (set(payload) != keys or type(version) is not int or version not in (1, 2)
             or payload['source'] != 'sec_companyconcept' or payload['issuers'] != config.issuers):
         raise SourceError('invalid_research_receipt')
+    if ((version == 1 and config.concepts != CONCEPTS)
+            or (version == 2 and payload['concepts'] != list(config.concepts))):
+        raise SourceError('research_concept_scope_mismatch')
     retrieved, expiry = payload['retrieved_at'], payload['expires_at']
     if (type(retrieved) is not int or type(expiry) is not int or retrieved > now+2
             or retrieved <= 0 or expiry != retrieved+RECEIPT_TTL or now >= expiry):
         raise SourceError('expired_research_receipt')
     facts = payload['facts']
-    if not isinstance(facts, list) or len(facts) != len(config.issuers)*len(CONCEPTS):
+    if not isinstance(facts, list) or len(facts) != len(config.issuers)*len(config.concepts):
         raise SourceError('incomplete_research_facts')
-    required = {(i['symbol'], i['cik'], c) for i in config.issuers for c in CONCEPTS}
+    required = {(i['symbol'], i['cik'], c) for i in config.issuers for c in config.concepts}
     for fact in facts:
         check_fact(fact, now)
     if {(f['symbol'], f['cik'], f['concept']) for f in facts} != required:
         raise SourceError('research_fact_identity_mismatch')
-    expected_paths = {source_path(i['cik'], c) for i in config.issuers for c in (None, *CONCEPTS)}
+    expected_paths = {source_path(i['cik'], c) for i in config.issuers for c in (None, *config.concepts)}
     sources = payload['sources']
     if not isinstance(sources, list) or len(sources) != len(expected_paths):
         raise SourceError('incomplete_source_provenance')

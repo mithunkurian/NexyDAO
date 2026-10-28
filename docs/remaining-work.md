@@ -1,6 +1,6 @@
 # Remaining work and planned PR packages
 
-Planning snapshot: 13 October 2026, Europe/Stockholm.
+Planning snapshot: 28 October 2026, Europe/Stockholm.
 
 Estimate: **8 substantial implementation PR packages to autonomous paper operation**,
 then **3 separate live-readiness packages**. This is a scope estimate, not a promise
@@ -11,14 +11,22 @@ PR #14 documents completed acceptance and is separate from this future estimate.
 
 ## Autonomous paper operation: eight packages
 
-Checklist status: **P1 in progress**; P2–P8 planned (existing partial components
+Checklist status: **P1 blocked/in progress; P3 in progress**; P2 and P4–P8 planned (existing partial components
 remain recorded in the development tracker). No package is struck off yet. After
 each merge, link the PR and strike a package only when all its acceptance gates pass.
 
-P1 foundations in this branch: supported per-currency Web API reader, cross-source
+PR #15 merged P1 foundations: supported per-currency Web API reader, cross-source
 cash matching, and atomic USD simulation planning holds. Real Web API acceptance,
 current debit/fee funding, allocation ownership and broker monetary reservations
 remain open. See [Item 1 implementation and acceptance](currency-reservations.md).
+
+PR #16 remains draft while paper Web authentication and real ledger acceptance are
+blocked. The owner reports a submitted IBKR support ticket with no reply as of
+28 October. Defer that acceptance step and continue independent P3 research work,
+then P4 simulation accounting/risk. This changes development order, not funding or
+execution prerequisites. New work branches from merged `main`, without PR #16 changes.
+The first P3 slice expands approved SEC concepts and binds claim reporting context;
+full P3 acceptance, broader sources and linked proposal revisions remain open.
 
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |
