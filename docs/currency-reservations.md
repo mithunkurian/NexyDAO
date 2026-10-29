@@ -54,8 +54,23 @@ and never release merely because evidence expires or a process crashes. Release
 is an explicit simulation-only action. A released ID cannot become a new hold.
 An event replay verifies hold state/payload integrity and rejects corruption.
 This is local consistency, not administrator-resistant audit or OS isolation.
-No simulated fill automatically consumes a hold; later execution/fill linkage is
-a separate acceptance gate. `reserve_broker` is unconditionally unavailable.
+Unlinked `sim-fill --fill` retains that behavior. The opt-in
+`sim-fill --held-fill` operator fixture now links a buy to its exact reservation,
+proposal hash and symbol, consuming notional and fees from separate remaining
+budgets in the same SQLite transaction as the fill. Partial fills preserve the
+unused balance; exhausted notional with leftover fee budget stays reserved until
+explicit release. Fully exhausted holds become `consumed` and cannot be reused.
+Release frees only the remainder, never the cash already spent by a recorded fill.
+
+Same-fill retries are idempotent after release/consumption; changed payloads,
+cross-reservation reuse, fee/notional overruns and relabelling an unlinked fill
+fail. Current policy digest, funding, exposure and fresh valuation checks still
+apply. In particular, another partial fill needs fresh marks on existing holdings.
+Policy changes or failures before commit roll back both fill and consumption.
+Replay cross-checks consumption events/links against the actual recorded fills
+and original reservation budgets. Legacy holds remain unchanged when the new
+link table is added. This is simulation consistency, not broker lifecycle evidence.
+`reserve_broker` is unconditionally unavailable.
 
 ## Installation, testing and Google Cloud trial
 
@@ -94,6 +109,22 @@ python3 -m nexydao sim-reserve --reservation /private/planning-fixture.json
 python3 -m nexydao portfolio-report
 python3 -m nexydao sim-release --reservation-id planning-fixture
 ```
+
+For a linked simulation-only buy, save an explicit envelope such as:
+
+```json
+{"reservation_id":"planning-fixture","proposal_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","fill":{"id":"held-fixture-1","side":"buy","symbol":"SPY","quantity":"1","price":"100","fee":"1","currency":"USD","asset_type":"STK"}}
+```
+
+```bash
+python3 -m nexydao sim-fill --held-fill /private/held-fixture.json
+```
+
+Use a separate test database. This command does not create an AI decision, submit
+an order, establish a broker fill or grant permission to spend broker cash. No
+automatic release/retry, foreign fees, sale reservation, price/quantity order
+limit or actual broker reservation is introduced. Input is bounded to 4 KB and
+duplicate JSON keys fail before recording. Operator fixtures are never agent tools.
 
 Run fixtures only in a separate test database for operational validation. Do not
 replace or replenish the real persistent DB. Live/broker execution remains disabled.

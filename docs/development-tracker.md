@@ -48,6 +48,16 @@ and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
 
+### P4 simulation hold/fill linkage — 29 October 2026
+
+Branch `codex/simulation-held-fills` adds opt-in operator fixtures for atomic buy
+fill/hold consumption, separate notional/fee budgets, partial fills, terminal
+consumption, replay validation and same-ID retries. Fresh valuation, current
+funding and owner policy remain required; residual capacity releases explicitly.
+The normal unlinked fill path remains available with all holds counted. No real
+broker reservations, order submissions or autonomous agent mutation tools are
+introduced. Local/VM acceptance is recorded with the implementation below.
+
 ### P4 reporting slice — 29 October 2026
 
 Branch `codex/portfolio-risk-report` adds reconciled net-performance attribution

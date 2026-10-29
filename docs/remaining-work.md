@@ -39,6 +39,11 @@ These reports do not certify liquidity,
 FX/tax accounting, broker reconciliation or complete P4 risk enforcement. See
 [portfolio accounting and stress scope](portfolio.md).
 
+The next P4 slice links operator simulation fills to planning holds atomically,
+including partial consumption, separate notional/fee budgets and retry/replay
+checks. Real broker fill ingestion, order bounds/lifecycle, allocation ownership,
+broker monetary reservations and full P1/P2/P4 acceptance remain open.
+
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |
 | P1 · Current cash and reservations | Supported per-currency settled-cash source; fee currencies/buffers; allocation ownership; current negative-cash handling; atomic capital/fee reservations and release rules | Evidence is fresh, exact-account and scoped; USD/other currencies never offset unknown debits; missing evidence and concurrent overspending fail closed; no automatic FX conversion or debt repayment |

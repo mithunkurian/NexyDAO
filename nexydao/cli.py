@@ -37,12 +37,17 @@ def main():
     parser.add_argument('--settlement-id')
     parser.add_argument('--reservation',type=Path)
     parser.add_argument('--reservation-id')
+    parser.add_argument('--held-fill',type=Path)
     parser.add_argument('--with-research',action='store_true')
     args = parser.parse_args()
     store = None
     try:
         config = Config.from_env()
         owner_policy = owner_policy_from_env()
+        if args.held_fill and args.command!='sim-fill':
+            raise ValueError('Held fill applies only to sim-fill')
+        if args.fill and args.held_fill:
+            raise ValueError('Choose one unreserved or held simulation fill')
         if args.reservation and args.command!='sim-reserve' or args.reservation_id and args.command!='sim-release':
             raise ValueError('Reservation arguments apply only to simulation planning holds')
         if args.command=='sim-reserve' and not args.reservation or args.command=='sim-release' and not args.reservation_id:
@@ -54,7 +59,7 @@ def main():
             raise ValueError("Evidence arguments apply only to deliberation")
         if args.command=='portfolio-mark' and (not args.market_evidence or args.evidence or args.research_evidence):
             raise ValueError('Portfolio marking requires one signed market receipt')
-        if args.command=='sim-fill' and not args.fill or args.command=='sim-settle' and not args.settlement_id:
+        if args.command=='sim-fill' and not (args.fill or args.held_fill) or args.command=='sim-settle' and not args.settlement_id:
             raise ValueError('Explicit simulated fill/settlement input required')
         if args.command == 'owner-policy':
             print(json.dumps({'policy': owner_policy.document(), 'sha256': owner_policy.digest,
@@ -164,8 +169,15 @@ def main():
             ledger=Portfolio(store)
             if args.command=='portfolio-report': result=ledger.snapshot()
             elif args.command=='sim-fill':
-                if args.fill.stat().st_size>4000: raise ValueError('Simulation fill size limit')
-                result=ledger.fill(json.loads(args.fill.read_text(encoding='utf-8')),owner_policy)
+                from .web_ledger import unique
+                path=args.held_fill or args.fill
+                with path.open('rb') as stream:body=stream.read(4001)
+                if len(body)>4000: raise ValueError('Simulation fill size limit')
+                data=json.loads(body,object_pairs_hook=unique)
+                if args.held_fill:
+                    from .reservations import Reservations
+                    result=Reservations(ledger).fill(data,owner_policy)
+                else:result=ledger.fill(data,owner_policy)
             elif args.command=='sim-settle': result=ledger.settle(args.settlement_id)
             else:
                 from .market import MarketConfig

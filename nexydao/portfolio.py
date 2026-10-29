@@ -158,6 +158,20 @@ class Portfolio:
 
     def fill(self, data, policy=None):
         policy = policy or from_env()
+        self.db.execute('BEGIN IMMEDIATE')
+        try:
+            result = self._record_fill(data, policy)
+            self.db.commit()
+            return result
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def _record_fill(self, data, policy, reservation_credit=None):
+        """Record within the caller's transaction; credit only a validated own hold."""
+        if not self.db.in_transaction:
+            raise PortfolioError('simulation_fill_transaction_required')
+        policy = policy or from_env()
         policy.assert_current()
         keys = {'id','side','symbol','quantity','price','fee','currency','asset_type'}
         if not isinstance(data, dict) or set(data) != keys:
@@ -171,56 +185,63 @@ class Portfolio:
         if qty<=0 or price<=0:
             raise PortfolioError('positive_simulated_quantity_and_price_required')
         serialized = json.dumps(data,sort_keys=True,separators=(',',':'))
-        self.db.execute('BEGIN IMMEDIATE')
-        try:
-            old = self.db.execute('SELECT payload FROM simulation_fills WHERE id=?',(data['id'],)).fetchone()
-            if old:
-                if old[0]!=serialized: raise PortfolioError('conflicting_simulated_fill_id')
-                self.db.rollback()
-                return {'status':'already_recorded','id':data['id'],'execution_authorized':False}
-            snapshot = self.snapshot()
-            cash, pending = Decimal(snapshot['settled_cash_usd']), Decimal(snapshot['unsettled_cash_usd'])
-            realized, fees = Decimal(snapshot['realized_pnl_usd']), Decimal(snapshot['simulation_fees_usd'])
-            row = self.db.execute('SELECT quantity,basis FROM simulated_positions WHERE symbol=?',(data['symbol'],)).fetchone()
-            held, basis = map(Decimal,row) if row else (Decimal(0),Decimal(0))
-            with localcontext() as context:
-                context.prec=50
-                notional=qty*price
-                if notional>Decimal('1000000000000'): raise PortfolioError('bounded_simulated_notional_required')
-                notional=notional.quantize(QUANTUM,rounding=ROUND_UP if data['side']=='buy' else ROUND_DOWN)
-                if data['side']=='buy':
-                    reasons=allocation_reasons(snapshot,[{'symbol':data['symbol'],'allocation_usd':str(notional+fee)}],policy)
-                    if reasons: raise PortfolioError(reasons[0])
-                    cash-=notional+fee
-                    held+=qty
-                    basis+=notional+fee
-                else:
-                    if qty>held: raise PortfolioError('owner_no_short_selling')
-                    if fee>Decimal(snapshot['available_cash_after_api_estimate_usd']):
-                        raise PortfolioError('owner_cash_funding_required')
-                    if notional<fee: raise PortfolioError('sale_fees_exceed_proceeds')
-                    removed = basis if qty==held else (basis*qty/held).quantize(QUANTUM,rounding=ROUND_DOWN)
-                    held-=qty
-                    basis-=removed
-                    realized+=notional-fee-removed
-                    pending+=notional-fee
-            fees+=fee
-            if held==0:
-                self.db.execute('DELETE FROM simulated_positions WHERE symbol=?',(data['symbol'],))
+        old = self.db.execute('SELECT payload FROM simulation_fills WHERE id=?',(data['id'],)).fetchone()
+        if old:
+            if old[0]!=serialized: raise PortfolioError('conflicting_simulated_fill_id')
+            return {'status':'already_recorded','id':data['id'],'execution_authorized':False}
+        snapshot = self.snapshot()
+        if reservation_credit is not None:
+            # The outer reservation transaction checks identity and remaining
+            # budgets. Replace only this fill's debit with the resulting holding;
+            # all other holds and the unspent remainder continue to count.
+            credit = reservation_credit
+            snapshot['available_cash_after_api_estimate_usd'] = str(
+                max(Decimal(0),Decimal(snapshot['settled_cash_usd'])
+                    -Decimal(snapshot['api_expense_estimate_or_reserved_usd'])
+                    -Decimal(snapshot['simulation_planning_reserved_usd'])+credit))
+            snapshot['simulation_planning_reserved_usd'] = str(
+                Decimal(snapshot['simulation_planning_reserved_usd'])-credit)
+            by_symbol = dict(snapshot['simulation_planning_reserved_by_symbol'])
+            by_symbol[data['symbol']] = str(Decimal(by_symbol[data['symbol']])-credit)
+            snapshot['simulation_planning_reserved_by_symbol'] = by_symbol
+        cash, pending = Decimal(snapshot['settled_cash_usd']), Decimal(snapshot['unsettled_cash_usd'])
+        realized, fees = Decimal(snapshot['realized_pnl_usd']), Decimal(snapshot['simulation_fees_usd'])
+        row = self.db.execute('SELECT quantity,basis FROM simulated_positions WHERE symbol=?',(data['symbol'],)).fetchone()
+        held, basis = map(Decimal,row) if row else (Decimal(0),Decimal(0))
+        with localcontext() as context:
+            context.prec=50
+            notional=qty*price
+            if notional>Decimal('1000000000000'): raise PortfolioError('bounded_simulated_notional_required')
+            notional=notional.quantize(QUANTUM,rounding=ROUND_UP if data['side']=='buy' else ROUND_DOWN)
+            if data['side']=='buy':
+                reasons=allocation_reasons(snapshot,[{'symbol':data['symbol'],'allocation_usd':format(notional+fee,'f')}],policy)
+                if reasons: raise PortfolioError(reasons[0])
+                cash-=notional+fee
+                held+=qty
+                basis+=notional+fee
             else:
-                self.db.execute('INSERT INTO simulated_positions(symbol,quantity,basis) VALUES(?,?,?) '
-                                'ON CONFLICT(symbol) DO UPDATE SET quantity=excluded.quantity,basis=excluded.basis',
-                                (data['symbol'],str(held),str(basis)))
-            self.db.execute('UPDATE portfolio_state SET cash=?,unsettled=?,realized=?,fees=?,revision=revision+1 WHERE id=1',
-                            (str(cash),str(pending),str(realized),str(fees)))
-            self.db.execute('INSERT INTO simulation_fills(id,payload,settled,proceeds) VALUES(?,?,?,?)',
-                            (data['id'],serialized,int(data['side']=='buy'),str(notional-fee) if data['side']=='sell' else '0'))
-            policy.assert_current()
-            self.db.commit()
-            return {'status':'simulated_fixture_recorded','id':data['id'],'execution_authorized':False}
-        except Exception:
-            self.db.rollback()
-            raise
+                if qty>held: raise PortfolioError('owner_no_short_selling')
+                if fee>Decimal(snapshot['available_cash_after_api_estimate_usd']):
+                    raise PortfolioError('owner_cash_funding_required')
+                if notional<fee: raise PortfolioError('sale_fees_exceed_proceeds')
+                removed = basis if qty==held else (basis*qty/held).quantize(QUANTUM,rounding=ROUND_DOWN)
+                held-=qty
+                basis-=removed
+                realized+=notional-fee-removed
+                pending+=notional-fee
+        fees+=fee
+        if held==0:
+            self.db.execute('DELETE FROM simulated_positions WHERE symbol=?',(data['symbol'],))
+        else:
+            self.db.execute('INSERT INTO simulated_positions(symbol,quantity,basis) VALUES(?,?,?) '
+                            'ON CONFLICT(symbol) DO UPDATE SET quantity=excluded.quantity,basis=excluded.basis',
+                            (data['symbol'],str(held),str(basis)))
+        self.db.execute('UPDATE portfolio_state SET cash=?,unsettled=?,realized=?,fees=?,revision=revision+1 WHERE id=1',
+                        (str(cash),str(pending),str(realized),str(fees)))
+        self.db.execute('INSERT INTO simulation_fills(id,payload,settled,proceeds) VALUES(?,?,?,?)',
+                        (data['id'],serialized,int(data['side']=='buy'),str(notional-fee) if data['side']=='sell' else '0'))
+        policy.assert_current()
+        return {'status':'simulated_fixture_recorded','id':data['id'],'execution_authorized':False}
 
     def settle(self, fill_id):
         self.db.execute('BEGIN IMMEDIATE')
