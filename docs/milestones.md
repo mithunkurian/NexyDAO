@@ -304,3 +304,20 @@ sustained operation, full P3 acceptance and all funding/execution gates remain o
 PR #16's authentication acceptance remains deferred. SSH access was separately
 restored using an owner-created recovery key; only its public key was registered
 through authenticated browser SSH, preserving existing keys and host pinning.
+
+## P4 performance and stress reporting slice, 2026-10-29
+
+Implementation `dbea8df` passed all 208 tests locally and in the isolated Ubuntu
+release `releases/portfolio-risk-dbea8df`; the isolated local demo passed too.
+The existing portfolio view now reconciles price P&L, recorded trading fees and
+API estimates/reservations to the change in net equity. Hypothetical 10%/30%/50%
+price shocks include holdings, fully deployed active planning holds and full
+reserved fees. Stale marks produce unknown scenario totals. Reports do not mutate
+cash, positions, holds or revision and cannot authorize execution.
+
+The CLI report over a private SQLite backup of the persistent VM ledger reconciled
+-$0.02957985 net P&L, entirely API expenses, to $4,999.97042015 net equity. The
+original database was opened read-only for backup/verification. Original/copied
+portfolio state and cost-entry counts remained unchanged. No paid call or broker
+request occurred. FX/tax/corporate actions, liquidity/stress enforcement, broker
+lifecycle accounting and full P4 acceptance remain open; PR #16 stays deferred.

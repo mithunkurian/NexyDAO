@@ -54,7 +54,10 @@ Branch `codex/portfolio-risk-report` adds reconciled net-performance attribution
 and three hypothetical portfolio-wide price shocks to the existing portfolio view.
 Active planning holds include full assumed fee payment; expired marks produce
 unknown scenario totals. Reports preserve cash, holds, revision and execution denial.
-All 208 local offline tests passed. Full P4 accounting/risk remains open, including
+Implementation `dbea8df` passed all 208 offline tests locally and in isolated Ubuntu
+release `releases/portfolio-risk-dbea8df`. A report over a private persistent-ledger
+backup reconciled net equity and API expenses without changing state or call counts;
+the original database was read in read-only mode. Full P4 accounting/risk remains open, including
 FX/tax/corporate actions, liquidity/stress enforcement and broker-linked lifecycle
 accounting. No paid call or broker request is required by this slice's offline tests.
 
