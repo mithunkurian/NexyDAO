@@ -11,7 +11,7 @@ PR #14 documents completed acceptance and is separate from this future estimate.
 
 ## Autonomous paper operation: eight packages
 
-Checklist status: **P1 blocked/in progress; P3 in progress**; P2 and P4–P8 planned (existing partial components
+Checklist status: **P1 blocked/in progress; P3 and P4 in progress**; P2 and P5–P8 planned (existing partial components
 remain recorded in the development tracker). No package is struck off yet. After
 each merge, link the PR and strike a package only when all its acceptance gates pass.
 
@@ -30,6 +30,12 @@ PR #17 merged as `c28a0ec`. Its seven-fact real SEC retrieval, 202 Ubuntu tests 
 nine-role paid advisory abstention path passed on 29 October. Simulation state was
 unchanged and execution denied. Full P3 acceptance, quote-backed allocation,
 broader sources and linked proposal revisions remain open; see [research evidence](research.md).
+
+P4's first slice adds reconciled price/fee/API-cost attribution and portfolio-wide
+hypothetical price shocks, including full deployment of active planning holds and
+their fees. All 208 local tests passed. These reports do not certify liquidity,
+FX/tax accounting, broker reconciliation or complete P4 risk enforcement. See
+[portfolio accounting and stress scope](portfolio.md).
 
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |

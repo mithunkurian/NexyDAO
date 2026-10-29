@@ -7,6 +7,7 @@ import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal
+from dataclasses import replace
 from pathlib import Path
 
 from nexydao.cli import DemoProvider
@@ -224,6 +225,91 @@ class PortfolioTests(unittest.TestCase):
                         'portfolio_risks':'Unsupported','abstain_reason':''}
         with self.assertRaisesRegex(PortfolioError,'quote_supported_allocation'):
             run_cycle(self.store,Manager(),evidence,portfolio=True)
+
+    def test_attribution_reconciles_partial_sale_fees_and_api_cost_settlement(self):
+        self.ledger.fill(self.fill())
+        self.ledger.fill(self.fill('sell', side='sell', quantity='1', price='110'))
+        self.mark('120')
+        ticket = self.store.reserve('fixture', 'risk', 'test', Decimal('10'), Decimal('20'))
+        before = self.ledger.snapshot()['performance_attribution']
+        self.assertEqual(Decimal(before['net_pnl_after_recorded_costs_usd']), Decimal('18'))
+        self.store.settle(ticket, Decimal('0.5'), {'input_tokens': 1, 'output_tokens': 1}, 'fixture')
+        report = self.ledger.snapshot()['performance_attribution']
+        self.assertEqual(Decimal(report['price_pnl_before_recorded_fees_usd']), Decimal('30'))
+        self.assertEqual(Decimal(report['recorded_trading_fees_usd']), Decimal('2'))
+        self.assertEqual(Decimal(report['net_pnl_after_recorded_costs_usd']), Decimal('27.5'))
+        self.assertTrue(report['equity_change_reconciled'])
+        self.ledger.settle('sell')
+        self.assertEqual(self.ledger.snapshot()['performance_attribution'], report)
+
+    def test_portfolio_stress_combines_positions_and_deducts_api_costs_once(self):
+        self.ledger.fill(self.fill())
+        self.mark('110')
+        self.ledger.fill(self.fill('other', symbol='OTHER', quantity='1', price='200', fee='2'))
+        self.market = replace(self.market, symbol='OTHER')
+        self.mark('180', symbol='OTHER', conid=456)
+        self.store.reserve('fixture', 'risk', 'test', Decimal('10'), Decimal('20'))
+        before = self.store.db.total_changes
+        report = self.ledger.snapshot()
+        scenario = report['portfolio_stress']['scenarios'][1]
+        self.assertEqual(Decimal(report['portfolio_stress']['holdings_market_value_usd']), Decimal('400'))
+        self.assertEqual(Decimal(scenario['loss_usd']), Decimal('120'))
+        self.assertEqual(Decimal(scenario['net_equity_estimate_usd']), Decimal('4867'))
+        self.assertEqual(self.store.db.total_changes, before)
+        self.assertFalse(report['portfolio_stress']['execution_authorized'])
+
+    def test_stress_includes_holds_without_spending_or_double_deducting_them(self):
+        from nexydao.reservations import Reservations
+        from nexydao.allocation import AllocationConfig
+        book = Reservations(self.ledger)
+        book.reserve({'id': 'risk-hold', 'proposal_sha256': 'a'*64, 'symbol': 'TEST',
+                      'notional_usd': '100', 'fee_usd': '2', 'fee_currency': 'USD'},
+                     self.policy, AllocationConfig())
+        revision = self.ledger.revision()
+        report = self.ledger.snapshot()
+        stress = report['portfolio_stress']
+        self.assertEqual(Decimal(report['net_equity_estimate_usd']), Decimal('5000'))
+        self.assertEqual(Decimal(stress['planning_holds_at_risk_usd']), Decimal('102'))
+        self.assertEqual(Decimal(stress['deployment_fee_assumption_usd']), Decimal('2'))
+        self.assertEqual(Decimal(stress['scenarios'][2]['net_equity_estimate_usd']), Decimal('4948'))
+        self.assertEqual(self.ledger.revision(), revision)
+        book.release('risk-hold', self.policy)
+        after = self.ledger.snapshot()['portfolio_stress']
+        self.assertTrue(all(Decimal(s['loss_usd']) == 0 for s in after['scenarios']))
+        self.assertTrue(self.ledger.snapshot()['performance_attribution']['equity_change_reconciled'])
+
+    def test_expired_marks_make_performance_and_stress_unknown(self):
+        self.ledger.fill(self.fill())
+        self.mark('110')
+        snapshot = self.ledger.snapshot()
+        expired = self.ledger.snapshot(now=snapshot['positions'][0]['mark_expires_at'])
+        self.assertEqual(expired['portfolio_stress']['status'], 'fresh_marks_required')
+        for scenario in expired['portfolio_stress']['scenarios']:
+            self.assertIsNone(scenario['loss_usd'])
+            self.assertIsNone(scenario['drawdown_limit_reached'])
+        performance = expired['performance_attribution']
+        self.assertIsNone(performance['net_pnl_after_recorded_costs_usd'])
+        self.assertIsNone(performance['price_pnl_before_recorded_fees_usd'])
+        self.assertFalse(performance['equity_change_reconciled'])
+        self.assertEqual(Decimal(performance['recorded_trading_fees_usd']), Decimal('1'))
+
+    def test_stress_breach_is_diagnostic_and_does_not_change_positions(self):
+        self.ledger.fill(self.fill())
+        self.mark('1000')
+        revision = self.ledger.revision()
+        report = self.ledger.snapshot()
+        self.assertTrue(report['portfolio_stress']['scenarios'][2]['drawdown_limit_reached'])
+        self.assertFalse(report['portfolio_stress']['changes_funding_limits'])
+        self.assertEqual(report['positions'][0]['quantity'], '2')
+        self.assertEqual(self.ledger.revision(), revision)
+
+    def test_cash_only_stress_and_attribution_include_api_reservations(self):
+        self.store.reserve('fixture', 'risk', 'test', Decimal('3'), Decimal('20'))
+        report = self.ledger.snapshot()
+        self.assertEqual(Decimal(report['performance_attribution']['net_pnl_after_recorded_costs_usd']), Decimal('-3'))
+        for scenario in report['portfolio_stress']['scenarios']:
+            self.assertEqual(Decimal(scenario['loss_usd']), Decimal('0'))
+            self.assertEqual(Decimal(scenario['net_equity_estimate_usd']), Decimal('4997'))
 
 
 if __name__=='__main__': unittest.main()

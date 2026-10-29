@@ -44,7 +44,9 @@ class Portfolio:
             raise PortfolioError('portfolio_changed_during_cycle')
 
     def snapshot(self, now=None):
-        return self._read(self._snapshot,now)
+        with localcontext() as context:
+            context.prec=50
+            return self._read(self._snapshot,now)
 
     def _read(self, function, *args):
         if self.db.in_transaction: return function(*args)
@@ -87,9 +89,11 @@ class Portfolio:
         for hold in holds:by_symbol[hold['symbol']]=str(Decimal(by_symbol.get(hold['symbol'],'0'))+Decimal(hold['total_usd']))
         equity = cash+unsettled+value-api if complete else None
         drawdown = max(Decimal(0), (peak-equity)/peak) if equity is not None else None
-        return {'simulated_capital_usd': 5000, 'currency': 'USD', 'settled_cash_usd': str(cash),
+        result = {'simulated_capital_usd': 5000, 'currency': 'USD', 'settled_cash_usd': str(cash),
                 'unsettled_cash_usd': str(unsettled), 'available_cash_after_api_estimate_usd': str(max(Decimal(0),cash-api-reserved)),
                 'simulation_planning_reserved_usd':str(reserved),'simulation_planning_reserved_by_symbol':by_symbol,
+                'simulation_planning_notional_usd':str(sum((Decimal(h['notional_usd']) for h in holds),Decimal(0))),
+                'simulation_planning_fee_usd':str(sum((Decimal(h['fee_usd']) for h in holds),Decimal(0))),
                 'positions': positions, 'realized_pnl_usd': str(realized), 'simulation_fees_usd': str(fees),
                 'api_expense_estimate_or_reserved_usd': str(api), 'valuation_complete': complete,
                 'net_equity_estimate_usd': str(equity) if equity is not None else None,
@@ -101,6 +105,13 @@ class Portfolio:
                 'tax_and_fx_model_complete': False, 'execution_enabled': False,
                 'simulation_internal_reconciliation':True, 'broker_reconciliation':False,
                 'accounting_mode': 'USD_simulation_only'}
+        from .portfolio_risk import reports
+        attribution, stress = reports(result)
+        if complete and not attribution['equity_change_reconciled']:
+            raise PortfolioError('performance_attribution_not_reconciled')
+        result['performance_attribution'] = attribution
+        result['portfolio_stress'] = stress
+        return result
 
     def reconcile(self):
         return self._read(self._reconcile)
