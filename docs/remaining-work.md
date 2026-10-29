@@ -1,6 +1,6 @@
 # Remaining work and planned PR packages
 
-Planning snapshot: 28 October 2026, Europe/Stockholm.
+Planning snapshot: 29 October 2026, Europe/Stockholm.
 
 Estimate: **8 substantial implementation PR packages to autonomous paper operation**,
 then **3 separate live-readiness packages**. This is a scope estimate, not a promise
@@ -26,7 +26,10 @@ blocked. The owner reports a submitted IBKR support ticket with no reply as of
 then P4 simulation accounting/risk. This changes development order, not funding or
 execution prerequisites. New work branches from merged `main`, without PR #16 changes.
 The first P3 slice expands approved SEC concepts and binds claim reporting context;
-full P3 acceptance, broader sources and linked proposal revisions remain open.
+PR #17 merged as `c28a0ec`. Its seven-fact real SEC retrieval, 202 Ubuntu tests and
+nine-role paid advisory abstention path passed on 29 October. Simulation state was
+unchanged and execution denied. Full P3 acceptance, quote-backed allocation,
+broader sources and linked proposal revisions remain open; see [research evidence](research.md).
 
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |

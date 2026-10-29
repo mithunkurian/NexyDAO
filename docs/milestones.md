@@ -278,3 +278,29 @@ verification passed; no OpenAI calls, funding imports, FX conversions or orders 
 The initial startup disconnect and successful spaced trial do not prove sustained
 reconnection reliability. Statement evidence, settlement semantics, full broker
 reconciliation and M3/M4 execution prerequisites remain open. See `funding-diagnostics.md`.
+
+## Expanded SEC research advisory acceptance, 2026-10-29
+
+Merged PR #17 (`c28a0ec`) passed all 202 tests in isolated Ubuntu release
+`releases/research-c28a0ec`. A real bounded SEC check retrieved seven approved MSFT
+concepts and verified the signed concept manifest, fact context and provenance.
+Receipt mode was 0600; existing runtime configuration and signing key were retained.
+
+After explicit owner approval, one nine-role advisory cycle completed under prompt
+version 8: `27d62b74-5165-4f51-a98e-a94cc871679a`. Both research reports passed
+numeric/context binding checks; Portfolio Manager abstained without a quote, CEO
+chose `investigate`, and two risk officers plus three committee members reviewed.
+Execution was denied. Simulation cash/revision remained unchanged; the completed
+run persisted in memory after reopening the same SQLite database.
+
+A private SQLite backup preceded the trial. Estimated cycle cost was $0.01362225;
+cumulative estimated costs were $0.02957985 over 38 calls, no unsettled reservations,
+under the unchanged $0.10 lifetime budget and recorded model rates. No IBKR calls,
+orders, schedules, capital resets or prior-transaction investigation occurred.
+
+This validates expanded SEC retrieval and the combined advisory abstention path.
+Quote-backed allocations, narrative/cross-publisher verification, proposal revisions,
+sustained operation, full P3 acceptance and all funding/execution gates remain open.
+PR #16's authentication acceptance remains deferred. SSH access was separately
+restored using an owner-created recovery key; only its public key was registered
+through authenticated browser SSH, preserving existing keys and host pinning.
