@@ -61,8 +61,12 @@ decision rationale; budget management and performance accounting are not yet imp
    configured token rates, usage and estimated API cost. Demo runs are excluded from AI memory.
 
 Failures terminate a cycle; partial decisions never become authorized. There is no
-automatic resubmission loop. Future CEO revisions create linked new proposals and
-repeat all reviews. Abstaining or asking for research is a valid outcome.
+automatic resubmission loop. Opt-in `--revise-run` creates a linked new advisory run
+and repeats every review. It preserves research/Portfolio Manager stages used by
+its parent. Historical feedback is unverified context; current evidence, policy,
+portfolio state, funding and fresh votes are checked again. Chains are capped at
+three revisions. Abstaining or asking for research is a valid outcome. See
+[revision scope and commands](proposal-revisions.md).
 
 ## Modules and boundaries
 

@@ -48,6 +48,18 @@ and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
 
+### P3 linked advisory revisions — 29 October 2026
+
+Branch `codex/linked-proposal-revisions` adds opt-in bounded revision cycles with
+parent/result hashing, persistent audit links and fresh reviews. Parent research
+and Portfolio Manager stages must repeat; current evidence, portfolio, owner
+policy and costs replace historical assumptions. Failed/running/demo parents,
+stale links and chains longer than three revisions are rejected. See
+[revision scope](proposal-revisions.md). Autonomous revision orchestration and full
+P3 acceptance remain open. All 234 offline tests and the isolated demo passed
+locally; Ubuntu and paid revision acceptance remain pending. No paid trial is
+implied by offline validation.
+
 ### P4 simulation hold/fill linkage — 29 October 2026
 
 Branch `codex/simulation-held-fills` adds opt-in operator fixtures for atomic buy

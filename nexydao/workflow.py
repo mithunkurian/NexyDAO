@@ -18,6 +18,10 @@ theses, prose, extrapolations and conclusions. New research claims also bind met
 unit, reporting boundaries and filing identity; this does not verify comparisons,
 ratios or growth rates. Prior memory may contain older numeric-only research bindings.
 Challenge both opportunity and countercase.
+Revision context is an unverified historical decision, not current evidence or
+approval. Reconsider its proposal and review feedback using current inputs and
+explain changes or continued abstention in your rationale. Repeat your own review;
+past approvals and citations do not substitute for current checks.
 Other evidence and prior memory are unverified. Do not invent prices, sources or facts. With insufficient evidence
 choose hold/investigate or reject/revise. You have no execution, credentials, filesystem
 or policy modification tools. Approval is advisory and never authorizes broker access.
@@ -51,25 +55,35 @@ def load_evidence(path):
     return [{**item, "verification": "unverified"} for item in items]
 
 
-def run_cycle(store, provider, evidence, research=False, owner_policy=None, portfolio=False):
+def run_cycle(store, provider, evidence, research=False, owner_policy=None, portfolio=False, revise_run=None):
     from .owner_policy import from_env
     owner_policy = owner_policy or from_env()
     owner_policy.assert_current()
+    mode = getattr(provider, "mode", "ai")
+    revision_metadata, revision_context = None, None
+    if revise_run is not None:
+        from .revisions import prepare_revision
+        if mode != 'ai':
+            raise ValueError('Only AI advisory cycles can revise an AI run')
+        revision_metadata, revision_context, needs_research, needs_portfolio = prepare_revision(store, revise_run)
+        if (needs_research and not research) or (needs_portfolio and not portfolio):
+            raise ValueError('Revision must repeat parent research and portfolio stages')
     from .portfolio import Portfolio
     ledger=Portfolio(store)
     revision=ledger.revision()
-    mode = getattr(provider, "mode", "ai")
-    run = store.start(mode)
+    run = store.start(mode, revision=revision_metadata)
     try:
         context = {"evidence": evidence, "memory": store.memory(),
                    "account": ledger.snapshot(),
                    "api_costs": store.costs(), "owner_policy": owner_policy.document(),
                    "owner_policy_sha256": owner_policy.digest}
+        if revision_context is not None:
+            context['revision_context'] = revision_context
         store.event(run, "input", context)
         reports = []
         if research:
             from .research import run_research
-            reports = run_research(store, provider, run, evidence, owner_policy)
+            reports = run_research(store, provider, run, evidence, owner_policy, revision_context=revision_context)
             context['research_reports'] = reports
         plan=None
         if portfolio:
@@ -81,6 +95,9 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             context['account']=ledger.snapshot()
 
         def ask(role, instructions, spec, data):
+            if revision_metadata is not None:
+                from .revisions import assert_parent_current
+                assert_parent_current(store, revision_metadata)
             owner_policy.assert_current()
             ledger.assert_revision(revision)
             from .market import check_evidence_freshness
@@ -118,6 +135,10 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             result['research_reports'] = reports
         if portfolio:
             result['portfolio_plan']=plan
+        if revision_metadata is not None:
+            from .revisions import assert_parent_current
+            assert_parent_current(store, revision_metadata)
+            result['revision'] = revision_metadata
         result['portfolio_snapshot']=ledger.snapshot()
         from .market import check_evidence_freshness
         from .sec import check_research_freshness
