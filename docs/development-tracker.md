@@ -59,7 +59,11 @@ broker reservations, order submissions or autonomous agent mutation tools are
 introduced. Implementation `09be8e3` passed all 222 offline tests locally and the
 isolated demo. Coverage includes CLI input, legacy hold migration, partial fills,
 concurrent consumption/retries, conservative rounding, policy rollback and retained
-funding/valuation checks. Ubuntu and separate operational CLI acceptance are pending.
+funding/valuation checks. All 222 tests also passed in isolated Ubuntu release
+`releases/held-fills-09be8e3`. A separate CLI fixture consumed a $201 hold into two
+shares, leaving $4,799 cash and zero held capital; retry and consumed-hold release
+left state/revision unchanged. The new fixture database recorded zero paid calls.
+No persistent runtime, broker request or execution permission was used.
 
 ### P4 reporting slice — 29 October 2026
 

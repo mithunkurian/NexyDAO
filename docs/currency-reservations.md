@@ -143,9 +143,13 @@ Held-fill implementation `09be8e3` passed all 222 offline tests locally and the
 isolated demo. Tests include separate notional/fee budgets, partial fills and
 release, terminal consumption, same-ID retries, concurrency, missing audit links,
 policy rollback, current API costs, conservative decimal rounding, retained fresh
-valuation requirements and legacy hold-table migration. Ubuntu and a separate
-operational CLI fixture trial remain pending. This is not actual broker fill or
-monetary reservation acceptance; Item 1 and execution prerequisites remain open.
+valuation requirements and legacy hold-table migration. All 222 tests also passed
+in isolated Ubuntu release `releases/held-fills-09be8e3`. A separate CLI trial
+reserved $200 notional plus $1 fee, recorded a two-share buy, then retried that
+fill and requested release of the consumed hold. Cash stayed $4,799, remaining
+hold zero and revision 2 after retries. The isolated DB recorded zero paid calls;
+no persistent runtime or broker access was used. This is not actual broker fill
+or monetary reservation acceptance; Item 1 and execution prerequisites remain open.
 
 All 196 tests pass locally, including concurrent holds, restart persistence, explicit
 release, fee-currency rejection, policy rollback, fill isolation, audit corruption,

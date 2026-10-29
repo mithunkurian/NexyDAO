@@ -114,6 +114,9 @@ only its own debit in preflight; other holds and the unused remainder continue t
 count. Normal unlinked fills retain all existing holds. No broker or model tools
 are added. Internal sub-cent debit formatting uses fixed decimal strings so
 conservative eight-place rounding is accepted by the existing policy parser.
+Implementation `09be8e3` passed 222 tests locally and on Ubuntu plus the isolated
+local demo. An Ubuntu CLI reserve/fill/retry fixture preserved state after duplicate
+submission and used no persistent runtime, paid calls or broker access.
 
 Use the existing persistent `NEXYDAO_DB`. No extra runtime dependencies are needed.
 No command resets the $5,000 capital or cost budget.

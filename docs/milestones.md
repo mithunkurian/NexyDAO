@@ -321,3 +321,19 @@ original database was opened read-only for backup/verification. Original/copied
 portfolio state and cost-entry counts remained unchanged. No paid call or broker
 request occurred. FX/tax/corporate actions, liquidity/stress enforcement, broker
 lifecycle accounting and full P4 acceptance remain open; PR #16 stays deferred.
+
+## Atomic simulation hold/fill acceptance, 2026-10-29
+
+Implementation `09be8e3` passed all 222 offline tests locally and in isolated Ubuntu
+release `releases/held-fills-09be8e3`; the isolated local demo also passed. Tests
+cover partial consumption, separate fee/notional budgets, conservative rounding,
+legacy migration, release, replay evidence, concurrent consumption/retries and
+rollback. Current owner-policy, funding and valuation checks remain in force.
+
+A separate Ubuntu CLI fixture used a new simulation database to reserve $200
+notional and $1 fee, then record a two-share buy. Cash became $4,799, the hold was
+fully consumed and revision became 2. Same-fill retry and release of the consumed
+hold left state/revision unchanged. Paid call count remained zero; execution stayed
+disabled. No persistent runtime, credential, IBKR connection or broker write was
+used. This validates simulation accounting, not broker fills, order authorization,
+monetary reservations or complete P1/P2/P4 acceptance.
