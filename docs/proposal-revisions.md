@@ -56,9 +56,14 @@ their existing quote-input restrictions. A quote-free Portfolio Manager must
 abstain. Demo/accounting/collector commands reject `--revise-run` before opening
 the database. Execution stays disabled even after unanimous fresh approval.
 
-All 234 offline tests and the isolated demo passed locally. Coverage includes fresh
+Implementation `4017611` passed all 234 offline tests locally and in isolated
+Ubuntu release `releases/revisions-4017611`; the isolated local demo passed too.
+Coverage includes fresh
 six/nine-stage review, stage preservation, current policy/costs, invalid parents,
 lineage depth, parent changes, stale citations, retained failed-call costs and
-legacy schema migration. Ubuntu and live paid revision acceptance remain pending.
+legacy schema migration. A separate Ubuntu fixture repeated all six review stages
+for a linked child and verified lineage/memory after reopening its isolated DB.
+These were synthetic provider responses: zero paid calls, no credentials/broker
+access and no persistent runtime used. Live paid revision acceptance remains pending.
 A schema/prompt change alone does not establish paid API
 acceptance, verified thesis prose, full P3 completion or autonomous operation.
