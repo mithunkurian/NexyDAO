@@ -1,9 +1,9 @@
 # NexyDAO — Development tracker
 
-Updated: **28 October 2026 · Europe/Stockholm**
+Updated: **29 October 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
-**Next checkpoint:** Advance P3 research evidence and claim-context verification independently of the blocked Web ledger acceptance. PR #16 remains draft; the owner reports the IBKR support ticket was submitted and no reply received. P1 acceptance is deferred, not passed. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
+**Next checkpoint:** Expanded SEC evidence and the nine-role advisory abstention path are validated. Continue P3's remaining evidence/revision work and P4 accounting/risk independently of the blocked Web ledger acceptance. PR #16 remains draft; the owner reports the IBKR support ticket was submitted and no reply received. P1 acceptance is deferred, not passed. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
 **Execution:** Disabled. **Operating mode:** Manual, bounded paper trials.
 
 Human access/maintenance procedures: [owner maintenance SOP](owner-maintenance-sop.md).
@@ -59,11 +59,17 @@ provenance and scope changes fail closed. Legacy receipts retain their original 
 All **202 offline tests passed locally**, including expanded seven-fact nine-role
 advisory flow and wrong-context rejection before manager/CEO. The nine-role fixture
 uses Portfolio Manager abstention without a quote; it does not validate an allocation.
-Broader public-source retrieval, paid advisory acceptance and VM validation for this
-slice remain pending. Narrative verification, linked proposal revisions and complete
-P3 acceptance remain open. P4 accounting/risk is the next independent workstream.
-Funding and execution stay disabled; no broker requests, paid calls or schedules
-were introduced by this validation.
+PR #17 merged as `c28a0ec`. On 29 October, all 202 tests also passed in the isolated
+Ubuntu release, and real SEC retrieval verified all seven selected MSFT filing
+observations with a private signed receipt. After explicit owner approval, paid run
+`27d62b74-5165-4f51-a98e-a94cc871679a` completed all nine roles with checked claim
+contexts, Portfolio Manager abstention and CEO investigation. Estimated cycle cost
+was $0.01362225; cumulative costs were $0.02957985 over 38 calls, zero unsettled,
+under the unchanged $0.10 lifetime budget. Memory persisted after reopening SQLite;
+simulation cash/revision stayed unchanged. Narrative verification, quote-backed
+allocation, linked proposal revisions and complete P3 acceptance remain open.
+P4 accounting/risk is the next independent workstream. Funding and execution stay
+disabled; no broker requests or schedules were introduced by this validation.
 
 | Task | Status | Acceptance condition |
 | --- | --- | --- |

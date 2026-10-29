@@ -1,6 +1,6 @@
 # Human owner maintenance SOP
 
-Version 1 · 14 October 2026 · All dates/times use Europe/Stockholm unless stated.
+Version 2 · 29 October 2026 · All dates/times use Europe/Stockholm unless stated.
 
 Purpose: keep authorized paper access available, preserve independent safeguards,
 and make required human actions predictable. The owner provides capital, controls
@@ -90,6 +90,14 @@ another one; do not disconnect sessions blindly.
 
 ## Procedure C — Restore laptop SSH tunnels
 
+Access recovery on 29 October: the original laptop key's passphrase was unavailable.
+The owner created and loaded `nexydao_recovery_ed25519` locally, then registered only
+its public key through authenticated Google Cloud browser SSH. A pinned-host-key
+connection using the new identity passed. The original key and authorized entries
+were retained. Current laptop commands below use the recovery identity. Load it
+locally with `ssh-add` after starting the Windows SSH agent when needed; passphrases
+stay local. This recovery does not change Gateway authentication or trading access.
+
 Open PowerShell on your laptop. Run the command for the connection you need.
 Enter your existing SSH key passphrase if prompted. Keep each window open. A blank
 window after authentication is normal. These commands expose only laptop localhost;
@@ -98,13 +106,13 @@ they do not open public VM ports or bypass host-key verification.
 VNC:
 
 ```powershell
-ssh -N -L "127.0.0.1:15901:127.0.0.1:5901" -i "$env:USERPROFILE\.ssh\nexydao_ed25519" -o IdentitiesOnly=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$env:USERPROFILE\.ssh\nexydao_known_hosts" mithunkurian@35.184.88.154
+ssh -N -L "127.0.0.1:15901:127.0.0.1:5901" -i "$env:USERPROFILE\.ssh\nexydao_recovery_ed25519" -o IdentitiesOnly=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$env:USERPROFILE\.ssh\nexydao_known_hosts" mithunkurian@35.184.88.154
 ```
 
 Web Gateway:
 
 ```powershell
-ssh -N -L "127.0.0.1:15000:127.0.0.1:5000" -i "$env:USERPROFILE\.ssh\nexydao_ed25519" -o IdentitiesOnly=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$env:USERPROFILE\.ssh\nexydao_known_hosts" mithunkurian@35.184.88.154
+ssh -N -L "127.0.0.1:15000:127.0.0.1:5000" -i "$env:USERPROFILE\.ssh\nexydao_recovery_ed25519" -o IdentitiesOnly=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$env:USERPROFILE\.ssh\nexydao_known_hosts" mithunkurian@35.184.88.154
 ```
 
 Use **Ctrl+C** in your tunnel window to stop that connection when finished.

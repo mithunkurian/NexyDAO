@@ -114,11 +114,36 @@ That second cycle has six calls and cannot execute. Manual `--evidence` stays un
 
 ## Acceptance and deployment
 
+On 29 October 2026, merged PR #17 (`c28a0ec`) was deployed into the isolated VM
+release `releases/research-c28a0ec`. All 202 offline tests passed on Ubuntu.
+One bounded SEC collection retrieved all seven approved MSFT concepts using the
+existing private operator contact and signing key. The signed version-2 receipt
+loaded successfully, with matching concept scope and provenance; file mode was
+0600. All seven observations were filed 28 October for a 30 September period end;
+duration facts retained their 1 July start. The original receipt/configuration,
+owner policy, persistent capital and cost database were preserved.
+
+After explicit owner approval of the API data transfer, one paid nine-role advisory
+cycle completed: run `27d62b74-5165-4f51-a98e-a94cc871679a`. The two researchers'
+claims passed numeric and context checks before Portfolio Manager, CEO, two risk
+officers and three committee voters ran. With no fresh quote, the manager proposed
+no allocations and the CEO chose `investigate`. Execution remained denied.
+
+The cycle used the existing credential, recorded model/rates and unchanged $0.10
+lifetime budget. Estimated cycle cost was $0.01362225; cumulative estimated costs
+were $0.02957985 across 38 calls, with zero unsettled reservations. A private SQLite
+backup preceded the trial. Simulation state, including the $5,000 cash and revision,
+was unchanged; the completed run persisted in AI memory after reopening SQLite.
+No IBKR request, order or schedule was made. This validates the expanded SEC-backed
+nine-role advisory abstention path, not quote-backed allocation, narrative truth,
+investment performance, sustained operation or complete P3 acceptance.
+
 On 28 October 2026, the expanded-concept/context-binding slice passed all 202 offline
 tests locally. Fixtures cover seven selected facts through the nine-role workflow
 with quote-free Portfolio Manager abstention, exact context rejection, legacy scope,
-missing facts/provenance and preserved files on failed collection. Expanded real
-retrieval, paid workflow and VM acceptance remain pending. This slice advances P3
+missing facts/provenance and preserved files on failed collection. At that point,
+expanded real retrieval, paid workflow and VM acceptance were pending; their
+29 October results are recorded above. This slice advances P3
 while PR #16's IBKR authentication acceptance is deferred; it does not complete P3.
 
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
