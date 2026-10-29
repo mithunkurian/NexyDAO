@@ -50,6 +50,8 @@ Every applicable research/manager/review stage repeats against current inputs;
 past decisions cannot supply current evidence or approval. Narrative verification,
 broader sources, quote-backed allocation acceptance and autonomous revision
 orchestration remain open. See [revision scope](proposal-revisions.md).
+Implementation `4017611` passed 234 local/Ubuntu tests and an isolated six-review
+synthetic revision fixture; live paid revision acceptance remains pending.
 
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |

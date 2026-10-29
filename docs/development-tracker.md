@@ -56,9 +56,12 @@ and Portfolio Manager stages must repeat; current evidence, portfolio, owner
 policy and costs replace historical assumptions. Failed/running/demo parents,
 stale links and chains longer than three revisions are rejected. See
 [revision scope](proposal-revisions.md). Autonomous revision orchestration and full
-P3 acceptance remain open. All 234 offline tests and the isolated demo passed
-locally; Ubuntu and paid revision acceptance remain pending. No paid trial is
-implied by offline validation.
+P3 acceptance remain open. Implementation `4017611` passed all 234 offline tests
+locally and in isolated Ubuntu release `releases/revisions-4017611`, plus the local
+demo. An isolated synthetic-provider fixture repeated six child review stages and
+preserved lineage/memory after reopening SQLite. Paid calls stayed zero; no
+persistent runtime or broker access was used. Paid revision acceptance remains
+pending and is not implied by these offline checks.
 
 ### P4 simulation hold/fill linkage — 29 October 2026
 
