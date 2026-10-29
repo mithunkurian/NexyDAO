@@ -106,6 +106,15 @@ denied even after unanimous approval.
 
 ## Commands
 
+The next P4 slice adds atomic simulation hold consumption through
+`sim-fill --held-fill`. See [hold/fill fixture scope](currency-reservations.md).
+It shares the existing fill validation and independently checks the reservation's
+proposal/symbol/policy and remaining notional/fee budgets. A partial fill replaces
+only its own debit in preflight; other holds and the unused remainder continue to
+count. Normal unlinked fills retain all existing holds. No broker or model tools
+are added. Internal sub-cent debit formatting uses fixed decimal strings so
+conservative eight-place rounding is accepted by the existing policy parser.
+
 Use the existing persistent `NEXYDAO_DB`. No extra runtime dependencies are needed.
 No command resets the $5,000 capital or cost budget.
 
