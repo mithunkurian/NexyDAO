@@ -69,9 +69,14 @@ cost basis or zero. No scenario generates a trade, releases a hold or grants acc
 Future planned API costs, unknown execution costs, FX, stress enforcement and
 full P4 acceptance remain open. Existing independent funding/risk gates still apply.
 
-Local validation: all 208 offline tests passed, including multi-position shocks,
+Validation on 29 October 2026: implementation `dbea8df` passed all 208 offline tests
+locally and on the isolated Ubuntu release `releases/portfolio-risk-dbea8df`, including multi-position shocks,
 partial-sale/cost attribution, full deployment fees, hold release, stale marks,
-cash-only API expenses and report immutability. VM validation is recorded separately.
+cash-only API expenses and report immutability. The isolated local demo also passed.
+`portfolio-report` reconciled a private SQLite backup of the persistent VM ledger:
+net P&L was -$0.02957985, entirely API costs; net equity was $4,999.97042015.
+Original and copied portfolio state/call counts were unchanged by reporting. No
+paid API call, broker request or persistent-capital modification was made.
 
 ## Independent constraints
 

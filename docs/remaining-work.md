@@ -33,7 +33,9 @@ broader sources and linked proposal revisions remain open; see [research evidenc
 
 P4's first slice adds reconciled price/fee/API-cost attribution and portfolio-wide
 hypothetical price shocks, including full deployment of active planning holds and
-their fees. All 208 local tests passed. These reports do not certify liquidity,
+their fees. Implementation `dbea8df` passed all 208 tests locally and on Ubuntu;
+a report over a private persistent-ledger backup reconciled without changing state.
+These reports do not certify liquidity,
 FX/tax accounting, broker reconciliation or complete P4 risk enforcement. See
 [portfolio accounting and stress scope](portfolio.md).
 
