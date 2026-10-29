@@ -337,3 +337,18 @@ hold left state/revision unchanged. Paid call count remained zero; execution sta
 disabled. No persistent runtime, credential, IBKR connection or broker write was
 used. This validates simulation accounting, not broker fills, order authorization,
 monetary reservations or complete P1/P2/P4 acceptance.
+
+## Linked proposal revision offline acceptance, 2026-10-29
+
+Implementation `4017611` passed all 234 tests locally and in isolated Ubuntu
+release `releases/revisions-4017611`; the isolated local demo passed too. The
+revision suite covers parent eligibility, bounded ancestry, hash/link checks,
+fresh review stages, research/manager stage preservation, current policy/costs,
+rejection of historical citations and retained costs after a failed revision.
+
+A separate Ubuntu fixture used synthetic provider responses in a new database:
+one completed root followed by a linked child with six fresh role calls. Its parent
+hash/depth link and AI memory persisted after reopening SQLite; execution remained
+denied. Paid call count stayed zero. No credentials, persistent runtime, broker
+access or schedules were used. This is offline workflow acceptance, not paid model
+acceptance, verified thesis prose, autonomous revisions or complete P3 acceptance.

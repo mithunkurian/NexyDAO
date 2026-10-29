@@ -45,6 +45,14 @@ checks. Implementation `09be8e3` passed 222 tests locally/on Ubuntu and an isola
 CLI consumption/retry fixture. Real broker fill ingestion, order bounds/lifecycle, allocation ownership,
 broker monetary reservations and full P1/P2/P4 acceptance remain open.
 
+The next P3 slice adds bounded, explicitly requested linked advisory revisions.
+Every applicable research/manager/review stage repeats against current inputs;
+past decisions cannot supply current evidence or approval. Narrative verification,
+broader sources, quote-backed allocation acceptance and autonomous revision
+orchestration remain open. See [revision scope](proposal-revisions.md).
+Implementation `4017611` passed 234 local/Ubuntu tests and an isolated six-review
+synthetic revision fixture; live paid revision acceptance remains pending.
+
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |
 | P1 · Current cash and reservations | Supported per-currency settled-cash source; fee currencies/buffers; allocation ownership; current negative-cash handling; atomic capital/fee reservations and release rules | Evidence is fresh, exact-account and scoped; USD/other currencies never offset unknown debits; missing evidence and concurrent overspending fail closed; no automatic FX conversion or debt repayment |

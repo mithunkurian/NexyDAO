@@ -39,11 +39,14 @@ def main():
     parser.add_argument('--reservation-id')
     parser.add_argument('--held-fill',type=Path)
     parser.add_argument('--with-research',action='store_true')
+    parser.add_argument('--revise-run')
     args = parser.parse_args()
     store = None
     try:
         config = Config.from_env()
         owner_policy = owner_policy_from_env()
+        if args.revise_run and args.command not in {'deliberate','research','portfolio'}:
+            raise ValueError('Revisions require an explicit AI advisory command')
         if args.held_fill and args.command!='sim-fill':
             raise ValueError('Held fill applies only to sim-fill')
         if args.fill and args.held_fill:
@@ -189,7 +192,7 @@ def main():
         else:
             provider = DemoProvider() if args.command == "demo" else OpenAIProvider(config, store)
             result = run_cycle(store, provider, evidence, research=args.command == 'research' or args.with_research,
-                               owner_policy=owner_policy,portfolio=args.command=='portfolio')
+                                 owner_policy=owner_policy,portfolio=args.command=='portfolio',revise_run=args.revise_run)
         print(json.dumps(result, indent=2))
     except (ProbeError, SourceError, OwnerPolicyError, PortfolioError) as exc:
         # All ProbeError messages are fixed local codes, never vendor response text.
