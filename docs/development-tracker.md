@@ -48,6 +48,16 @@ and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
 
+### P4 reporting slice — 29 October 2026
+
+Branch `codex/portfolio-risk-report` adds reconciled net-performance attribution
+and three hypothetical portfolio-wide price shocks to the existing portfolio view.
+Active planning holds include full assumed fee payment; expired marks produce
+unknown scenario totals. Reports preserve cash, holds, revision and execution denial.
+All 208 local offline tests passed. Full P4 accounting/risk remains open, including
+FX/tax/corporate actions, liquidity/stress enforcement and broker-linked lifecycle
+accounting. No paid call or broker request is required by this slice's offline tests.
+
 ### P3 development slice — 28 October 2026
 
 Branch `codex/research-filing-context` starts from merged `main`, independently of

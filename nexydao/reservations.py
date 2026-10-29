@@ -43,7 +43,8 @@ def active_holds(db):
         total=validate_request(data)
         if data['id']!=identifier or hashlib.sha256(canonical(data)).hexdigest()!=digest or replay[identifier]!=status:
             raise PortfolioError('simulation_reservation_audit_mismatch')
-        if status=='active':held.append({'id':identifier,'symbol':data['symbol'],'total_usd':str(total)})
+        if status=='active':held.append({'id':identifier,'symbol':data['symbol'],'total_usd':str(total),
+                                          'notional_usd':data['notional_usd'],'fee_usd':data['fee_usd']})
     return held
 
 

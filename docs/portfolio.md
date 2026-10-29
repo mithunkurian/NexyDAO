@@ -38,6 +38,41 @@ Contributions, withdrawals, corporate actions, dividends, taxes, broker settleme
 are **not yet implemented**. Weighted-average basis is only a simulation accounting
 choice, not an ISK tax calculation. Full M3 acceptance remains broader than this slice.
 
+## Performance attribution and portfolio stress (P4 first slice)
+
+`portfolio-report` and advisory portfolio snapshots now include
+`performance_attribution` and `portfolio_stress`. Both use the same reconciled
+SQLite read transaction and 50-digit Decimal calculation context.
+
+Attribution explains the change from initial simulation equity as price P&L before
+recorded fees, minus all recorded buy/sell fees and API estimates/reservations.
+Buy fees already included in remaining basis and realized sale gains are counted
+once. Settling a sale moves cash without changing P&L; settling an API reservation
+updates estimated net performance. Complete marks must reconcile net P&L exactly
+to net equity minus initial capital, or reporting fails. With stale/missing marks,
+total price/net P&L remain unknown; realized gains and recorded costs stay visible.
+Taxes, FX and unrecorded fees/slippage remain explicitly outside the model.
+
+Stress scenarios apply simultaneous 10%, 30% and 50% price declines to current
+marked holdings plus the full notional of active USD simulation planning holds.
+They assume all those holds deploy and charge their reserved fees in full, once.
+Existing trading fees/API estimates are already deducted in starting net equity.
+Pending holds do not reduce current equity; only their hypothetical deployment
+affects stressed equity. Loss rounds upward to eight decimal places. Reports show
+stressed net equity and drawdown from the observed peak, including whether the
+existing 10% drawdown threshold would be reached. A released hold leaves the scenario.
+
+These are fixed diagnostic scenarios, not forecasts, probabilities, correlated
+asset models, liquidity estimates or new funding limits. Missing/expired marks
+make total scenario loss/equity/drawdown unknown rather than replacing prices with
+cost basis or zero. No scenario generates a trade, releases a hold or grants access.
+Future planned API costs, unknown execution costs, FX, stress enforcement and
+full P4 acceptance remain open. Existing independent funding/risk gates still apply.
+
+Local validation: all 208 offline tests passed, including multi-position shocks,
+partial-sale/cost attribution, full deployment fees, hold release, stale marks,
+cash-only API expenses and report immutability. VM validation is recorded separately.
+
 ## Independent constraints
 
 Application code checks incremental exposure against existing holdings, using the
