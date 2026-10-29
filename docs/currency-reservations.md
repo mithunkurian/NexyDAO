@@ -139,6 +139,14 @@ That is an operations constraint, not a completed autonomy feature.
 
 ## Acceptance and checklist status
 
+Held-fill implementation `09be8e3` passed all 222 offline tests locally and the
+isolated demo. Tests include separate notional/fee budgets, partial fills and
+release, terminal consumption, same-ID retries, concurrency, missing audit links,
+policy rollback, current API costs, conservative decimal rounding, retained fresh
+valuation requirements and legacy hold-table migration. Ubuntu and a separate
+operational CLI fixture trial remain pending. This is not actual broker fill or
+monetary reservation acceptance; Item 1 and execution prerequisites remain open.
+
 All 196 tests pass locally, including concurrent holds, restart persistence, explicit
 release, fee-currency rejection, policy rollback, fill isolation, audit corruption,
 fixed verified-TLS GETs, identity/freshness checks and cross-source disagreement.

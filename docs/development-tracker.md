@@ -56,7 +56,10 @@ consumption, replay validation and same-ID retries. Fresh valuation, current
 funding and owner policy remain required; residual capacity releases explicitly.
 The normal unlinked fill path remains available with all holds counted. No real
 broker reservations, order submissions or autonomous agent mutation tools are
-introduced. Local/VM acceptance is recorded with the implementation below.
+introduced. Implementation `09be8e3` passed all 222 offline tests locally and the
+isolated demo. Coverage includes CLI input, legacy hold migration, partial fills,
+concurrent consumption/retries, conservative rounding, policy rollback and retained
+funding/valuation checks. Ubuntu and separate operational CLI acceptance are pending.
 
 ### P4 reporting slice — 29 October 2026
 
