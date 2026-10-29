@@ -26,6 +26,8 @@ class Store:
             id TEXT PRIMARY KEY, run_id TEXT NOT NULL, role TEXT NOT NULL,
             created TEXT NOT NULL, model TEXT NOT NULL, charged TEXT NOT NULL,
             status TEXT NOT NULL, usage TEXT, response_id TEXT);
+        CREATE TABLE IF NOT EXISTS run_revisions (
+            child_run_id TEXT PRIMARY KEY, metadata TEXT NOT NULL);
         """)
         if "mode" not in {r[1] for r in self.db.execute("PRAGMA table_info(runs)")}:
             with self.db:
@@ -34,11 +36,14 @@ class Store:
     def close(self):
         self.db.close()
 
-    def start(self, mode="ai"):
+    def start(self, mode="ai", revision=None):
         run = str(uuid.uuid4())
         with self.db:
             self.db.execute("INSERT INTO runs(id,created,status,result,mode) VALUES (?, ?, 'running', NULL, ?)",
                             (run, now(), mode))
+            if revision is not None:
+                self.db.execute('INSERT INTO run_revisions VALUES(?,?)',
+                                (run, json.dumps(revision, allow_nan=False)))
         return run
 
     def event(self, run, role, payload):
