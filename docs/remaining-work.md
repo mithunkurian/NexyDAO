@@ -41,7 +41,8 @@ FX/tax accounting, broker reconciliation or complete P4 risk enforcement. See
 
 The next P4 slice links operator simulation fills to planning holds atomically,
 including partial consumption, separate notional/fee budgets and retry/replay
-checks. Real broker fill ingestion, order bounds/lifecycle, allocation ownership,
+checks. Implementation `09be8e3` passed 222 tests locally/on Ubuntu and an isolated
+CLI consumption/retry fixture. Real broker fill ingestion, order bounds/lifecycle, allocation ownership,
 broker monetary reservations and full P1/P2/P4 acceptance remain open.
 
 | Package | Remaining work | Acceptance before closing |
