@@ -35,6 +35,8 @@ Ubuntu and two-UID acceptance and the PR merges. Real service installation and
 startup/recovery acceptance belong to S2; live source/workflow gates also remain
 explicit in their own workstreams. A successful S1 merge leaves about **14 PRs**
 on this planning baseline, subject to the stated range and recorded scope changes.
+S1 implementation `df3860b` has passed all 262 Ubuntu tests and its real two-UID
+fixture; publication/merge remains the last delivery step.
 The owner-facing overall progress estimate remains **approximately 45% (40–50%)**,
 a subjective engineering guide rather than measured milestone completion or an
 investment-readiness claim. Reassess it when material acceptance gates close.
@@ -43,3 +45,12 @@ Every PR handoff includes completed scope, validation evidence, remaining work,
 blockers, the remaining delivery count and a labelled estimate/progress bar. Full
 P1–P8 criteria remain in [remaining work](remaining-work.md). Real-money account,
 eligibility, access and commissioning are a separate authorization/design phase.
+
+## Engineering authorization
+
+On 5 November the owner authorized routine NexyDAO PR uploads to the existing VM,
+GitHub branch/PR publication, self-merging when checks pass and the change is
+suitable, and continuation to the next development package. This preference
+persists across these delivery steps. Before merging, verify the current head's
+CI, applicable acceptance evidence, mergeability and blocking review state. This
+engineering workflow does not itself grant broker execution or live-money access.

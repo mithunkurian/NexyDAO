@@ -388,3 +388,18 @@ execution denied. No production key, persistent runtime, SEC retrieval, broker
 access or service/host-identity change occurred. Separate collector/consumer OS
 identities, migration of other HMAC receipt types, live public-key acceptance and
 complete P5 remain open.
+
+## Collector/consumer publication acceptance, 2026-11-05
+
+Implementation `df3860b` passed a 262-test local suite (257 passed, five Unix-only
+Windows skips) and all 262 tests in isolated Ubuntu release
+`releases/research-boundary-df3860b`. The isolated local demo passed too.
+
+A root-controlled temporary `/run` fixture used distinct collector/consumer UIDs
+with generated keys and synthetic facts. The collector signed/published a 0640
+receipt under the required 2750 group-readable directory, and the consumer verified
+two facts. Private-key reads and writes to receipt/directory/config/code were all
+denied (five checks); consumer republication failed. No paid calls, persistent
+runtime, production keys, host accounts/services or firewall changes occurred.
+This validates S1's filesystem/publication mechanism, not actual service deployment,
+boot/recovery, remaining receipt types or complete P5.
