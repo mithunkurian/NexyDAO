@@ -133,6 +133,24 @@ class Tests(unittest.TestCase):
         self.assertEqual(Decimal(costs['estimated_or_reserved_usd']), cap)
         self.assertEqual(costs['calls'], 1)
 
+    def test_invalid_api_charges_cannot_create_budget_headroom(self):
+        run = self.store.start()
+        cap = Decimal('1')
+        for amount, budget in ((Decimal('-0.1'), cap), (Decimal('NaN'), cap), (cap, Decimal('Infinity'))):
+            with self.subTest(amount=amount, budget=budget):
+                with self.assertRaisesRegex(ValueError, 'Invalid API charge'):
+                    self.store.reserve(run, 'ceo', 'test', amount, budget)
+        self.assertEqual(self.store.costs()['calls'], 0)
+
+        ticket = self.store.reserve(run, 'ceo', 'test', cap, cap)
+        with self.store.db:
+            self.store.db.execute("UPDATE costs SET charged='-1' WHERE id=?", (ticket,))
+        with self.assertRaisesRegex(ValueError, 'Invalid API charge'):
+            self.store.reserve(run, 'risk', 'test', cap, cap)
+        with self.assertRaisesRegex(ValueError, 'Invalid API charge'):
+            self.store.costs()
+        self.assertEqual(self.store.db.execute('SELECT count(*) FROM costs').fetchone()[0], 1)
+
     def test_transport_failure_retains_reservation(self):
         def transport(*args):
             raise TimeoutError()
