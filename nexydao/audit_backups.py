@@ -19,10 +19,10 @@ MAX_DB=64*1024*1024
 MAX_ROWS=100000
 TIMEOUT=10
 PURPOSE='audit_inspection_only'
-CORE={'runs','events','costs','run_revisions'}
+CORE={'runs','events','costs'}
 PORTFOLIO={'portfolio_state','simulation_fills','simulated_positions','portfolio_marks'}
 HOLDS={'simulation_reservations','simulation_reservation_events','simulation_reservation_fills','simulation_reservation_limits'}
-ALLOWED=CORE|PORTFOLIO|HOLDS|{'funding_reviews','allocation_reviews','sqlite_sequence','recovery_guard'}
+ALLOWED=CORE|PORTFOLIO|HOLDS|{'run_revisions','funding_reviews','allocation_reviews','sqlite_sequence','recovery_guard'}
 MANIFEST_FIELDS={'schema_version','purpose','created_at','database_sha256','database_bytes','audit'}
 
 
