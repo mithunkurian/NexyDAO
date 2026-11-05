@@ -311,6 +311,8 @@ class Portfolio:
             if snapshot['valuation_complete']:
                 peak=max(Decimal(snapshot['peak_observed_net_equity_usd']),Decimal(snapshot['net_equity_estimate_usd']))
                 self.db.execute('UPDATE portfolio_state SET peak=? WHERE id=1',(str(peak),))
+            if time.time() >= item['expires_at']:
+                raise PortfolioError('portfolio_mark_expired_before_commit')
             self.db.commit()
             return {'status':'simulated_position_marked','execution_authorized':False}
         except Exception:
