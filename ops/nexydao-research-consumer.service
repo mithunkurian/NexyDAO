@@ -5,6 +5,7 @@ After=nexydao-controller-firewall.service
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 User=nexydao-controller
 Group=nexydao-controller
 SupplementaryGroups=nexydao-evidence

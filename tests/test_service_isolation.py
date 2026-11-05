@@ -14,7 +14,7 @@ def properties(role='consumer'):
             'DropInPaths':'','LoadState':'loaded','SupplementaryGroups':'nexydao-evidence' if role=='consumer' else '',
             'RestrictAddressFamilies':'AF_UNIX' if role=='consumer' else 'AF_UNIX AF_INET AF_INET6',
             'Result':'success','ExecMainStatus':'0','ExecMainStartTimestampMonotonic':'10',
-            'ExecMainExitTimestampMonotonic':'20'}
+            'ExecMainExitTimestampMonotonic':'20','RemainAfterExit':'yes','ActiveState':'active','SubState':'exited'}
 
 
 class ServiceIsolationTests(unittest.TestCase):
@@ -28,14 +28,15 @@ class ServiceIsolationTests(unittest.TestCase):
         for field,value in (('User','root'),('Group','sudo'),('ProtectSystem','no'),('ProtectHome','no'),
                             ('NoNewPrivileges','no'),('PrivateTmp','no'),('CapabilityBoundingSet','cap_dac_override'),
                             ('DropInPaths','override.conf'),('SupplementaryGroups','sudo nexydao-evidence'),
-                            ('RestrictAddressFamilies','AF_UNIX AF_INET'),('LoadState','not-found')):
+                            ('RestrictAddressFamilies','AF_UNIX AF_INET'),('LoadState','not-found'),('RemainAfterExit','no')):
             changed=properties();changed[field]=value
             with self.subTest(field=field):self.assertFalse(hardened_service(changed,'consumer'))
 
     def test_never_started_or_failed_process_cannot_count_as_acceptance(self):
         self.assertTrue(last_start_succeeded(properties()))
         for field,value in (('ExecMainStartTimestampMonotonic','0'),('ExecMainExitTimestampMonotonic','1'),
-                            ('ExecMainStatus','1'),('Result','exit-code'),('ExecMainStartTimestampMonotonic','invalid')):
+                            ('ExecMainStatus','1'),('Result','exit-code'),('ExecMainStartTimestampMonotonic','invalid'),
+                            ('ActiveState','inactive'),('SubState','running')):
             changed=properties();changed[field]=value
             with self.subTest(field=field):self.assertFalse(last_start_succeeded(changed))
         self.assertFalse(last_start_succeeded({}))
