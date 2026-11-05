@@ -69,7 +69,10 @@ IDs and linked fees, retaining cross-currency separation and exact arithmetic.
 Corrections, mutated/disappeared fills and ambiguous metadata suppress arithmetic;
 unexplained changes are explicit. A numerical match cannot establish interval
 attribution, complete coverage, funding, reservations or execution authority.
-Windows: 409 tests, 402 passed/seven Unix-only skips. Ubuntu acceptance follows.
+Windows: 409 tests, 402 passed/seven Unix-only skips. Implementation `e2b6913`
+passed all 409 Ubuntu tests, including the 20 new transition/public CLI tests.
+Exact archive SHA-256:
+`b03f9dc3f2f3a00cef701463257f9ae5d673180acd610563ef8334bfa809a6b0`.
 The existing account-audit fixture now uses a fixed test clock; production
 freshness enforcement is unchanged. Synthetic fixtures only;
 no owner transaction/history query, paid call or production change is included.
