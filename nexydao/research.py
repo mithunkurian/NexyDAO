@@ -96,6 +96,33 @@ def check_research_observations(evidence):
     return facts
 
 
+def _filing_comparisons(facts):
+    groups = {}
+    for item in sorted(facts, key=lambda observation: observation['id']):
+        fact = item['fact']
+        end = date.fromisoformat(fact['end'])
+        start = date.fromisoformat(fact['start']) if fact['start'] else None
+        days = (end - start).days + 1 if start is not None else None
+        key = (fact['cik'], fact['concept'], fact['unit'], days)
+        groups.setdefault(key, {}).setdefault(end, (start, item))
+
+    comparisons = []
+    for periods in groups.values():
+        if len(periods) < 2:
+            continue
+        earlier_end, later_end = sorted(periods)[-2:]
+        _, earlier = periods[earlier_end]
+        later_start, later = periods[later_end]
+        if later_start is not None and later_start <= earlier_end:
+            continue
+        earlier_value = numeric(earlier['fact']['value'])
+        later_value = numeric(later['fact']['value'])
+        direction = 'higher' if later_value > earlier_value else 'lower' if later_value < earlier_value else 'equal'
+        comparisons.append({'earlier_evidence_id': earlier['id'], 'later_evidence_id': later['id'],
+                            'reported_value_direction': direction})
+    return comparisons
+
+
 def run_research(store, provider, run, evidence, owner_policy, revision_context=None):
     facts = check_research_observations(evidence)
     if not facts:
@@ -103,6 +130,9 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
     context = {'filing_observations': facts, 'memory': store.memory(),
                'scope': 'Filing observations only; no current valuation or investment authorization.',
                'owner_policy': owner_policy.document(), 'owner_policy_sha256': owner_policy.digest}
+    comparisons = _filing_comparisons(facts)
+    if comparisons:
+        context['filing_comparisons'] = comparisons
     if revision_context is not None:
         context['revision_context'] = revision_context
     reports = []
