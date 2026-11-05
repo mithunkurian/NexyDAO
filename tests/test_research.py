@@ -449,6 +449,22 @@ class ResearchTests(unittest.TestCase):
                          'matched_source_observations')
         self.assertFalse(result['policy']['execution_authorized'])
 
+    def test_combined_evidence_rejects_ambiguous_issuer_before_model_call(self):
+        evidence = self.receipt()
+        for index, identity in enumerate(({'cik': '0000009999'}, {'symbol': 'OTHER'})):
+            with self.subTest(identity=identity):
+                other = copy.deepcopy(evidence[0])
+                other['id'] = f'sec-other-issuer-{index}'
+                other['fact'].update(identity)
+                store = Store(self.root / f'issuer-conflict-{index}.sqlite3')
+                self.addCleanup(store.close)
+                provider = self.provider(evidence)
+
+                with self.assertRaisesRegex(SourceError, 'invalid_combined_research_issuer_scope'):
+                    run_cycle(store, provider, evidence + [other], portfolio=True)
+
+                self.assertEqual(provider.calls, [])
+
     def test_wrong_claim_context_stops_before_manager_and_ceo(self):
         evidence = self.receipt()
         store = Store(self.root/'context-failure.sqlite3')
