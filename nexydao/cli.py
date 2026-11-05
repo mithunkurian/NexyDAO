@@ -30,7 +30,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -113,6 +113,12 @@ def main():
             result = run_access_check(web=args.command=='web-access-check')
             print(json.dumps(result, indent=2))
             if not result['non_loopback_tcp_ingress_denied']: parser.exit(1)
+            return
+        if args.command=='service-isolation-check':
+            from .service_isolation import run_service_isolation_check
+            result=run_service_isolation_check()
+            print(json.dumps(result,indent=2))
+            if not result['sec_role_boundary_verified']:parser.exit(1)
             return
         if args.command=='controller-access-check':
             from .controller_access import run_controller_access_check

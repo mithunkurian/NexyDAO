@@ -8,6 +8,10 @@ scope changes. Live readiness is separate. Broker compatibility, source availabi
 acceptance failures may need extra fixes or splits. Ongoing evaluation also takes
 elapsed observation time; a PR merge cannot substitute for that evidence.
 PR #14 documents completed acceptance and is separate from this future estimate.
+PR #24 closed S1 after 262 Ubuntu tests and real two-UID acceptance; about **14 PRs
+remain**. S2 prepares actual SEC role installation/startup audit. Remaining broker
+receipt key migration is paired with D2/D3 integration, without dropping that gate
+or increasing the baseline count. See [service audit scope](service-isolation-audit.md).
 
 The next S1/P5 package connects Ed25519 receipt publication to distinct collector
 and consumer identities. It includes strict shared-directory ownership/modes,

@@ -43,13 +43,23 @@ guide, not a measured score or evidence of investment readiness.
 Passing M2A does not mean NexyDAO is autonomously investing.
 
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
-eight paper workstreams; **0/15 delivery packages closed** at this baseline.
+eight paper workstreams; **1/15 delivery packages closed** through merged PR #24,
+leaving about **14 PRs** on the planning baseline.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
 time. See the [remaining-work checklist](remaining-work.md) for scope, dependencies
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### S2/P5 SEC service installation audit — 5 November 2026
+
+Branch `codex/service-isolation-audit` adds a plan-first no-overwrite installer and
+root/operator effective-service audit. It checks identity, protected code/config,
+no private consumer keys, actual successful starts, hardening and kernel egress.
+Local suite: 271 tests, 266 passes/five Unix-only skips on Windows. Ubuntu and real
+service start/restart acceptance remain pending. Existing private runtime is not
+migrated. See [concrete operation/scope](service-isolation-audit.md).
 
 ### S1/P5 collector-consumer publication — 5 November 2026
 
