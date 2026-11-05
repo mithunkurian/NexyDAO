@@ -14,9 +14,10 @@ bounded state-retention correction. **2/15 packages are closed**. PR #27 adds an
 S3 shadow permit foundation; its separate authorizer/evidence integration remains
 open. PR #28 adds external owner-control and a temporary separate-identity fixture.
 PR #29 adds typed stock executions/linked fees with public-only receipt verification;
-PR #30 adds order-prefix/status visibility and conservative diagnostic integration,
-without closing D2's full data acceptance. **13 packages remain**; revised planning
-estimate is **13–18 further PRs after PR #30** (20–25 total after #23 versus the
+PR #30 adds order-prefix/status visibility and conservative diagnostic integration;
+PR #31 adds public cash/position receipts and partial three-view cross-checks.
+Full D2 data and D3 lifecycle/reservation acceptance remain open. **13 packages remain**;
+revised planning estimate is **13–18 further PRs after PR #31** (21–26 total after #23 versus the
 original 12–18). Implementation/acceptance splits exceeded that estimate; project
 scope has not grown. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
