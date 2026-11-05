@@ -47,8 +47,9 @@ eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
 **2/15 delivery packages complete**. S3's shadow protocol in PR #27 does not close
 S3. PR #29/#30 advance D2 and PR #31 advances D3 without closing full data,
 lifecycle or monetary-reservation acceptance.
-Updated estimate: **13–18 further PRs after PR #31**, with **13 packages open**.
-This revises the earlier 13-PR point estimate: observed splits project 21–26 total
+PR #32 advances R4/D3 simulation enforcement without closing market liquidity or
+actual monetary reservations. Updated estimate: **13–18 further PRs after PR #32**,
+with **13 packages open**. Observed splits project 22–27 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -56,6 +57,18 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### R4/D3 simulation stress and active commitment limits — 5 November 2026
+
+Branch `codex/commitment-risk-enforcement` stores each new hold's allocation cap,
+fee buffer, request binding and risk-model version. All new simulated buys and
+allocation/reservation checks retain active envelopes, including after restart and
+API-cost changes. Missing legacy contexts stay encumbered and block deployment;
+corrupt contexts stop replay. The fixed 50% stress/10% projected-drawdown guard now
+blocks new risk while preserving reductions and explicit releases. Partial fills
+credit only their own notional/fee budgets. Local suite: 361 tests, 355 passed and
+six Unix-only skips; Ubuntu acceptance follows. No actual broker funds or production
+runtime is used. See [enforcement and remaining scope](commitment-risk.md).
 
 ### D3/P2 public state and cross-observation diagnostics — 5 November 2026
 

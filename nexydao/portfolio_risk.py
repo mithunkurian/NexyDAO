@@ -3,11 +3,35 @@
 No probabilities, asset correlations, liquidity model or execution authority.
 Inputs come from one reconciled portfolio snapshot, never agent assertions.
 """
-from decimal import Decimal, ROUND_UP
+from decimal import Decimal, ROUND_UP, localcontext
 
 
 SHOCKS = (Decimal('0.10'), Decimal('0.30'), Decimal('0.50'))
 PRECISION = Decimal('0.00000001')
+STRESS_LIMIT = Decimal('0.10')
+
+
+def projected_stress_reasons(snapshot,total,fee=Decimal(0)):
+    """Fixed hypothetical 50% shock guard for new USD simulation risk only.
+
+    Existing positions need fresh bids. Holds are assumed fully deployed; their
+    fees and prospective fees are deducted once, API costs already enter equity.
+    No probability, market liquidity claim or forced liquidation is implied.
+    """
+    if not snapshot['valuation_complete'] or snapshot.get('net_equity_estimate_usd') is None:
+        return ['fresh_portfolio_valuation_required']
+    with localcontext() as context:
+        context.prec=50
+        equity=Decimal(snapshot['net_equity_estimate_usd']);peak=Decimal(snapshot['peak_observed_net_equity_usd'])
+        market=sum((Decimal(position['market_value_usd']) for position in snapshot['positions']),Decimal(0))
+        notional=Decimal(snapshot.get('simulation_planning_notional_usd','0'))+total-fee
+        fees=Decimal(snapshot.get('simulation_planning_fee_usd','0'))+fee
+        loss=((market+notional)*SHOCKS[-1]+fees).quantize(PRECISION,rounding=ROUND_UP)
+        stressed=equity-loss
+        if peak<=0 or total<fee or fee<0:return ['invalid_projected_stress_inputs']
+        if max(Decimal(0),(peak-stressed)/peak)>=STRESS_LIMIT:
+            return ['projected_stress_drawdown_limit_exceeded']
+    return []
 
 
 def reports(snapshot):

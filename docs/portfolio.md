@@ -154,6 +154,11 @@ use the new constraints. No live ISK account or access change is performed.
 
 ## Validation and deployment
 
+PR #32 makes the existing 50% stress scenario/10% drawdown boundary a guard on
+incremental simulation risk and retains active reservation caps/fee buffers across
+restart and fills. It does not force sales or establish market liquidity. See
+[exact enforcement and acceptance scope](commitment-risk.md).
+
 Run `python3 -m unittest discover -s tests -v` and the offline demo. Tests cover persistent
 initialization, rounding/basis/fees, settlement, idempotency, concurrent transactions,
 marks/contracts/expiry, drawdown, internal reconciliation, changing state and seven/nine
