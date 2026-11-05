@@ -13,6 +13,11 @@ CANDIDATE = schema({'symbol': {'type': 'string', 'maxLength': 12},
                     'claims': {'type': 'array', 'minItems': 1, 'maxItems': 9, 'items': CLAIM}})
 REPORT = schema({'candidates': {'type': 'array', 'maxItems': 3, 'items': CANDIDATE},
                  'abstain_reason': {'type': 'string', 'maxLength': 3000}})
+COMPARISON_CLAIM = schema({
+    'earlier_evidence_id': {'type': 'string', 'maxLength': 80},
+    'later_evidence_id': {'type': 'string', 'maxLength': 80},
+    'reported_value_direction': {'type': 'string', 'enum': ['higher', 'lower', 'equal']},
+})
 
 INSTRUCTIONS = """You are a NexyDAO research agent. Identify ideas for further research,
 not orders or allocations. Reason from supplied SEC filing observations only; they are
@@ -40,9 +45,9 @@ safeguards. Research conclusions cannot change access, limits or verification la
 """
 
 
-def validate_claims(report, evidence):
-    validate(report, REPORT)
+def validate_claims(report, evidence, comparisons=()):
     facts = [e for e in evidence if e.get('verification') == 'verified_filing_observation']
+    validate(report, report_schema(facts, comparisons) if comparisons else REPORT)
     observations = {e['id']: e for e in facts}
     if len(observations) != len(facts):
         raise SourceError('duplicate_research_evidence_id')
@@ -62,15 +67,27 @@ def validate_claims(report, evidence):
                     or any(claim[key] != item['fact'][key] for key in CLAIM_CONTEXT)):
                 raise SourceError('unsupported_research_claim')
             references.add(claim['evidence_id'])
+    expected = {(item['earlier_evidence_id'], item['later_evidence_id']): item['reported_value_direction']
+                for item in comparisons}
+    seen_pairs = set()
+    for claim in report.get('comparison_claims', []):
+        pair = (claim['earlier_evidence_id'], claim['later_evidence_id'])
+        if pair in seen_pairs or expected.get(pair) != claim['reported_value_direction']:
+            raise SourceError('unsupported_research_comparison_claim')
+        seen_pairs.add(pair)
 
 
-def report_schema(evidence):
+def report_schema(evidence, comparisons=()):
     spec = copy.deepcopy(REPORT)
     symbols = sorted({e['fact']['symbol'] for e in evidence})
     spec['properties']['candidates']['maxItems'] = len(symbols)
     item = spec['properties']['candidates']['items']['properties']
     item['symbol']['enum'] = symbols
     item['claims']['items']['properties']['evidence_id']['enum'] = sorted(e['id'] for e in evidence)
+    if comparisons:
+        spec['properties']['comparison_claims'] = {'type': 'array', 'maxItems': len(comparisons),
+                                                   'items': copy.deepcopy(COMPARISON_CLAIM)}
+        spec['required'].append('comparison_claims')
     return spec
 
 
@@ -131,8 +148,13 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
                'scope': 'Filing observations only; no current valuation or investment authorization.',
                'owner_policy': owner_policy.document(), 'owner_policy_sha256': owner_policy.digest}
     comparisons = _filing_comparisons(facts)
+    comparison_instructions = ''
     if comparisons:
-        context['filing_comparisons'] = comparisons
+        context['filing_comparisons'] = copy.deepcopy(comparisons)
+        comparison_instructions = (
+            ' Copy any directional filing comparison you rely on into comparison_claims '
+            'using its exact earlier and later evidence IDs and direction. Return an empty list if none are used.'
+        )
     if revision_context is not None:
         context['revision_context'] = revision_context
     reports = []
@@ -141,8 +163,9 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
                         ('research_countercase', 'Independently search for downside, contradictions and missing evidence.')]:
         check_research_freshness(facts)
         owner_policy.assert_current()
-        report = provider.decide(run, role, INSTRUCTIONS + owner_policy.instructions() + focus, context, report_schema(facts))
-        validate_claims(report, facts)
+        report = provider.decide(run, role, INSTRUCTIONS + owner_policy.instructions() + focus + comparison_instructions,
+                                 context, report_schema(facts, comparisons))
+        validate_claims(report, facts, comparisons)
         check_research_freshness(facts)
         store.event(run, role, {'report': report, 'numeric_claim_bindings': 'matched_source_observations',
                                'claim_context_bindings': 'matched_source_observations',

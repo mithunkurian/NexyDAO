@@ -348,6 +348,8 @@ class ResearchTests(unittest.TestCase):
                             'portfolio_risks':'Missing quotes','abstain_reason':'Insufficient price data'}
                 if 'candidates' in schema['properties']:
                     report = parent.report(evidence)
+                    if 'comparison_claims' in schema['properties']:
+                        report['comparison_claims'] = copy.deepcopy(context['filing_comparisons'])
                     if mutate: mutate(report)
                     return report
                 return super().decide(run, role, instructions, context, schema)
@@ -502,6 +504,12 @@ class ResearchTests(unittest.TestCase):
                      'reported_value_direction': 'higher'}]
         for _, context in provider.calls[:2]:
             self.assertEqual(context['filing_comparisons'], expected)
+
+        wrong = self.provider(evidence, lambda report: report['comparison_claims'][0].update(
+            reported_value_direction='lower'))
+        with self.assertRaisesRegex(SourceError, 'unsupported_research_comparison_claim'):
+            run_cycle(store, wrong, evidence, research=True)
+        self.assertEqual([role for role, _ in wrong.calls], ['research_opportunity'])
 
     def test_wrong_claim_context_stops_before_manager_and_ceo(self):
         evidence = self.receipt()

@@ -127,6 +127,9 @@ latest two eligible observations of an issuer, concept and unit. Duration facts
 also require equal-length, non-overlapping periods. Each comparison identifies
 both source facts by citation ID. It describes the reported values and leaves
 business interpretation to the advisory review.
+When these comparisons are available, research reports include a
+`comparison_claims` list. Each claim must match a supplied pair and direction.
+An unsupported or duplicate claim stops the run before advisory review.
 
 ## Acceptance and deployment
 
