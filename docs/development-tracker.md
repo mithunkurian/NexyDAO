@@ -48,6 +48,16 @@ and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
 
+### P5 public-key research receipts — 5 November 2026
+
+Branch `codex/public-key-research-receipts` adds optional Ed25519 SEC signatures,
+pinned public-key verification and collector-only private signing material.
+HMAC remains the default; neither mode falls back to the other. Consumer tests
+verify receipts after both signing/HMAC secrets are removed and run a nine-role
+synthetic workflow. The local 255-test suite has 254 passes and one Unix-only
+permission skip on Windows. Ubuntu and real OS-identity separation remain pending;
+full P5 remains open. See [receipt scope](public-key-research-receipts.md).
+
 ### P5 controller egress foundation — 5 November 2026
 
 PR #22 branch `codex/controller-egress-guard` adds a dedicated-UID outbound broker

@@ -19,8 +19,9 @@ The guard covers configured broker, Web Gateway, VNC and SSH TCP ports. Alternat
 ports, HTTPS broker endpoints/proxies, Unix socket/descriptor passing, destination
 allowlisting and compromised root are outside this boundary. No privileged group,
 sudo access, broker credentials or collector signing key belongs to this identity.
-The current HMAC receipt model still requires separate verification/key design
-before a real consumer can run with independently protected signing authority.
+The optional [public-key SEC receipt mode](public-key-research-receipts.md) separates
+research signing from verification. Other HMAC receipt types and deployment of
+independently protected signing identities still require work.
 
 The implementation follows [nftables socket UID matching](https://wiki.nftables.org/wiki-nftables/index.php/Matching_packet_metainformation)
 and [numeric/JSON output and inet/output hooks](https://netfilter.org/projects/nftables/manpage.html).

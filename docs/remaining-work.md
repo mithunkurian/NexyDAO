@@ -59,6 +59,11 @@ audit and an offline sandboxed service template. Implementation `bd7ed90` passed
 installation and full key/identity separation remain open. See
 [controller isolation scope](controller-isolation.md).
 
+The next P5 slice adds opt-in public-key verification for SEC receipts without
+the consumer holding a signing secret. Collector signatures do not certify thesis
+truth, other HMAC receipt types or OS isolation. See
+[public-key receipt scope](public-key-research-receipts.md).
+
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |
 | P1 · Current cash and reservations | Supported per-currency settled-cash source; fee currencies/buffers; allocation ownership; current negative-cash handling; atomic capital/fee reservations and release rules | Evidence is fresh, exact-account and scoped; USD/other currencies never offset unknown debits; missing evidence and concurrent overspending fail closed; no automatic FX conversion or debt repayment |
