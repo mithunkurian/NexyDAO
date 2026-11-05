@@ -491,6 +491,25 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(store.db.execute('SELECT status FROM runs').fetchone()[0], 'failed')
         self.assertEqual(store.memory(), [])
 
+    def test_cli_combines_distinct_filing_periods_and_deduplicates_shared_facts(self):
+        payload = self.payload()
+        first = self.receipt(payload)
+        prior = self.root / 'prior.json'
+        prior.write_bytes(self.config.snapshot.read_bytes())
+        payload['facts'][0]['end'] = (self.today - timedelta(days=21)).isoformat()
+        second = self.receipt(payload)
+        env = {'NEXYDAO_EVIDENCE_KEY_FILE': str(self.key), 'NEXYDAO_RESEARCH_UNIVERSE': json.dumps([self.issuer]),
+               'NEXYDAO_DB': str(self.root / 'combined.sqlite3')}
+        args = ['nexydao', 'research', '--research-evidence', str(prior),
+                '--research-evidence', str(self.config.snapshot)]
+        with patch.dict(os.environ, env, clear=True), patch('sys.argv', args), \
+                patch('nexydao.cli.run_cycle', return_value={}) as cycle, patch('sys.stdout'):
+            main()
+
+        supplied = cycle.call_args.args[2]
+        self.assertEqual(len(supplied), 3)
+        self.assertEqual({item['id'] for item in supplied}, {item['id'] for item in first + second})
+
     def test_expired_cli_receipt_prevents_paid_provider_and_db(self):
         self.receipt()
         env = {'NEXYDAO_EVIDENCE_KEY_FILE': str(self.key), 'NEXYDAO_RESEARCH_UNIVERSE': json.dumps([self.issuer])}

@@ -35,7 +35,8 @@ def main():
     parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-transition-report", "audit-backup", "audit-backup-check", "audit-restore-inspection", "operations-health", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "quote-liquidity-report", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
-    parser.add_argument("--research-evidence", type=Path)
+    parser.add_argument("--research-evidence", type=Path, action='append', default=[],
+                        help='Signed SEC receipt. Advisory commands accept up to three receipts.')
     parser.add_argument('--fill',type=Path)
     parser.add_argument('--settlement-id')
     parser.add_argument('--reservation',type=Path)
@@ -79,7 +80,7 @@ def main():
         if args.published_evidence and args.command!='research-publish':
             raise ValueError('Published evidence applies only to research-publish')
         if args.command in {'research-publish','research-receipt-check'}:
-            if not args.research_evidence or args.evidence or args.market_evidence:
+            if len(args.research_evidence) != 1 or args.evidence or args.market_evidence:
                 raise ValueError('One explicit signed research receipt required')
             if args.command=='research-publish' and not args.published_evidence:
                 raise ValueError('Explicit public receipt destination required')
@@ -120,12 +121,13 @@ def main():
         if args.command in {'research-publish','research-receipt-check'}:
             from .sec import ResearchConfig,load_research_evidence
             settings=ResearchConfig.from_env()
+            receipt, = args.research_evidence
             if args.command=='research-publish':
                 from .research_publication import publish_research
-                result=publish_research(args.research_evidence,args.published_evidence,settings,
+                result=publish_research(receipt,args.published_evidence,settings,
                                         os.environ.get('NEXYDAO_RESEARCH_READ_GROUP',''))
             else:
-                facts=load_research_evidence(args.research_evidence,settings)
+                facts=load_research_evidence(receipt,settings)
                 result={'status':'research_receipt_verified','facts':len(facts),
                         'receipt_mode':settings.receipt_mode,'execution_authorized':False}
             print(json.dumps(result,indent=2));return
@@ -280,7 +282,17 @@ def main():
             evidence += load_market_evidence(args.market_evidence, MarketConfig.from_env())
         if args.research_evidence:
             from .sec import ResearchConfig, load_research_evidence
-            evidence += load_research_evidence(args.research_evidence, ResearchConfig.from_env())
+            if len(args.research_evidence) > 3:
+                raise ValueError('At most three research receipts are allowed')
+            settings = ResearchConfig.from_env()
+            observations = {}
+            for receipt in args.research_evidence:
+                for item in load_research_evidence(receipt, settings):
+                    previous = observations.get(item['id'])
+                    # The verified loader derives IDs from the entire fact.
+                    if previous is None or item['expires_at'] > previous['expires_at']:
+                        observations[item['id']] = item
+            evidence.extend(observations.values())
         if len(evidence) > 10:
             raise ValueError("Combined evidence must have at most ten unique IDs")
         validate_evidence_ids(evidence)
