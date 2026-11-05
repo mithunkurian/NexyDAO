@@ -65,8 +65,10 @@ fills/corrections and flags pending price/currency mismatches. Dedicated-domain
 Ed25519 receipts verify using only a pinned public key. CLI reporting opens no
 application DB, provider or broker socket. No broker history query is run for
 development acceptance; the owner's prior-transaction exclusion remains in force.
-Local suite: 310 tests run, 304 passed and six Unix-only skips. Ubuntu evidence
-follows after acceptance. D2 and S3 remain open; no balances/fills are imported and
+Local suite: 310 tests run, 304 passed and six Unix-only skips. Implementation
+`f5ae699` passed all 310 Ubuntu tests in an isolated release, including 16 new
+execution tests. No real broker queries, paid calls or production runtime changes
+occurred. D2 and S3 remain open; no balances/fills are imported and
 execution remains disabled. See [scope and coverage](execution-observations.md).
 
 ### S3/P5 external owner-control and shadow identities — 5 November 2026
