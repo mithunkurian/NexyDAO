@@ -33,6 +33,16 @@ class AuditBackupTests(unittest.TestCase):
 
     def backup(self):return create_backup(self.source,self.bundle)
 
+    def test_backup_accepts_database_from_before_run_revisions(self):
+        self.store.db.execute('DROP TABLE run_revisions')
+        self.store.db.commit()
+
+        self.backup()
+        audit = verify_backup(self.bundle)['audit']
+
+        self.assertNotIn('run_revisions', audit['table_row_counts'])
+        self.assertEqual(audit['api_call_records'], self.store.costs()['calls'])
+
     def portfolio(self):
         ledger=Portfolio(self.store);book=Reservations(ledger)
         data={'id':'plan','proposal_sha256':'a'*64,'symbol':'TEST','notional_usd':'400','fee_usd':'2','fee_currency':'USD'}
