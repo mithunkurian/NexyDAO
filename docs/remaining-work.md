@@ -9,9 +9,11 @@ acceptance failures may need extra fixes or splits. Ongoing evaluation also take
 elapsed observation time; a PR merge cannot substitute for that evidence.
 PR #14 documents completed acceptance and is separate from this future estimate.
 PR #24 closed S1 after 262 Ubuntu tests and real two-UID acceptance. PR #25 merged,
-and S2 passed real installation/startup/restart acceptance after PR #26's bounded
-state-retention correction; S2 closes when that correction merges, leaving about
-**13 delivery PRs**. The correction adds one PR inside the original 12–18 range,
+and S2 passed real installation/startup/restart acceptance with merged PR #26's
+bounded state-retention correction. **2/15 packages are closed**. PR #27 adds an
+S3 shadow permit foundation; its separate authorizer/evidence integration remains
+open. About **13 delivery PRs remain after PR #27**, assuming one per open package.
+The correction and S3 split project about 17 PRs against the original 12–18 range,
 without expanding package scope. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
 or increasing the baseline count. See [service audit scope](service-isolation-audit.md).

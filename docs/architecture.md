@@ -81,6 +81,7 @@ three revisions. Abstaining or asking for research is a valid outcome. See
 - `sec`: fixed public filing endpoints, typed source observations and signed receipts.
 - `research`: two independent reports, strict schemas and application-enforced numeric bindings.
 - `owner_policy`: protected, versioned owner constraints, immutable cycle snapshot and independent cash/short/leverage preflight denial.
+- `paper_permits`: shadow-only signed intent/policy binding, persistent single-use nonces and stop epochs; no executable order permit or independent production authorizer yet.
 - `portfolio`: transactional USD simulation, quarantine/settlement, internal replay reconciliation and signed bid marks.
 - `portfolio_manager`: AI allocation reasoning with quote binding and independent funding/exposure checks; no mutation tools.
 

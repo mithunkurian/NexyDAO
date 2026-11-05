@@ -95,32 +95,32 @@ def check_signer(private_path, public_path, pin, executable):
         raise ReceiptSignatureError('research_signing_key_mismatch')
 
 
-def _message(payload):
+def _message(payload, domain=DOMAIN):
     try:
         raw = json.dumps(payload, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
     except (TypeError, ValueError):
         raise ReceiptSignatureError('invalid_public_research_payload') from None
     if len(raw) > 64000:
         raise ReceiptSignatureError('research_signature_payload_limit')
-    return DOMAIN+raw
+    return domain+raw
 
 
-def sign(payload, private_path, public_path, pin, executable):
+def sign(payload, private_path, public_path, pin, executable, *, domain=DOMAIN):
     check_signer(private_path, public_path, pin, executable)
     private = _read(private_path, 2048, private=True)
     with tempfile.TemporaryDirectory(prefix='nexydao-sec-sign-') as folder:
         key = _write(folder, 'key.pem', private)
-        message = _write(folder, 'message', _message(payload))
+        message = _write(folder, 'message', _message(payload, domain))
         signature = _command(executable, ['pkeyutl', '-sign', '-rawin', '-inkey', key,
                                           '-passin', 'pass:', '-in', message])
     if len(signature) != 64:
         raise ReceiptSignatureError('research_signature_size')
     receipt = {'payload': payload, 'signature': signature.hex(), 'algorithm': 'ed25519', 'key_sha256': pin}
-    verify(receipt, public_path, pin, executable)
+    verify(receipt, public_path, pin, executable, domain=domain)
     return receipt
 
 
-def verify(receipt, public_path, pin, executable):
+def verify(receipt, public_path, pin, executable, *, domain=DOMAIN):
     if (not isinstance(receipt, dict) or set(receipt) != {'payload', 'signature', 'algorithm', 'key_sha256'}
             or receipt['algorithm'] != 'ed25519' or receipt['key_sha256'] != pin
             or not isinstance(receipt['signature'], str) or not re.fullmatch('[0-9a-f]{128}', receipt['signature'])):
@@ -128,7 +128,7 @@ def verify(receipt, public_path, pin, executable):
     trusted = public_key(public_path, pin)
     with tempfile.TemporaryDirectory(prefix='nexydao-sec-verify-') as folder:
         key = _write(folder, 'public.der', trusted)
-        message = _write(folder, 'message', _message(receipt['payload']))
+        message = _write(folder, 'message', _message(receipt['payload'], domain))
         signature = _write(folder, 'signature', bytes.fromhex(receipt['signature']))
         _command(executable, ['pkeyutl', '-verify', '-rawin', '-pubin', '-keyform', 'DER',
                               '-inkey', key, '-in', message, '-sigfile', signature])

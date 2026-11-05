@@ -34,7 +34,7 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | M2A | Read-only IBKR paper connectivity | **Validated** | Exact account pin matched; four summary fields; deliberate wrong pin rejected before summary |
 | M2B | Verified market evidence and research | **In progress** | Quote component, typed SEC source checks and two-researcher cycle validated. Wider narrative/cross-publisher corroboration remains pending |
 | M3 | Portfolio Manager and simulated accounting | **In progress** | USD ledger and advisory manager slice tested/VM-validated. Quote-backed allocations tested offline; FX/tax/corporate actions and actual broker reconciliation pending |
-| M4 | Independent authorization and paper execution | **Planned; locked** | Isolated executor, signed permits, kill switch, exposure reservations and execution failure tests |
+| M4 | Independent authorization and paper execution | **In progress; execution locked** | Shadow permit protocol underway; separate authorizer/executor, accepted gates, reservations and recovery remain |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
 
 Owner-facing rough progress estimate: **about 45% (40–50%)** toward autonomous paper
@@ -43,15 +43,28 @@ guide, not a measured score or evidence of investment readiness.
 Passing M2A does not mean NexyDAO is autonomously investing.
 
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
-eight paper workstreams; S1 is closed and S2's VM acceptance passed after merged
-PR #25 plus corrective PR #26. On PR #26 merge, **2/15 delivery packages close**,
-leaving about **13 delivery PRs**. One extra corrective PR was needed inside S2.
+eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
+**2/15 delivery packages complete**. S3's shadow protocol in PR #27 does not close
+S3. About **13 delivery PRs remain after PR #27**, assuming one per remaining
+package. The S2 correction and S3 split bring the projected baseline total to 17.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
 time. See the [remaining-work checklist](remaining-work.md) for scope, dependencies
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### S3/P5 shadow permit protocol — 5 November 2026
+
+Branch `codex/shadow-paper-permits` adds a dedicated shadow Ed25519 domain/purpose,
+exact intent/policy binding, maximum 60-second expiry, atomic persistent nonce
+consumption and a stopped-by-default ledger with epoch revocation. A valid shadow
+permit never grants broker authority. Separate signer/stop identities and accepted
+funding/reconciliation/risk/review/reservation inputs remain required to close S3.
+Local suite: 287 tests run, 282 passed with five Unix-only skips; 16 new permit
+tests passed. Ubuntu evidence follows after validation. No production service,
+signer or cost database is modified.
+See [protocol scope and limitations](paper-permits.md).
 
 ### S2/P5 SEC service installation audit — 5 November 2026
 
