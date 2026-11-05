@@ -450,6 +450,19 @@ class ResearchTests(unittest.TestCase):
                          'matched_source_observations')
         self.assertFalse(result['policy']['execution_authorized'])
 
+    def test_manual_note_cannot_shadow_a_verified_filing_id(self):
+        evidence = self.receipt()
+        note = {'id': evidence[0]['id'], 'verification': 'unverified', 'summary': 'Manual note'}
+        store = Store(self.root / 'citation-collision.sqlite3')
+        self.addCleanup(store.close)
+        provider = self.provider(evidence)
+
+        with self.assertRaisesRegex(ValueError, 'Combined evidence must have unique IDs'):
+            run_cycle(store, provider, [note, *evidence], research=True)
+
+        self.assertEqual(provider.calls, [])
+        self.assertEqual(store.costs()['calls'], 0)
+
     def test_combined_evidence_rejects_ambiguous_issuer_before_model_call(self):
         evidence = self.receipt()
         for index, identity in enumerate(({'cik': '0000009999'}, {'symbol': 'OTHER'})):
