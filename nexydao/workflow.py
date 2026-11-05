@@ -73,10 +73,13 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
     revision=ledger.revision()
     run = store.start(mode, revision=revision_metadata)
     try:
+        from .quote_liquidity import QuoteLiquidity
+        quote_liquidity=QuoteLiquidity(evidence)
         context = {"evidence": evidence, "memory": store.memory(),
                    "account": ledger.snapshot(),
                    "api_costs": store.costs(), "owner_policy": owner_policy.document(),
                    "owner_policy_sha256": owner_policy.digest}
+        context['quote_liquidity']=quote_liquidity.report()
         if revision_context is not None:
             context['revision_context'] = revision_context
         store.event(run, "input", context)
@@ -90,7 +93,7 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             from .portfolio_manager import run_manager
             context['account']=ledger.snapshot()
             context['api_costs']=store.costs()
-            plan=run_manager(store,provider,run,context,evidence,owner_policy,ledger,revision)
+            plan=run_manager(store,provider,run,context,evidence,owner_policy,ledger,revision,quote_liquidity)
             context['portfolio_plan']=plan
             context['account']=ledger.snapshot()
 
@@ -104,6 +107,7 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             from .sec import check_research_freshness
             check_evidence_freshness(evidence)
             check_research_freshness(evidence)
+            quote_liquidity.assert_current(evidence)
             result = provider.decide(run, role, COMMON + owner_policy.instructions() + instructions, data, spec)
             validate(result, spec)
             validate_references(result, evidence)
@@ -125,9 +129,11 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
                      ("investment", "Vote independently on thesis and alternatives; respect risk challenges."),
                      ("fiduciary", "Vote independently on capital preservation and net costs."),
                      ("audit", "Vote independently on evidence sufficiency and conflicts of interest.")]]
+        quote_liquidity.assert_current(evidence)
         result = {"schema_version": SCHEMA_VERSION, "prompt_version": PROMPT_VERSION, "mode": mode,
                   "run_id": run, "proposal": proposal, "risk_reviews": reviews,
-                  "committee_votes": votes, "policy": evaluate(proposal, reviews, votes, owner_policy,ledger.snapshot()),
+                  "committee_votes": votes, "policy": evaluate(proposal, reviews, votes, owner_policy,ledger.snapshot(),quote_liquidity=quote_liquidity),
+                  "quote_liquidity":quote_liquidity.report(),
                   "owner_policy_version": owner_policy.document()['policy_version'],
                   "owner_policy_sha256": owner_policy.digest,
                   "api_costs": store.costs()}
@@ -146,6 +152,7 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
         check_research_freshness(evidence)
         owner_policy.assert_current()
         ledger.assert_revision(revision)
+        quote_liquidity.assert_current(evidence)
         store.event(run, "policy", result["policy"])
         store.finish(run, "completed", result)
         return result

@@ -7,7 +7,7 @@ MAX_POSITION = Decimal("500")
 MIN_CASH_RESERVE = Decimal("4000")
 
 
-def evaluate(proposal, reviews, votes, owner_policy=None, portfolio_snapshot=None):
+def evaluate(proposal, reviews, votes, owner_policy=None, portfolio_snapshot=None, *, quote_liquidity=None):
     from .owner_policy import from_env, proposal_reasons
     owner_policy = owner_policy or from_env()
     owner_policy.assert_current()
@@ -18,6 +18,8 @@ def evaluate(proposal, reviews, votes, owner_policy=None, portfolio_snapshot=Non
         reasons.extend(allocation_reasons(portfolio_snapshot,[{'symbol':proposal['symbol'],
                          'allocation_usd':str(proposal['allocation_usd'])}],owner_policy))
     if proposal["action"] == "propose_investment":
+        if quote_liquidity is None:reasons.append('fresh_quote_liquidity_evidence_required')
+        else:reasons.extend(quote_liquidity.reasons([proposal],portfolio_snapshot))
         reasons.append("verified_market_evidence_pipeline_not_implemented")
         if not proposal["symbol"] or not proposal["evidence_ids"] or proposal["allocation_usd"] <= 0:
             reasons.append("incomplete_investment_proposal")

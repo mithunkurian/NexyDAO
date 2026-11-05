@@ -231,8 +231,12 @@ class MarketTests(unittest.TestCase):
         store = Store(self.root/'between.sqlite3')
         self.addCleanup(store.close)
         provider = DemoProvider()
-        with patch('nexydao.market.time.time', side_effect=[self.now, self.now+60]), \
-                patch.object(provider, 'decide', wraps=provider.decide) as decide:
+        clock=[self.now];original=provider.decide
+        def first_call_then_expire(*args,**kwargs):
+            result=original(*args,**kwargs);clock[0]=self.now+60
+            return result
+        with patch('nexydao.market.time.time', side_effect=lambda:clock[0]), \
+                patch.object(provider, 'decide', side_effect=first_call_then_expire) as decide:
             with self.assertRaises(ProbeError):
                 run_cycle(store, provider, evidence)
             self.assertEqual(decide.call_count, 1)

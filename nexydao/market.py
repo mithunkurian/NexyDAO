@@ -87,7 +87,14 @@ def validate_payload(payload, expected_account, now=None):
         raise ProbeError("unsupported_evidence_source")
     if not expected_account or payload['account_sha256'] != hashlib.sha256(expected_account.encode()).hexdigest():
         raise ProbeError("evidence_account_mismatch")
-    contract = payload['contract']
+    validate_quote_observation(payload['contract'],payload['quote'],payload['received_at'],payload['expires_at'],now)
+    if not isinstance(payload['raw_sha256'], str) or not re.fullmatch(r'[0-9a-f]{64}', payload['raw_sha256']):
+        raise ProbeError("invalid_provenance_digest")
+
+
+def validate_quote_observation(contract,quote,received,expires,now=None):
+    """Structural/freshness checks; caller must independently authenticate provenance."""
+    now=time.time() if now is None else now
     if not isinstance(contract, dict) or set(contract) != {'con_id', 'symbol', 'security_type', 'currency', 'exchange', 'primary_exchange'}:
         raise ProbeError("invalid_contract")
     if (type(contract['con_id']) is not int or contract['con_id'] <= 0
@@ -96,7 +103,6 @@ def validate_payload(payload, expected_account, now=None):
             or contract['exchange'] != 'SMART' or not isinstance(contract['primary_exchange'], str)
             or not re.fullmatch(r'[A-Z0-9.]{1,20}', contract['primary_exchange'])):
         raise ProbeError("invalid_contract")
-    quote = payload['quote']
     if not isinstance(quote, dict) or set(quote) != {'bid', 'ask', 'bid_size', 'ask_size', 'event_time', 'flags'}:
         raise ProbeError("invalid_quote")
     bid, ask = positive(quote['bid']), positive(quote['ask'])
@@ -104,14 +110,12 @@ def validate_payload(payload, expected_account, now=None):
     positive(quote['ask_size'])
     if bid > ask or type(quote['flags']) is not int or quote['flags'] != 0:
         raise ProbeError("crossed_or_flagged_quote")
-    event, received, expires = quote['event_time'], payload['received_at'], payload['expires_at']
+    event = quote['event_time']
     if any(type(v) is not int for v in (event, received, expires)):
         raise ProbeError("invalid_evidence_time")
     if (event <= 0 or event > received + 2 or received > now + 2 or now < event - 2
             or received < event - 2 or received >= expires or expires != event + MAX_AGE or now >= expires):
         raise ProbeError("stale_or_future_quote")
-    if not isinstance(payload['raw_sha256'], str) or not re.fullmatch(r'[0-9a-f]{64}', payload['raw_sha256']):
-        raise ProbeError("invalid_provenance_digest")
 
 
 def market_message(command, config, contract=None):
@@ -218,7 +222,14 @@ def load_market_evidence(path, config, now=None):
         raw = f.read(16001)
     if len(raw) > 16000:
         raise ProbeError('evidence_size_limit')
-    receipt = json.loads(raw)
+    def unique(pairs):
+        result={}
+        for name,value in pairs:
+            if name in result:raise ProbeError('duplicate_market_receipt_field')
+            result[name]=value
+        return result
+    try:receipt=json.loads(raw,object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(ValueError()))
+    except (ValueError,TypeError,RecursionError):raise ProbeError('invalid_market_receipt_json') from None
     if not isinstance(receipt, dict) or set(receipt) != {'payload', 'signature'}:
         raise ProbeError('unsigned_evidence')
     expected = hmac.new(read_key(config.key_path), canonical(receipt['payload']), hashlib.sha256).hexdigest()
@@ -230,6 +241,7 @@ def load_market_evidence(path, config, now=None):
         raise ProbeError('evidence_symbol_mismatch')
     # Do not expose the account fingerprint, signing key or arbitrary broker text to models.
     summary = {'contract': payload['contract'], 'quote': payload['quote'], 'expires_at': payload['expires_at'],
+               'received_at':payload['received_at'],
                'scope': 'Fresh bid/ask observation only; investment thesis and other claims are unverified.'}
     return [{'id': 'quote-' + hashlib.sha256(canonical(payload)).hexdigest(),
              'source_url': 'ibkr://contract/' + str(payload['contract']['con_id']),
