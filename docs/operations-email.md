@@ -110,8 +110,14 @@ The first service run was started manually. It created a verified backup and
 returned `mail_no_critical_alert`. A recovery drill restored that backup into
 a temporary inspection copy, matched its digest and audit summary, and confirmed
 that `Store` refused to open it. The restored copy also passed verification after
-the refusal. The first unattended timer trigger and sustained pilot operation
-remain acceptance checks.
+the refusal.
+
+The regular hourly timer first triggered at 21:20:01 Stockholm time on
+5 November 2026. The journal records a successful service completion at
+21:20:02 and `mail_no_critical_alert`. The maintenance ledger contained two
+completed attempts, one manual and one timer-triggered. Verification of the
+latest archive matched the digest recorded for that attempt. Sustained pilot
+operation remains an acceptance check.
 
 On the VM, check the timer, the last timer trigger and the service outcome.
 
