@@ -122,6 +122,11 @@ class CommitmentRiskTests(unittest.TestCase):
         self.store.db.commit()
         with self.assertRaisesRegex(PortfolioError,'limits_corrupt'):self.ledger.snapshot()
 
+    def test_missing_main_hold_table_cannot_hide_surviving_audit_context(self):
+        self.reserve()
+        self.store.db.execute('DROP TABLE simulation_reservations');self.store.db.commit()
+        with self.assertRaisesRegex(PortfolioError,'audit_mismatch'):self.ledger.snapshot()
+
     def test_strictest_active_envelope_is_combined_without_excess_cross_pair_tightening(self):
         self.book.reserve(self.request('a','AAA','100','0'),self.policy,AllocationConfig('400','10'))
         self.book.reserve(self.request('b','BBB','100','0'),self.policy,AllocationConfig('500','100'))

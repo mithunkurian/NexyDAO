@@ -67,6 +67,10 @@ def validate_request(data):
 
 def active_holds(db):
     if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='simulation_reservations'").fetchone():
+        for evidence in ('simulation_reservation_limits','simulation_reservation_events','simulation_reservation_fills'):
+            if (db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",(evidence,)).fetchone()
+                    and db.execute('SELECT 1 FROM '+evidence+' LIMIT 1').fetchone()):
+                raise PortfolioError('simulation_reservation_audit_mismatch')
         return []
     profiles=limit_profiles(db)
     rows=db.execute('SELECT id,CASE WHEN length(payload)<=4000 THEN payload END,digest,status FROM simulation_reservations LIMIT 1001').fetchall()

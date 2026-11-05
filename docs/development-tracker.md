@@ -66,7 +66,8 @@ allocation/reservation checks retain active envelopes, including after restart a
 API-cost changes. Missing legacy contexts stay encumbered and block deployment;
 corrupt contexts stop replay. The fixed 50% stress/10% projected-drawdown guard now
 blocks new risk while preserving reductions and explicit releases. Partial fills
-credit only their own notional/fee budgets. Local suite: 361 tests, 355 passed and
+credit only their own notional/fee budgets. Missing main hold tables with surviving
+audit evidence fail closed. Local suite: 362 tests, 356 passed and
 six Unix-only skips; Ubuntu acceptance follows. No actual broker funds or production
 runtime is used. See [enforcement and remaining scope](commitment-risk.md).
 
