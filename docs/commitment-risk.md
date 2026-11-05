@@ -62,12 +62,13 @@ new-risk stress test. Reports do not force liquidation or mutate limits/position
 
 ## Acceptance and remaining gates
 
-Twelve new tests cover stress before actual drawdown breach, boundary rounding,
+Thirteen new tests cover stress before actual drawdown breach, boundary rounding,
 full fee treatment, report-field non-relaxation, restart/API-cost erosion of the
 buffer, active cap retention across raw/reserved buys and different defaults,
 idempotent-ID changes, partial-fill budget conversion, legacy-context migration,
-corrupt/orphan profiles, exact combined envelopes, concurrent cap enforcement and
-continued position reductions. Windows: 361 tests run, 355 passed and six Unix-only
+corrupt/orphan profiles, missing main tables with surviving audit evidence, exact
+combined envelopes, concurrent cap enforcement and continued position reductions.
+Windows: 362 tests run, 356 passed and six Unix-only
 skips. Ubuntu and exact tested commit/archive follow after validation.
 
 All fills, holds, marks and API estimates in these tests are synthetic and use
