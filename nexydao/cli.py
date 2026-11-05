@@ -14,7 +14,7 @@ from .operations_health import HealthError
 from .provider import OpenAIProvider
 from .records import PROPOSAL, REVIEW
 from .store import Store
-from .workflow import run_cycle, load_evidence
+from .workflow import run_cycle, load_evidence, validate_evidence_ids
 
 
 class DemoProvider:
@@ -281,8 +281,9 @@ def main():
         if args.research_evidence:
             from .sec import ResearchConfig, load_research_evidence
             evidence += load_research_evidence(args.research_evidence, ResearchConfig.from_env())
-        if len(evidence) > 10 or len({item['id'] for item in evidence}) != len(evidence):
+        if len(evidence) > 10:
             raise ValueError("Combined evidence must have at most ten unique IDs")
+        validate_evidence_ids(evidence)
         store = Store(config.db)
         if args.command in {'sim-reserve','sim-release'}:
             from .portfolio import Portfolio

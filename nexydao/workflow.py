@@ -55,7 +55,13 @@ def load_evidence(path):
     return [{**item, "verification": "unverified"} for item in items]
 
 
+def validate_evidence_ids(evidence):
+    if len({item['id'] for item in evidence}) != len(evidence):
+        raise ValueError('Combined evidence must have unique IDs')
+
+
 def run_cycle(store, provider, evidence, research=False, owner_policy=None, portfolio=False, revise_run=None):
+    validate_evidence_ids(evidence)
     from .owner_policy import from_env
     owner_policy = owner_policy or from_env()
     owner_policy.assert_current()
