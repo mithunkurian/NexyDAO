@@ -8,15 +8,18 @@ scope changes. Live readiness is separate. Broker compatibility, source availabi
 acceptance failures may need extra fixes or splits. Ongoing evaluation also takes
 elapsed observation time; a PR merge cannot substitute for that evidence.
 PR #14 documents completed acceptance and is separate from this future estimate.
-PR #24 closed S1 after 262 Ubuntu tests and real two-UID acceptance; about **14 PRs
-remain**. S2 prepares actual SEC role installation/startup audit. Remaining broker
+PR #24 closed S1 after 262 Ubuntu tests and real two-UID acceptance. PR #25 merged,
+and S2 passed real installation/startup/restart acceptance after PR #26's bounded
+state-retention correction; S2 closes when that correction merges, leaving about
+**13 delivery PRs**. The correction adds one PR inside the original 12–18 range,
+without expanding package scope. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
 or increasing the baseline count. See [service audit scope](service-isolation-audit.md).
 
-The next S1/P5 package connects Ed25519 receipt publication to distinct collector
-and consumer identities. It includes strict shared-directory ownership/modes,
-protected configuration templates and a two-UID permission fixture. Production
-service deployment and full P5 acceptance remain separate gates; see
+S1 connects Ed25519 receipt publication to distinct collector and consumer identities;
+S2 adds actual protected SEC role services and startup audit. S3's independent
+authorizer, signed permits/replay prevention and kill switch are next. Full P5
+also requires the broker receipt/key boundaries tracked in D2/D3; see
 [collector/consumer boundary](collector-consumer-boundary.md).
 
 ## Autonomous paper operation: eight workstreams

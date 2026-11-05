@@ -43,8 +43,9 @@ guide, not a measured score or evidence of investment readiness.
 Passing M2A does not mean NexyDAO is autonomously investing.
 
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
-eight paper workstreams; **1/15 delivery packages closed** through merged PR #24,
-leaving about **14 PRs** on the planning baseline.
+eight paper workstreams; S1 is closed and S2's VM acceptance passed after merged
+PR #25 plus corrective PR #26. On PR #26 merge, **2/15 delivery packages close**,
+leaving about **13 delivery PRs**. One extra corrective PR was needed inside S2.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
 time. See the [remaining-work checklist](remaining-work.md) for scope, dependencies
@@ -58,10 +59,14 @@ Branch `codex/service-isolation-audit` adds a plan-first no-overwrite installer 
 root/operator effective-service audit. It checks identity, protected code/config,
 no private consumer keys, actual successful starts, hardening and kernel egress.
 Local suite: 271 tests, 266 passes/five Unix-only skips on Windows. Ubuntu passed
-all 271 tests on `b310cd6`, and the read-only fresh-install plan passed. Automatic
-approval review rejected persistent root installation pending specific owner
-authorization; no installer mutation ran. Actual service start/restart acceptance
-remains open. Existing private runtime is not migrated.
+all 271 tests on `b310cd6` and corrective implementation `ef4b840`. The owner
+authorized the previously blocked installation after merging PR #25. Both SEC
+services started and restarted, but inactive one-shot units lost systemd timestamps.
+PR #26 retains completed state and requires active/exited successful completion.
+The narrow five-file repair preserved generated keys/configuration; both starts/
+restarts and all 12 installed audit checks passed. No paid calls, timers or broker
+writes occurred; the existing private runtime was not migrated. Boot/sustained
+recovery and other receipt boundaries remain open. S3 authorization is next.
 See [concrete operation/scope](service-isolation-audit.md).
 
 ### S1/P5 collector-consumer publication — 5 November 2026
