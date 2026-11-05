@@ -87,6 +87,35 @@ confirmed fresh installation targets. Actual service installation and successful
 start/restart audit remain pending: automatic approval review rejected root apply
 because persistent accounts, protected files, services, a firewall guard and a
 signing key require specific installation authorization beyond routine PR rights.
-No installer mutation ran. Keep this delivery package open and the PR in draft
-until that authorization and actual acceptance pass. The installer performs no root
-action merely because this document/PR exists or the code has been merged.
+The initial rejected attempt made no installer mutation. The installer performs no
+root action merely because this document/PR exists or the code has been merged.
+
+### Authorized installation and corrective acceptance
+
+The owner subsequently explicitly approved installation and reported PR #25 merged.
+The fresh installation created only the planned roles, directories, key/config,
+units and controller guard. Both initial start and bounded restart completed, but
+the audit failed: inactive one-shot units had been unloaded and their process
+timestamps returned zero. This was an acceptance defect, not a successful audit.
+
+Corrective implementation `ef4b840` (PR #26) adds `RemainAfterExit=yes` to both SEC
+units and requires retained active/exited state as well as real successful process
+timestamps. This retains completed state without a running worker or scheduler;
+see the [systemd service documentation](https://www.freedesktop.org/software/systemd/man/255/systemd.service.html).
+Failed, never-started and inactive units still cannot pass. These services require
+an explicit `restart` for another collection/verification; repeated `start` on an
+already active/exited unit does not refresh evidence. Receipt freshness checks
+remain independent; retained state does not make old evidence fresh.
+
+All 271 Ubuntu tests passed on the correction; Windows passed 266 with five
+Unix-only skips. Correction archive SHA-256:
+`1576a7c0cf4d2dff93b2f56d830e5cbc77bdad65545183d23e5594fd9de188cb`.
+A bounded repair checked old bytes and both archive digests before atomically
+replacing only the installed audit module, two protected unit templates and their
+two systemd copies. It preserved all installed keys and configuration, then
+reloaded systemd and ran both services through start and restart. Every one of the
+12 operator checks passed, including retained successful starts and actual UID
+egress denial. No paid call, timer, broker write or original runtime modification
+occurred. S2 acceptance is passed; its final correction must merge before closure.
+The audit continues to report other receipt types and boot/sustained recovery as
+unverified, and execution authorization as false.

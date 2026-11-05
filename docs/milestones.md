@@ -403,3 +403,19 @@ denied (five checks); consumer republication failed. No paid calls, persistent
 runtime, production keys, host accounts/services or firewall changes occurred.
 This validates S1's filesystem/publication mechanism, not actual service deployment,
 boot/recovery, remaining receipt types or complete P5.
+
+## SEC service installation and retained completion, 2026-11-05
+
+Following explicit owner installation approval and PR #25 merge, the fresh SEC
+roles/configuration/key, public evidence directory and controller UID guard were
+installed. Initial starts/restarts succeeded, but the audit correctly failed when
+inactive one-shot units returned zero process timestamps after unloading.
+PR #26 implementation `ef4b840` retains active/exited completion state and checks it
+alongside successful nonzero process timestamps. All 271 Ubuntu tests passed;
+Windows passed 266 with five Unix-only skips. A narrow five-file repair verified
+old source bytes, preserved keys/configuration and reran both starts/restarts.
+All 12 operator audit checks passed. No paid API call, broker write, timer or
+original runtime modification occurred. S2 closes on correction merge; S3 is next.
+Other receipt types and boot/sustained recovery are explicitly unverified; full P5
+and execution remain gated. Exact archive digests and limitations are recorded in
+[the service audit](service-isolation-audit.md).

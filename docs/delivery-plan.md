@@ -14,7 +14,7 @@ implementation order: independent work can proceed while broker access is blocke
 | Slot | Delivery package | Status at baseline |
 | --- | --- | --- |
 | S1 | SEC collector/consumer identity boundary, publication and protected configuration | Complete; PR #24 merged, 262 Ubuntu tests and two-UID acceptance |
-| S2 | SEC role service deployment, protected configuration and bounded startup/restart audit | Tests/plan passed; specific root-install authorization and startup/restart acceptance pending |
+| S2 | SEC role service deployment, protected configuration and bounded startup/restart audit | VM acceptance passed; PR #25 merged, corrective PR #26 required to retain one-shot state |
 | S3 | Independent policy authorizer, signed permits, nonce/replay checks and kill switch | Planned |
 | D1 | Verified current cash, currencies/fees and funding gate closure | Blocked by broker acceptance |
 | D2 | Full orders/fills/commissions/transfers, manual visibility and public-key broker receipt integration | Planned; partial readers exist |
@@ -29,11 +29,14 @@ implementation order: independent work can proceed while broker access is blocke
 | O2 | VM/authentication reliability, resource limits and operational reporting | Planned |
 | O3 | Sustained paper evaluation, outcome learning and readiness review | Planned; requires elapsed observation |
 
-Current planning count: **1/15 packages closed after PR #23**, through PR #24;
-about **14 PRs remain**. S1's mechanism passed local/Ubuntu/two-UID acceptance and
-merged. S2 closes after actual SEC role installation, successful bounded start/
-restart and protected-service audit, plus merge. Boot/sustained recovery stay in
-O2, and live advisory model gates stay in R1.
+Current planning count: **1/15 packages closed**, with S2's actual VM acceptance
+passed and its corrective PR #26 awaiting merge. After that merge the count is
+**2/15 closed**, leaving about **13 delivery PRs**. PR #26 is an additional
+corrective PR inside S2: inactive one-shot services lost their systemd timestamps,
+so retained successful completion state and stricter state checks were necessary.
+The package scope is unchanged; one extra corrective PR has been spent against
+the original 12–18 range. Boot/sustained recovery stay in O2, and live advisory
+model gates stay in R1. S3's independent authorizer is next; execution remains off.
 
 Sequencing refinement on 5 November (no scope/count increase): remaining broker
 receipt key migration is paired with D2/D3's broker-data schema integration. S2
@@ -56,3 +59,9 @@ suitable, and continuation to the next development package. This preference
 persists across these delivery steps. Before merging, verify the current head's
 CI, applicable acceptance evidence, mergeability and blocking review state. This
 engineering workflow does not itself grant broker execution or live-money access.
+
+After reporting PR #25 merged, the owner explicitly authorized its previously
+blocked root SEC installation. It created the scoped service identities, protected
+paths, fresh collector key and UID guard. The bounded PR #26 state-retention repair
+preserved that key/configuration and passed the complete operator audit. This is
+not authorization for unrelated services or broker execution.
