@@ -14,6 +14,14 @@ class Store:
     def __init__(self, path):
         path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(path, timeout=10)
+        # A restored/backup audit ledger must never resume with an older lifetime
+        # cost total or replay state. Inspect it through the recovery tools only.
+        try:
+            if self.db.execute("SELECT 1 FROM sqlite_master WHERE name='recovery_guard'").fetchone():
+                raise ValueError('Inspection-only recovery database cannot be used as runtime')
+        except Exception:
+            self.db.close()
+            raise
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.executescript("""
         CREATE TABLE IF NOT EXISTS runs (
