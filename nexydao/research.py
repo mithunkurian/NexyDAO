@@ -150,7 +150,7 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
     comparisons = _filing_comparisons(facts)
     comparison_instructions = ''
     if comparisons:
-        context['filing_comparisons'] = copy.deepcopy(comparisons)
+        context['filing_comparisons'] = comparisons
         comparison_instructions = (
             ' Copy any directional filing comparison you rely on into comparison_claims '
             'using its exact earlier and later evidence IDs and direction. Return an empty list if none are used.'
@@ -164,7 +164,7 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
         check_research_freshness(facts)
         owner_policy.assert_current()
         report = provider.decide(run, role, INSTRUCTIONS + owner_policy.instructions() + focus + comparison_instructions,
-                                 context, report_schema(facts, comparisons))
+                                 copy.deepcopy(context), report_schema(facts, comparisons))
         validate_claims(report, facts, comparisons)
         check_research_freshness(facts)
         store.event(run, role, {'report': report, 'numeric_claim_bindings': 'matched_source_observations',
