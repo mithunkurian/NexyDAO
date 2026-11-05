@@ -78,6 +78,7 @@ three revisions. Abstaining or asking for research is a valid outcome. See
 - `safety`: static capital envelope and unconditional execution denial.
 - `cli`: offline demo fixture, real AI deliberation, cost inspection.
 - `ibkr` / `market`: bounded read-only paper snapshots/quotes, local integrity and freshness checks.
+- `executions`: bounded typed stock fills/linked commissions, dedicated Ed25519 public-only verification and limited-coverage reports; no ledger import or order writes.
 - `sec`: fixed public filing endpoints, typed source observations and signed receipts.
 - `research`: two independent reports, strict schemas and application-enforced numeric bindings.
 - `owner_policy`: protected, versioned owner constraints, immutable cycle snapshot and independent cash/short/leverage preflight denial.

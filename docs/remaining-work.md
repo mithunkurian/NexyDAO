@@ -13,9 +13,11 @@ and S2 passed real installation/startup/restart acceptance with merged PR #26's
 bounded state-retention correction. **2/15 packages are closed**. PR #27 adds an
 S3 shadow permit foundation; its separate authorizer/evidence integration remains
 open. PR #28 adds external owner-control and a temporary separate-identity fixture.
-About **13 delivery PRs remain after PR #28**, assuming one per open package.
-The correction and two S3 foundations project about 18 PRs against the original 12–18 range,
-without expanding package scope. Remaining broker
+PR #29 adds typed stock executions/linked fees with public-only receipt verification,
+without closing D2's full data acceptance. **13 packages remain**; revised planning
+estimate is **13–18 further PRs after PR #29** (19–24 total after #23 versus the
+original 12–18). Implementation/acceptance splits exceeded that estimate; project
+scope has not grown. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
 or increasing the baseline count. See [service audit scope](service-isolation-audit.md).
 
