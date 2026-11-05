@@ -51,7 +51,8 @@ PR #32 advances R4/D3 simulation enforcement without closing market liquidity or
 actual monetary reservations. PR #33 adds a prospective quote-spread guard while
 leaving executable/full-book liquidity unverified. Updated estimate:
 PR #34 adds opt-in public market receipts; remaining deployment/key boundaries stay
-open. **13–18 further PRs after PR #34**, with **13 packages open**. Observed splits project 24–29 total
+open. PR #35 adds fresh paired-delta diagnostics without closing D3.
+**13–17 further PRs after PR #35**, with **13 packages open**. Observed splits project 25–29 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -59,6 +60,20 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### D3 paired cash/position and visible-fill changes — 5 November 2026
+
+Branch `codex/broker-state-transitions` adds a public-only four-receipt report.
+It compares fresh ordered position/CashBalance deltas with new visible execution
+IDs and linked fees, retaining cross-currency separation and exact arithmetic.
+Corrections, mutated/disappeared fills and ambiguous metadata suppress arithmetic;
+unexplained changes are explicit. A numerical match cannot establish interval
+attribution, complete coverage, funding, reservations or execution authority.
+Windows: 409 tests, 402 passed/seven Unix-only skips. Ubuntu acceptance follows.
+The existing account-audit fixture now uses a fixed test clock; production
+freshness enforcement is unchanged. Synthetic fixtures only;
+no owner transaction/history query, paid call or production change is included.
+See [scope and remaining gates](broker-transitions.md).
 
 ### P5/D3 public market quote consumer — 5 November 2026
 

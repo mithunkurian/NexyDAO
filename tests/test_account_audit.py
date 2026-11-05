@@ -10,10 +10,12 @@ from unittest.mock import patch
 from nexydao.account_audit import collect_audit, load_audit, report, validate_summary
 from nexydao.ibkr import BrokerConfig, ProbeError, TAGS
 
+FIXTURE_TIME = 1793894400
+
 
 def snapshot():
     return {'schema_version': 1, 'source': 'ibkr_gateway_account_summary',
-            'retrieved_at': datetime.now(timezone.utc).isoformat(), 'protocol_version': 178,
+            'retrieved_at': datetime.fromtimestamp(FIXTURE_TIME,timezone.utc).isoformat(), 'protocol_version': 178,
             'account': 'DU123', 'paper_identity_evidence': 'single_DU_account_namespace',
             'expected_account_matched': True, 'execution_authorized': False,
             'values': [{'tag': tag, 'currency': 'USD', 'value': '1000000'} for tag in TAGS]}
@@ -21,6 +23,8 @@ def snapshot():
 
 class AccountAuditTests(unittest.TestCase):
     def setUp(self):
+        clock=patch('nexydao.account_audit.time.time',return_value=FIXTURE_TIME+1)
+        clock.start();self.addCleanup(clock.stop)
         root = Path(__file__).resolve().parents[1] / 'data'
         root.mkdir(exist_ok=True)
         self.folder = tempfile.TemporaryDirectory(dir=root)

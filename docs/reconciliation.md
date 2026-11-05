@@ -4,6 +4,10 @@ This slice adds account-specific currency observations and contract-based positi
 comparison. It does not import broker funds or holdings, convert currencies, submit
 orders or certify full reconciliation. The $5,000 ledger remains a USD simulation.
 
+PR #35 adds [paired public observation diagnostics](broker-transitions.md) over
+two fresh state/execution pairs. It detects numerical residuals without importing
+funds, attributing executions to an interval or closing full reconciliation.
+
 ## Operator commands
 
 Use the existing local exact paper-account pin, private evidence key and ledger DB.

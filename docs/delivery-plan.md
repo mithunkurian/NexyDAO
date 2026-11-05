@@ -18,7 +18,7 @@ implementation order: independent work can proceed while broker access is blocke
 | S3 | Independent policy authorizer, signed permits, nonce/replay checks and kill switch | In progress; PR #27 shadow protocol, PR #28 external owner control/identity fixture; accepted evidence and deployed authorizer still required |
 | D1 | Verified current cash, currencies/fees and funding gate closure | Blocked by broker acceptance |
 | D2 | Full orders/fills/commissions/transfers, manual visibility and public-key broker receipt integration | In progress; PR #29 fills/fees, PR #30 typed order-prefix/status diagnostics and public receipts; full semantics/coverage/transfers/live acceptance open |
-| D3 | Broker cash/position lifecycle reconciliation, remaining broker key boundaries and actual monetary reservations | In progress; PR #31 public cash/position receipts and partial cross-observation diagnostics; lifecycle/monetary reservations/deployment remain open |
+| D3 | Broker cash/position lifecycle reconciliation, remaining broker key boundaries and actual monetary reservations | In progress; PR #31 public state/cross-checks and PR #35 fresh paired-delta diagnostics; interval attribution, lifecycle/reservations/deployment remain open |
 | R1 | Remaining research/quote-backed advisory and paid revision acceptance | Planned; initial live paths exist |
 | R2 | Broader approved evidence and supported narrative/contradiction checks | Planned; typed SEC checks exist |
 | R3 | Scoped FX/tax/corporate-action and portfolio accounting completion | Planned; USD simulation exists |
@@ -41,7 +41,9 @@ without closing market-liquidity or actual monetary-reservation acceptance.
 PR #33 adds immutable quote/spread checks for prospective advisory risk, without
 certifying executable depth or full-book liquidity. PR #34 adds opt-in market
 public-key consumption and temporary role acceptance; production broker-key
-deployment still remains open. Updated estimate after PR #34: **13–18 further PRs**,
+deployment still remains open. PR #35 adds fresh paired state/execution delta
+diagnostics without certifying interval attribution or closing D3. Updated estimate
+after PR #35: **13–17 further PRs**,
 with 13 open delivery packages; this replaces the earlier 13-PR point estimate.
 PR #26 was an additional
 corrective PR inside S2: inactive one-shot services lost their systemd timestamps,
@@ -50,9 +52,13 @@ S3 is split because funding/reconciliation and independent authorization inputs
 are not yet accepted: PR #27 exercises the protocol without granting orders; its
 remaining accepted-evidence integration and deployed identity acceptance stay open.
 The correction, two S3 foundation slices and D2/D3 data foundations have consumed
-eleven PRs after #23 while closing two packages. At least one further PR per remaining
-package projects 24 total after #23; allowing further integration/failure splits
-gives about 24–29 total, beyond the original 12–18 range. The scope has not expanded;
+twelve PRs after #23 while closing two packages. At least one further PR per remaining
+package projects 25 total after #23; allowing further integration/failure splits
+gives about 25–29 total, beyond the original 12–18 range. PR #35 consumes one
+of the previous 13–18 remaining allowance for integration slices; with 13 packages
+still open, the revised remaining range is 13–17 rather than simply subtracting
+one from both ends. The projected total lower bound rises from 24 to 25; its
+upper bound remains 29. The scope has not expanded;
 the estimate underestimated implementation/acceptance splits. Report future changes
 explicitly rather than count partial packages as complete.
 Proceed with data acceptance before further signer deployment. Scope is unchanged. Boot/sustained recovery stay
