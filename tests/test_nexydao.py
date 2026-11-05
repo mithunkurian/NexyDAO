@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 from dataclasses import replace
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from pathlib import Path
 from unittest.mock import patch
 
@@ -107,6 +107,18 @@ class Tests(unittest.TestCase):
             other.close()
 
         self.assertEqual(Decimal(self.store.costs()['estimated_or_reserved_usd']), Decimal('0.1'))
+
+    def test_api_budget_admission_preserves_fractional_charges(self):
+        run = self.store.start()
+        cap = Decimal('0.10001')
+        self.store.reserve(run, 'ceo', 'test', cap, cap)
+        with localcontext(prec=3):
+            with self.assertRaisesRegex(ValueError, 'Lifetime API budget exhausted'):
+                self.store.reserve(run, 'risk', 'test', Decimal('0.00001'), cap)
+            costs = self.store.costs()
+
+        self.assertEqual(Decimal(costs['estimated_or_reserved_usd']), cap)
+        self.assertEqual(costs['calls'], 1)
 
     def test_transport_failure_retains_reservation(self):
         def transport(*args):
