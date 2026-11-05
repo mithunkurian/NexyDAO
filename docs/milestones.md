@@ -435,3 +435,22 @@ production services/runtime data were changed.
 S3 remains in progress: accepted broker/risk/review/reservation inputs and protected
 independent signer/stop identities remain required. This protocol does not certify
 those gates. See [scope, exact archive and limitations](paper-permits.md).
+
+## External shadow owner authority and identity fixture, 2026-11-05
+
+PR #28 implementation `4033bcd` passed all 294 Ubuntu tests; Windows passed 288
+with six Unix-only skips. A temporary root-controlled `/run` tree separated the
+signer's private test key (UID 65533), consumer ledger (UID 65534) and root-owned
+policy/control/lock/code. Real permissions denied six consumer protected accesses,
+five signer accesses and eight role control operations. Public-only consumption
+succeeded; consumer minting, fresh-process replay, old epochs after re-arm and
+consumption after owner stop failed. Root stop persisted across reopen. Corrupt,
+world-writable and symlinked control were rejected. A held shared lock made stop
+fail busy without claiming completion, then owner stop succeeded after release.
+
+Only temporary test keys/state and fabricated intent/digests were used. No paid
+calls, persistent accounts, services, firewall rules, existing runtime/budget or
+broker operations were changed. This is shadow mechanism/identity-fixture evidence,
+not deployed authorizer or hardened emergency-stop acceptance. S3 remains open
+for accepted broker/risk/review/reservation inputs and protected deployment.
+See [exact archive, acceptance and limitations](permit-authority-boundary.md).
