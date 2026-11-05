@@ -54,7 +54,8 @@ Implementation `4017611` passed 234 local/Ubuntu tests and an isolated six-revie
 synthetic revision fixture; live paid revision acceptance remains pending.
 
 P5's first slice adds a dedicated controller UID egress guard, strict operator
-audit and an offline sandboxed service template. Local tests pass; real service
+audit and an offline sandboxed service template. Implementation `bd7ed90` passed
+243 local/Ubuntu tests and a 14-probe isolated kernel fixture; real service
 installation and full key/identity separation remain open. See
 [controller isolation scope](controller-isolation.md).
 

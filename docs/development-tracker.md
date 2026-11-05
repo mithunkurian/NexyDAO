@@ -52,8 +52,11 @@ and acceptance criteria. Small documentation updates accompany those packages.
 
 PR #22 branch `codex/controller-egress-guard` adds a dedicated-UID outbound broker
 port guard, operator audit and isolated offline service template. Both ingress and
-controller audits reject dormant tables. All 243 offline tests pass locally.
-Ubuntu/kernel validation and real identity/service installation remain pending.
+controller audits reject dormant tables. Implementation `bd7ed90` passed all 243
+tests locally and on Ubuntu. Its separate network-namespace test denied 14 fixture
+UID probes across seven protected ports/IPv4/IPv6 while operator UID and allowed
+control ports worked. Host users/services/firewall rules and the persistent runtime
+were unchanged. Real identity/service installation remains pending.
 Receipt signing/verification-key separation, complete OS isolation, permits and
 executor security remain open. See [controller isolation scope](controller-isolation.md).
 

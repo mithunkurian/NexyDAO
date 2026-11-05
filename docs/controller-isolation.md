@@ -67,7 +67,9 @@ identity no longer needs protection; an operator may then remove only
 
 ## Validation scope
 
-All 243 local offline tests passed. Coverage includes exact UID/direction/protocol,
+Implementation `bd7ed90` passed all 243 offline tests locally and in isolated
+Ubuntu release `releases/controller-guard-bd7ed90`, plus the local offline demo.
+Coverage includes exact UID/direction/protocol,
 complete ports, malformed/oversized output, absent accounts, failed privileged
 inspection, dormant tables and a database-free CLI failure path.
 
@@ -82,5 +84,13 @@ and applies the installer's rule body with a fixture UID, and probes local liste
 on every protected port for both IPv4 and IPv6. Root/operator probes and an allowed
 control port must still work. No host account, service, firewall table, public
 network connection or persistent runtime is changed. This fixture does not install
-or validate the actual dedicated service identity. Ubuntu/kernel/service-install
-acceptance remains pending until recorded; full P5 stays open.
+or validate the actual dedicated service identity.
+
+On 5 November 2026, shell syntax validation and this namespace fixture passed on
+Ubuntu: all 14 protected-port probes (seven TCP ports, two address families) were
+denied for the fixture UID. Both allowed control-port probes and operator/root UID
+connections succeeded. The audit recognized the actual kernel JSON for the rule
+body. No host users, services, firewall rules, persistent runtime, credentials,
+paid APIs or broker connections were used/changed. Installation of the real
+identity/service, boot/restart acceptance and full key/OS separation remain pending;
+full P5 stays open.
