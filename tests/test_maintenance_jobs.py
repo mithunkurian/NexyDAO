@@ -57,6 +57,26 @@ class MaintenanceJobTests(unittest.TestCase):
         self.clock[0]+=1;self.assertTrue(reopened.tick(self.plan)['maintenance_passed'])
         self.assertEqual(reopened.status()['attempt_count'],2)
 
+    def test_archive_audit_detects_missing_and_mismatched_archives_without_writing(self):
+        self.arm()
+        attempt = self.jobs.tick(self.plan)['attempt_id']
+        folder = self.archives / ('job-' + attempt)
+        original_state = self.path.read_bytes()
+        report = self.jobs.verify_archives()
+        self.assertEqual(report['verified_archive_count'], 1)
+        self.assertEqual(report['archive_errors'], [])
+        self.assertEqual(self.path.read_bytes(), original_state)
+
+        with closing(sqlite3.connect(self.path)) as db, db:
+            db.execute('UPDATE attempts SET digest=? WHERE id=?', ('0' * 64, attempt))
+        self.assertEqual(self.jobs.verify_archives()['archive_errors'], [
+            {'attempt_id': attempt, 'reason': 'archive_attempt_mismatch'},
+        ])
+        (folder / 'manifest.json').unlink()
+        self.assertEqual(self.jobs.verify_archives()['archive_errors'], [
+            {'attempt_id': attempt, 'reason': 'archive_unverifiable'},
+        ])
+
     def test_concurrent_tick_cannot_overlap_or_disarm_a_legitimate_running_attempt(self):
         self.arm();entered=threading.Event();release=threading.Event();create=backups.create_backup
         def blocked(*args):

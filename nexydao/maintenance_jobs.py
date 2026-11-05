@@ -65,11 +65,14 @@ class MaintenanceJobs:
         return int(value)
 
     @contextmanager
-    def _db(self):
+    def _db(self, *, readonly=False):
         with backups._file(self.path,1024*1024):pass
-        db=sqlite3.connect(self.path,timeout=2,isolation_level=None)
+        target=self.path.as_uri()+'?mode=ro' if readonly else self.path
+        db=sqlite3.connect(target,uri=readonly,timeout=2,isolation_level=None)
         try:
-            db.execute('PRAGMA trusted_schema=OFF');db.execute('PRAGMA synchronous=FULL');db.execute('BEGIN IMMEDIATE')
+            db.execute('PRAGMA trusted_schema=OFF')
+            if not readonly:db.execute('PRAGMA synchronous=FULL')
+            db.execute('BEGIN' if readonly else 'BEGIN IMMEDIATE')
             yield db
             db.execute('COMMIT')
         except BaseException:
@@ -126,6 +129,27 @@ class MaintenanceJobs:
 
     def status(self):
         with self._db() as db:return self._report(*self._read(db))
+
+    def verify_archives(self):
+        with self._db(readonly=True) as db:
+            enabled, reason, plan, attempts = self._read(db)
+        root = Path(plan['backup_root'])
+        verified = 0
+        errors = []
+        for identifier, _, _, _, size, digest in attempts:
+            if not digest:
+                continue
+            try:
+                archive = backups.verify_backup(root / ('job-' + identifier))
+            except backups.BackupError:
+                errors.append({'attempt_id': identifier, 'reason': 'archive_unverifiable'})
+                continue
+            if (archive['database_bytes'], archive['database_sha256']) != (size, digest):
+                errors.append({'attempt_id': identifier, 'reason': 'archive_attempt_mismatch'})
+            else:
+                verified += 1
+        return self._report(enabled, reason, plan, attempts,
+                            verified_archive_count=verified, archive_errors=errors)
 
     def stop(self):
         with self._db() as db:
@@ -186,7 +210,7 @@ class MaintenanceJobs:
 
 def main():
     parser=argparse.ArgumentParser(description='Explicit finite backup/health ticks; no timer or paid/broker jobs')
-    parser.add_argument('action',choices=['init','arm','tick','stop','status'])
+    parser.add_argument('action',choices=['init','arm','tick','stop','status','verify-archives'])
     parser.add_argument('--state',required=True,type=Path);parser.add_argument('--plan',type=Path)
     args=parser.parse_args()
     try:
@@ -199,9 +223,9 @@ def main():
             result=getattr(jobs,{'init':'initialize','arm':'arm','tick':'tick'}[args.action])(plan)
         else:
             if args.plan is not None:raise JobError('maintenance_plan_modifier_not_applicable')
-            result=getattr(jobs,args.action)()
+            result=getattr(jobs,args.action.replace('-','_'))()
         print(json.dumps(result,indent=2))
-        if result['failed_attempt_count'] or result['incomplete_attempt_count'] or result['reason'] in ('attempt_cap','archive_cap','clock_regressed','plan_changed','disk_space_low'):parser.exit(1)
+        if result.get('archive_errors') or result['failed_attempt_count'] or result['incomplete_attempt_count'] or result['reason'] in ('attempt_cap','archive_cap','clock_regressed','plan_changed','disk_space_low'):parser.exit(1)
     except Exception as exc:
         code=str(exc) if isinstance(exc,JobError) else 'maintenance_unavailable'
         parser.exit(1,'NexyDAO maintenance stopped safely ('+code+').\n')

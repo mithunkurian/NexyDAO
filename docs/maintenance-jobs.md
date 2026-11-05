@@ -36,6 +36,7 @@ python3 -m nexydao.maintenance_jobs init --state /private/jobs.sqlite3 --plan /p
 python3 -m nexydao.maintenance_jobs arm --state /private/jobs.sqlite3 --plan /private/jobs.json
 python3 -m nexydao.maintenance_jobs tick --state /private/jobs.sqlite3 --plan /private/jobs.json
 python3 -m nexydao.maintenance_jobs status --state /private/jobs.sqlite3
+python3 -m nexydao.maintenance_jobs verify-archives --state /private/jobs.sqlite3
 python3 -m nexydao.maintenance_jobs stop --state /private/jobs.sqlite3
 ```
 
@@ -44,6 +45,15 @@ Ordinary commands never initialize missing state. Plan JSON rejects duplicates,
 unknown fields and unsupported values. The stored canonical plan/digest, state
 schema/version, stop flag/reason and attempt records are checked before dispatch.
 Valid changed plans stop a tick rather than silently changing its bounds.
+
+`verify-archives` reads a snapshot of the attempt ledger and releases the read
+transaction before inspecting files. It checks each recorded archive with the
+backup verifier and compares its size and digest to the original attempt record.
+The report includes the verified count and fixed failure reasons with attempt IDs.
+An unverifiable or mismatched archive, a failed attempt, or an incomplete attempt
+gives a nonzero exit status. The audit does not access the live application database,
+change scheduler state, or claim work. Attempts recorded after the snapshot appear
+on the next audit.
 
 ## Scheduling and failure behaviour
 
