@@ -71,8 +71,13 @@ persist. The current application rejects marked copies before WAL/schema setup,
 preventing silent budget rollback through normal runtime commands. No credentials,
 authority ledger, production runtime or recurring service is backed up/deployed.
 Twenty-one synthetic tests include actual CLI backup/check/restore and runtime
-denial. Windows: 430 tests, 422 passed/eight Unix-only skips. Ubuntu acceptance
-follows. O1's scheduling, health/alerts and
+denial. Windows: 430 tests, 422 passed/eight Unix-only skips. Implementation
+`382aa16` passed all 430 Ubuntu tests; exact archive SHA-256
+`4e1e0aef027f7a2cc08ccd955879cea1a69aa3fdfc450be6f9a072855d4a0d40`.
+A separate Ubuntu CLI fixture passed exact restore, retained uncertain costs and
+partial holds, refused two runtime commands on the old copy and preserved newer
+source charges/state. Zero paid calls, real broker queries or production runtime
+use. O1's scheduling, health/alerts and
 deployed recovery remain open. See [scope and operator use](audit-backups.md).
 
 ### D3 paired cash/position and visible-fill changes — 5 November 2026

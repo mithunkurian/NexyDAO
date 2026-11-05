@@ -97,6 +97,14 @@ runtime denial, older-snapshot budget rollback prevention, new-target enforcemen
 missing source, malformed/damaged/changed artifacts, private paths, guard/journal
 checks, application/schema/audit failures, limits/timeouts, interruption cleanup
 and actual CLI backup/check/restore without DB initialization/provider/network.
-Windows: 430 tests, 422 passed/eight Unix-only skips. Exact Ubuntu archive
-evidence follows testing. All inputs are
+Windows: 430 tests, 422 passed/eight Unix-only skips. Implementation `382aa16`
+passed all 430 Ubuntu tests in isolated release `releases/audit-backups-382aa16`.
+Exact tested source archive SHA-256:
+`4e1e0aef027f7a2cc08ccd955879cea1a69aa3fdfc450be6f9a072855d4a0d40`.
+A separate Ubuntu subprocess CLI fixture passed backup/check/restore/check with
+identical artifact hashes, retained uncertain costs and a partial simulation hold,
+and refused both `costs` and `demo` on the restored DB. Newer source charges and
+simulation revision/state stayed intact after restoring the older inspection copy.
+It reported zero paid calls, zero real broker queries and no production runtime
+use. All inputs are
 synthetic private DBs; production services, keys, costs and budgets are untouched.
