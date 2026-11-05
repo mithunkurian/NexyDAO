@@ -74,5 +74,10 @@ Before S3 can close: independently validate accepted evidence and votes, bind ac
 monetary reservations/current portfolio, provision a separate protected signer and
 state/stop authority, and demonstrate cross-identity denial plus owner stop/restart
 acceptance. D1–D3/P4 remain prerequisite inputs; E1/E2 own order submission and
-recovery. This PR advances S3 without closing it. Verification results and exact
-tested commit are recorded in the tracker/milestones after Ubuntu validation.
+recovery. This PR advances S3 without closing it.
+
+Final implementation `2b73201` passed all 288 tests on Ubuntu in isolated release
+`releases/shadow-permits-2b73201`. Windows ran 288 tests: 283 passed and five
+Unix-only skips. All 17 new protocol tests passed on both platforms. Exact archive
+SHA-256: `173b9bf21606c40925fa7b46aac6070bdbddeac102e45a90d172136c1c6b8a78`.
+No installed service, runtime signing key, cost DB or broker was changed.

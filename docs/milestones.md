@@ -419,3 +419,19 @@ original runtime modification occurred. S2 closes on correction merge; S3 is nex
 Other receipt types and boot/sustained recovery are explicitly unverified; full P5
 and execution remain gated. Exact archive digests and limitations are recorded in
 [the service audit](service-isolation-audit.md).
+
+## Shadow paper permit protocol, 2026-11-05
+
+PR #27 implementation `2b73201` passed 288 tests on Ubuntu; Windows passed 283
+with five Unix-only skips. Seventeen protocol tests include public-only signature
+verification, SEC/shadow domain separation, strict signed integer types, every
+intent binding, owner-policy changes, expiry after verification, stopped/default/
+rearmed epochs, replay across reopen, six concurrent redeemers with one winner,
+capacity stop and unchanged execution locks. A valid shadow consumption explicitly
+denies execution and broker submission. Test keys, fabricated account/contract and
+synthetic digests were confined to isolated temporary fixtures; no paid calls or
+production services/runtime data were changed.
+
+S3 remains in progress: accepted broker/risk/review/reservation inputs and protected
+independent signer/stop identities remain required. This protocol does not certify
+those gates. See [scope, exact archive and limitations](paper-permits.md).
