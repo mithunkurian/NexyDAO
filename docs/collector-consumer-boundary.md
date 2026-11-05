@@ -90,4 +90,9 @@ then verifies as the consumer. Consumer reads of the private key and writes to t
 receipt, publication directory, pinned config and code must be denied. Consumer
 republication must also fail. The tree is cleaned up; no host user/group, service,
 firewall, production key/runtime, network retrieval or paid API is changed/used.
-Ubuntu and this cross-UID acceptance are pending until recorded.
+Implementation `df3860b` passed all 262 tests in isolated Ubuntu release
+`releases/research-boundary-df3860b`. The two-UID fixture also passed: the consumer
+verified two facts, five protected access attempts were denied, and consumer
+republication failed. Zero paid calls; no production runtime, host accounts,
+services or rules were changed. This closes the filesystem mechanism's acceptance
+when merged, not real service installation or full P5 deployment acceptance.

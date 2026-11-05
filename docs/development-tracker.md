@@ -57,9 +57,11 @@ Branch `codex/collector-consumer-boundary` adds Ed25519-only group-readable
 publication, database-free receipt checks, role-specific service templates and a
 two-UID filesystem acceptance fixture. Private keys remain collector-only, while
 the consumer can read but not replace published receipts or trusted configuration.
-Local validation: 262 tests, 257 passed/five Unix-only skips on Windows. Ubuntu,
-cross-UID and actual service/deployment acceptance remain pending. S1 and full P5
-remain open. See [boundary scope](collector-consumer-boundary.md).
+Local validation: 262 tests, 257 passed/five Unix-only skips on Windows.
+Implementation `df3860b` passed all 262 tests on Ubuntu and the two-UID fixture:
+five protected consumer accesses and republication were denied while two signed
+facts verified. S1 is validated awaiting merge; real service/deployment acceptance
+belongs to S2. Full P5 remains open. See [boundary scope](collector-consumer-boundary.md).
 
 ### P5 public-key research receipts — 5 November 2026
 
