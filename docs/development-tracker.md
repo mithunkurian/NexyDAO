@@ -45,14 +45,27 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
 eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
 **2/15 delivery packages complete**. S3's shadow protocol in PR #27 does not close
-S3. About **13 delivery PRs remain after PR #27**, assuming one per remaining
-package. The S2 correction and S3 split bring the projected baseline total to 17.
+S3. About **13 delivery PRs remain after PR #28**, assuming one per remaining
+package. The S2 correction and two S3 foundation slices project 18 total after
+PR #23, the top of the original range; more splits would increase that estimate.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
 time. See the [remaining-work checklist](remaining-work.md) for scope, dependencies
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### S3/P5 external owner-control and shadow identities — 5 November 2026
+
+Branch `codex/shadow-authority-boundary` separates the epoch/stop authority from
+the consumer ledger. Root-owned control/policy and a cooperative lock bind the
+signer and consumer to the same owner state without sharing private key/ledger.
+Root alone can transition state; a successful transition cannot interleave with
+nonce commit. Busy transitions fail and are not completed stops. A temporary
+three-role Unix fixture tests real access denials and stop/re-arm/reopen behaviour.
+Local suite: 294 tests run, 288 passed and six Unix-only skips. Ubuntu/UID fixture
+acceptance pending. No persistent identity/service deployment is included.
+See [scope and remaining gates](permit-authority-boundary.md).
 
 ### S3/P5 shadow permit protocol — 5 November 2026
 
