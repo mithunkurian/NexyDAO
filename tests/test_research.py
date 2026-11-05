@@ -505,6 +505,23 @@ class ResearchTests(unittest.TestCase):
         for _, context in provider.calls[:2]:
             self.assertEqual(context['filing_comparisons'], expected)
 
+        independent = self.provider(evidence)
+        original_decide = independent.decide
+
+        def mutate_opportunity_context(run, role, instructions, context, spec):
+            report = original_decide(run, role, instructions, context, spec)
+            if role == 'research_opportunity':
+                context['filing_comparisons'].clear()
+                context['filing_observations'][0]['fact']['value'] = '999'
+            return report
+
+        independent.decide = mutate_opportunity_context
+        original_evidence = copy.deepcopy(evidence)
+        run_cycle(store, independent, evidence, research=True)
+        self.assertEqual(independent.calls[1][1]['filing_comparisons'], expected)
+        self.assertEqual(independent.calls[1][1]['filing_observations'], original_evidence)
+        self.assertEqual(evidence, original_evidence)
+
         wrong = self.provider(evidence, lambda report: report['comparison_claims'][0].update(
             reported_value_direction='lower'))
         with self.assertRaisesRegex(SourceError, 'unsupported_research_comparison_claim'):
