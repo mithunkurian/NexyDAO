@@ -78,7 +78,15 @@ receipt migration is tracked explicitly with D2/D3; full P5 remains open.
 Local suite: 271 tests run, 266 passed and five Unix-only skips on Windows.
 Tests cover hardening/identity/network/capability mismatches, failed/never-started
 services, bounded literal environment parsing, archive traversal/links/digests,
-header/credential injection rejection and database-free CLI failure. Ubuntu,
-actual service installation and successful start/restart audit are pending until
-recorded. The installer performs no root action merely because this document/PR
-exists or the code has been merged.
+header/credential injection rejection and database-free CLI failure.
+Ubuntu validation passed all 271 tests on implementation `b310cd6`. The exact
+archive SHA-256 was
+`72b335d28423d414737ef48dee77991e731fbda11e0c18c537b94f95378c5ff8`.
+The read-only plan passed against the existing issuer/contact configuration and
+confirmed fresh installation targets. Actual service installation and successful
+start/restart audit remain pending: automatic approval review rejected root apply
+because persistent accounts, protected files, services, a firewall guard and a
+signing key require specific installation authorization beyond routine PR rights.
+No installer mutation ran. Keep this delivery package open and the PR in draft
+until that authorization and actual acceptance pass. The installer performs no root
+action merely because this document/PR exists or the code has been merged.
