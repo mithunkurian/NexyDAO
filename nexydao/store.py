@@ -3,11 +3,21 @@ import json
 import sqlite3
 import uuid
 from datetime import datetime, timezone
-from decimal import Decimal, ROUND_CEILING, localcontext
+from decimal import Decimal, InvalidOperation, ROUND_CEILING, localcontext
 
 
 def now():
     return datetime.now(timezone.utc).isoformat()
+
+
+def _api_charge(value):
+    try:
+        charge = Decimal(str(value))
+    except InvalidOperation:
+        raise ValueError("Invalid API charge") from None
+    if not charge.is_finite() or charge < 0:
+        raise ValueError("Invalid API charge")
+    return charge
 
 
 class Store:
@@ -70,15 +80,17 @@ class Store:
         return [{"run_id": r[0], "result": json.loads(r[1])} for r in rows]
 
     def reserve(self, run, role, model, amount, budget):
+        charge = _api_charge(amount)
+        cap = _api_charge(budget)
         ticket = str(uuid.uuid4())
         self.db.execute("BEGIN IMMEDIATE")
         try:
             with localcontext(prec=100, rounding=ROUND_CEILING):
-                total = sum((Decimal(r[0]) for r in self.db.execute("SELECT charged FROM costs")), Decimal(0))
-                if total + amount > budget:
+                total = sum((_api_charge(r[0]) for r in self.db.execute("SELECT charged FROM costs")), Decimal(0))
+                if total + charge > cap:
                     raise ValueError("Lifetime API budget exhausted")
             self.db.execute("INSERT INTO costs VALUES(?,?,?,?,?,?, 'reserved',NULL,NULL)",
-                            (ticket, run, role, now(), model, str(amount)))
+                            (ticket, run, role, now(), model, str(charge)))
             self.db.commit()
         except Exception:
             self.db.rollback()
@@ -86,9 +98,7 @@ class Store:
         return ticket
 
     def settle(self, ticket, amount, usage, response_id):
-        charge = Decimal(str(amount))
-        if not charge.is_finite() or charge < 0:
-            raise ValueError("Invalid API charge")
+        charge = _api_charge(amount)
         encoded_usage = json.dumps(usage, allow_nan=False)
         with self.db:
             updated = self.db.execute(
@@ -104,7 +114,7 @@ class Store:
             if existing is None:
                 raise ValueError("Unknown API reservation")
             previous_charge, status, previous_usage, previous_response = existing
-            if (status != 'reported' or Decimal(previous_charge) != charge
+            if (status != 'reported' or _api_charge(previous_charge) != charge
                     or previous_response != response_id
                     or json.loads(previous_usage) != json.loads(encoded_usage)):
                 raise ValueError("Conflicting API settlement")
@@ -112,6 +122,6 @@ class Store:
     def costs(self):
         rows = self.db.execute("SELECT charged,status FROM costs").fetchall()
         with localcontext(prec=100, rounding=ROUND_CEILING):
-            total = sum((Decimal(r[0]) for r in rows), Decimal(0))
+            total = sum((_api_charge(r[0]) for r in rows), Decimal(0))
         return {"estimated_or_reserved_usd": str(total),
                 "calls": len(rows), "unsettled_calls": sum(r[1] == "reserved" for r in rows)}
