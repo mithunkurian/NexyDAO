@@ -72,7 +72,12 @@ source reads or same-count backup changes from appearing current. Critical local
 findings return exit 1; source state/costs/holds remain unchanged. No scheduler,
 provider/broker call, notification delivery or production deployment is enabled.
 Twenty-two synthetic tests cover the new health paths. Windows: 452 tests,
-444 passed/eight Unix-only skips. Exact Ubuntu acceptance follows.
+444 passed/eight Unix-only skips. Implementation `e6d71b0` passed all 452 Ubuntu
+tests; archive SHA-256
+`1869d866fa56ad3b0eb3568a4cc5f6ff50ade3840b6fe843018cd1aed5bae0fa`.
+A separate Ubuntu subprocess CLI trial passed healthy and three critical exit-code
+scenarios while preserving partial holds, uncertain charges and source state.
+Zero paid calls, broker queries, production runtime use, timers or alert delivery.
 See [operator use and remaining gates](operations-health.md).
 
 ### O1 verified audit backup and inspection-only recovery — 5 November 2026

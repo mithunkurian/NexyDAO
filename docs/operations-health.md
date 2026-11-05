@@ -40,7 +40,7 @@ requirements apply; Windows ACLs remain the operator's responsibility.
 
 These thresholds are operator engineering diagnostics, not provider/broker rules
 or guarantees of health. Run timestamps are creation times: this does not measure
-completion duration or prove that a running process is alive/dead. ISO timestamps
+completion duration or prove that a running process is alive/dead. Run and reserved-cost timestamps
 must be bounded, timezone-aware and not future-dated. Timezone offsets are compared
 as actual instants rather than text. Unknown run states/modes or malformed records
 stop the check. No failure is automatically retried, marked completed or cleared.
@@ -87,8 +87,15 @@ budget/disk/backup boundaries, failed AI versus demo, tied/offset timestamps,
 malformed records, missing source, restored-copy denial, retained partial holds,
 same-count content changes, concurrent source writes, backup changes during extra
 reads and actual CLI exit codes without Store/provider/socket access.
-Windows: 452 tests, 444 passed/eight Unix-only skips. Exact Ubuntu archive and
-subprocess acceptance evidence follow validation. Fixtures are
+Windows: 452 tests, 444 passed/eight Unix-only skips. Implementation `e6d71b0`
+passed all 452 Ubuntu tests in isolated release `releases/operations-health-e6d71b0`.
+Exact tested source archive SHA-256:
+`1869d866fa56ad3b0eb3568a4cc5f6ff50ade3840b6fe843018cd1aed5bae0fa`.
+A separate Ubuntu subprocess CLI trial passed healthy exit 0 and uncertain costs
+on a finished run, inspection-source and damaged-backup exit 1. Partial holds,
+uncertain charges and source state stayed unchanged. Zero paid calls, real broker
+queries, production runtime use, recurring automation or notification delivery.
+Fixtures are
 synthetic; no production DB, account/history query, paid call or budget change.
 
 Bounded scheduling, authorized notification delivery, deployed recovery procedures,
