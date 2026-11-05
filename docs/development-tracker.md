@@ -54,7 +54,8 @@ PR #34 adds opt-in public market receipts; remaining deployment/key boundaries s
 open. PR #35 adds fresh paired-delta diagnostics without closing D3.
 PR #36 adds verified audit backups/isolated restore without closing O1.
 PR #37 adds consistent health/local alerts while leaving O1 commissioning open.
-**13–15 further PRs after PR #37**, with **13 packages open**. Observed splits project 27–29 total
+PR #38 adds finite maintenance ticks without closing O1 commissioning.
+**13–14 further PRs after PR #38**, with **13 packages open**. Observed splits project 28–29 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -62,6 +63,17 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### O1 finite maintenance scheduling ticks — 5 November 2026
+
+Branch `codex/bounded-maintenance-jobs` adds stopped-by-default private job state,
+an operator-pinned plan and exactly one backup/health pipeline per due tick.
+Durable claims prevent overlap; interruption retains worst-case archive capacity;
+failure, caps and changed/backwards state stop further work without retries.
+No source/budget reset, paid/model/broker job, installed timer or notification
+delivery is supported. Eighteen new tests; Windows suite: 470 tests,
+461 passed/nine Unix-only skips. Exact Ubuntu acceptance follows.
+See [finite-runner scope and commissioning gates](maintenance-jobs.md).
 
 ### O1 read-only health and local alerts — 5 November 2026
 
