@@ -60,6 +60,19 @@ class Tests(unittest.TestCase):
         self.assertEqual(provider.decide(self.store.start(), "ceo", "", {}, PROPOSAL), self.proposal)
         self.assertEqual(Decimal(self.store.costs()["estimated_or_reserved_usd"]), Decimal("0.0002"))
 
+    def test_provider_preserves_reservation_and_charge_under_low_precision(self):
+        config = replace(self.config, input_rate=Decimal('1.1234567'), output_rate=Decimal('2.7654321'))
+        provider = OpenAIProvider(config, self.store, lambda *_: self.response())
+        with patch.object(self.store, 'reserve', wraps=self.store.reserve) as reserve:
+            provider.decide(self.store.start(), 'ceo', '', {}, PROPOSAL)
+            baseline = reserve.call_args.args[3]
+            with localcontext(prec=3):
+                provider.decide(self.store.start(), 'ceo', '', {}, PROPOSAL)
+                self.assertEqual(reserve.call_args.args[3], baseline)
+
+        charges = self.store.db.execute('SELECT charged FROM costs ORDER BY rowid').fetchall()
+        self.assertEqual([Decimal(row[0]) for row in charges], [Decimal('0.000250617275')] * 2)
+
     def test_full_cycle_uses_six_separate_api_calls(self):
         contexts = []
         def transport(payload, key):

@@ -1,6 +1,6 @@
 """Small Responses API client; fixed endpoint, no tools, no implicit retries."""
 import json
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING, localcontext
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 
@@ -46,7 +46,7 @@ class OpenAIProvider:
         # UTF-8 byte count is a conservative token bound for these text-only requests.
         # Extra allowance covers protocol/schema overhead; output includes reasoning tokens.
         input_bound = len(json.dumps(payload).encode()) + 4096
-        reserve = (input_bound * c.input_rate + c.max_output * c.output_rate) / Decimal(1_000_000)
+        reserve = _token_charge(input_bound, c.max_output, c)
         ticket = self.store.reserve(run, role, c.model, reserve, c.budget)
         self.store.event(run, role + ":request", {
             "model": c.model, "input_rate_per_million": str(c.input_rate),
@@ -57,7 +57,7 @@ class OpenAIProvider:
         inp, out = usage.get("input_tokens"), usage.get("output_tokens")
         if type(inp) is not int or type(out) is not int or min(inp, out) < 0:
             raise ValueError("Missing or invalid API usage; reservation retained")
-        cost = (inp * c.input_rate + out * c.output_rate) / Decimal(1_000_000)
+        cost = _token_charge(inp, out, c)
         self.store.settle(ticket, cost, usage, response.get("id"))
         if inp > input_bound or out > c.max_output:
             raise ValueError("API usage exceeded reservation bound; stop for operator review")
@@ -70,3 +70,8 @@ class OpenAIProvider:
         value = json.loads("".join(p["text"] for p in chunks if p.get("type") == "output_text"))
         validate(value, schema)
         return value
+
+
+def _token_charge(input_tokens, output_tokens, config):
+    with localcontext(prec=100, rounding=ROUND_CEILING):
+        return (input_tokens * config.input_rate + output_tokens * config.output_rate) / Decimal(1_000_000)
