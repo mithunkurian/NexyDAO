@@ -139,6 +139,15 @@ class PaperPermitTests(unittest.TestCase):
             with self.subTest(field=field),self.assertRaises(permits.PermitError):self.consume(receipt)
         self.consume(original)
 
+    def test_signed_boolean_or_float_contract_cannot_equal_expected_integer(self):
+        self.intent['contract_id']=1
+        original=self.issue()
+        for value in (True,1.0):
+            payload={**original['payload'],'intent':{**self.intent,'contract_id':value}}
+            receipt=signatures.sign(payload,self.private,self.public,self.pin,signatures.DEFAULT_OPENSSL,domain=permits.DOMAIN)
+            with self.subTest(value=value),self.assertRaises(permits.PermitError):self.consume(receipt)
+        self.consume(original)
+
     def test_owner_policy_version_change_and_file_change_invalidate(self):
         receipt=self.issue()
         changed=OwnerPolicy(json.dumps({**BASE,'policy_version':2},sort_keys=True,separators=(',',':')).encode())
