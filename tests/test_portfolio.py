@@ -174,6 +174,16 @@ class PortfolioTests(unittest.TestCase):
         with self.assertRaisesRegex(PortfolioError,'portfolio_changed_during_cycle'):
             run_cycle(self.store,Change(),[])
 
+    def test_advisory_position_limit_detects_fractional_overrun_under_low_precision(self):
+        self.ledger.fill(self.fill(), self.policy)
+        snapshot = self.ledger.snapshot()
+        limit = Decimal(self.policy.document()['max_position_usd'])
+        allocation = limit - Decimal(snapshot['positions'][0]['cost_basis_usd']) + Decimal('0.00000001')
+        with localcontext(prec=3):
+            reasons = allocation_reasons(snapshot, [{'symbol': 'TEST', 'allocation_usd': str(allocation)}], self.policy)
+
+        self.assertIn('aggregate_position_limit_exceeded', reasons)
+
     def test_concurrent_connections_cannot_exceed_aggregate_position_limit(self):
         self.ledger.fill(self.fill(quantity='3',fee='0'))
         self.mark('100')
