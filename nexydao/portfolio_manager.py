@@ -1,6 +1,7 @@
 """AI allocation reasoning; no accounting mutation or execution capability."""
 import copy
 import json
+from decimal import Decimal, localcontext
 from .records import TEXT, REFERENCES, schema, validate, validate_references
 from .portfolio import allocation_reasons, PortfolioError
 from .market import check_evidence_freshness
@@ -52,6 +53,7 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
         spec['properties']['allocations']['items']['properties']['symbol']['enum']=sorted(set(quotes.values()))
     else:
         spec['properties']['abstain_reason']['minLength']=1
+    input_cash = Decimal(context['account']['available_cash_after_api_estimate_usd'])
     plan=provider.decide(run,'portfolio_manager',instructions,context,spec)
     validate(plan,spec)
     seen=set()
@@ -69,11 +71,11 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
     reasons.extend(quote_liquidity.reasons(plan['allocations'],snapshot))
     # The manager's own call is now charged: reconcile using its input funding
     # view, then independently check current funding after that actual expense.
-    from decimal import Decimal
-    proposed_cash=Decimal(context['account']['available_cash_after_api_estimate_usd'])-sum(
-        (Decimal(str(a['allocation_usd'])) for a in plan['allocations']),Decimal(0))
-    if abs(Decimal(str(plan['cash_target_usd']))-proposed_cash)>Decimal('0.01'):
-        reasons.append('portfolio_cash_target_not_reconciled')
+    with localcontext(prec=50):
+        proposed_cash = input_cash - sum(
+            (Decimal(str(a['allocation_usd'])) for a in plan['allocations']), Decimal(0))
+        if abs(Decimal(str(plan['cash_target_usd'])) - proposed_cash) > Decimal('0.01'):
+            reasons.append('portfolio_cash_target_not_reconciled')
     if reasons: raise PortfolioError(reasons[0])
     policy.assert_current()
     ledger.assert_revision(revision)
