@@ -22,7 +22,7 @@ implementation order: independent work can proceed while broker access is blocke
 | R1 | Remaining research/quote-backed advisory and paid revision acceptance | Planned; initial live paths exist |
 | R2 | Broader approved evidence and supported narrative/contradiction checks | Planned; typed SEC checks exist |
 | R3 | Scoped FX/tax/corporate-action and portfolio accounting completion | Planned; USD simulation exists |
-| R4 | Portfolio liquidity/stress enforcement and complete aggregate-risk acceptance | Planned; diagnostic reports exist |
+| R4 | Portfolio liquidity/stress enforcement and complete aggregate-risk acceptance | In progress; PR #32 projected-stress and persistent simulation commitment limits; market liquidity/full aggregate acceptance remain |
 | E1 | Narrow paper executor with permits, price/quantity bounds and idempotency | Locked until prerequisites |
 | E2 | Execution ambiguity, partial fills, cancellation and crash/restart recovery | Locked until E1 |
 | O1 | Bounded scheduling, health/alerts and tested backup/restore | Planned |
@@ -36,7 +36,9 @@ remaining count. PR #29 adds typed execution/fee observations inside D2 without
 closing full D2 acceptance. PR #30 adds order-prefix/status visibility and diagnostic
 integration, also without closing D2. PR #31 adds public state and three-view
 cross-checks inside D3, without closing lifecycle/reservation acceptance.
-Updated estimate after PR #31: **13–18 further PRs**,
+PR #32 adds binding simulation stress and retained active-hold limits inside R4/D3,
+without closing market-liquidity or actual monetary-reservation acceptance.
+Updated estimate after PR #32: **13–18 further PRs**,
 with 13 open delivery packages; this replaces the earlier 13-PR point estimate.
 PR #26 was an additional
 corrective PR inside S2: inactive one-shot services lost their systemd timestamps,
@@ -45,9 +47,9 @@ S3 is split because funding/reconciliation and independent authorization inputs
 are not yet accepted: PR #27 exercises the protocol without granting orders; its
 remaining accepted-evidence integration and deployed identity acceptance stay open.
 The correction, two S3 foundation slices and D2/D3 data foundations have consumed
-eight PRs after #23 while closing two packages. At least one further PR per remaining
-package projects 21 total after #23; allowing further integration/failure splits
-gives about 21–26 total, beyond the original 12–18 range. The scope has not expanded;
+nine PRs after #23 while closing two packages. At least one further PR per remaining
+package projects 22 total after #23; allowing further integration/failure splits
+gives about 22–27 total, beyond the original 12–18 range. The scope has not expanded;
 the estimate underestimated implementation/acceptance splits. Report future changes
 explicitly rather than count partial packages as complete.
 Proceed with data acceptance before further signer deployment. Scope is unchanged. Boot/sustained recovery stay

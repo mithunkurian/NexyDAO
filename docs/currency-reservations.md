@@ -139,6 +139,10 @@ That is an operations constraint, not a completed autonomy feature.
 
 ## Acceptance and checklist status
 
+PR #32 adds [persistent active-hold limits and new-risk stress enforcement](commitment-risk.md).
+Legacy holds without saved limits remain encumbered and cannot deploy new risk;
+explicit release/replan is required. No broker reservation is created by this change.
+
 Held-fill implementation `09be8e3` passed all 222 offline tests locally and the
 isolated demo. Tests include separate notional/fee budgets, partial fills and
 release, terminal consumption, same-ID retries, concurrency, missing audit links,

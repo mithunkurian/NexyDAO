@@ -8,8 +8,49 @@ from decimal import Decimal, localcontext, ROUND_UP
 from .market import canonical
 from .owner_policy import amount
 from .portfolio import PortfolioError, allocation_reasons, QUANTUM
+from .ibkr import ProbeError
 
 FIELDS={'id','proposal_sha256','symbol','notional_usd','fee_usd','fee_currency'}
+
+
+def limit_profiles(db):
+    """Validate stored contexts; absent legacy profiles never release a hold."""
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='simulation_reservation_limits'").fetchone():return {}
+    rows=db.execute('SELECT reservation_id,CASE WHEN length(payload)<=4000 THEN payload END,digest FROM simulation_reservation_limits LIMIT 1001').fetchall()
+    if len(rows)>1000:raise PortfolioError('simulation_reservation_history_limit')
+    result={}
+    from .allocation import AllocationConfig
+    def unique(pairs):
+        value={}
+        for key,item in pairs:
+            if key in value:raise PortfolioError('simulation_reservation_limits_corrupt')
+            value[key]=item
+        return value
+    for identifier,raw,digest in rows:
+        try:data=json.loads(raw,object_pairs_hook=unique)
+        except (ValueError,TypeError,RecursionError):raise PortfolioError('simulation_reservation_limits_corrupt') from None
+        original=db.execute('SELECT digest FROM simulation_reservations WHERE id=?',(identifier,)).fetchone()
+        if (not isinstance(data,dict) or set(data)!={'reservation_id','request_sha256','allocation','risk_model_version'}
+                or data['reservation_id']!=identifier or original is None or data['request_sha256']!=original[0]
+                or type(data['risk_model_version']) is not int or data['risk_model_version']!=1
+                or hashlib.sha256(canonical(data)).hexdigest()!=digest
+                or not isinstance(data['allocation'],dict) or set(data['allocation'])!={'capital_usd','fee_reserve_usd'}):
+            raise PortfolioError('simulation_reservation_limits_corrupt')
+        try:AllocationConfig(**data['allocation']).document()
+        except (ValueError,TypeError,ProbeError):raise PortfolioError('simulation_reservation_limits_corrupt') from None
+        result[identifier]=data
+    return result
+
+
+def enforce_commitment_limits(snapshot,policy,settings,additional=Decimal(0)):
+    gross=Decimal(snapshot['gross_risk_exposure_usd'])
+    committed=Decimal(snapshot['simulation_planning_reserved_usd'])
+    costs=Decimal(snapshot['api_expense_estimate_or_reserved_usd'])
+    for envelope in settings:
+        cap,buffer=Decimal(envelope['capital_usd']),Decimal(envelope['fee_reserve_usd'])
+        if gross+committed+additional+costs+buffer>cap:raise PortfolioError('simulation_allocation_cap_exceeded')
+        if Decimal(snapshot['available_cash_after_api_estimate_usd'])-additional-buffer<amount(policy.document()['min_cash_reserve_usd']):
+            raise PortfolioError('simulation_fee_buffer_or_cash_reserve_breached')
 
 
 def validate_request(data):
@@ -27,6 +68,7 @@ def validate_request(data):
 def active_holds(db):
     if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='simulation_reservations'").fetchone():
         return []
+    profiles=limit_profiles(db)
     rows=db.execute('SELECT id,CASE WHEN length(payload)<=4000 THEN payload END,digest,status FROM simulation_reservations LIMIT 1001').fetchall()
     events=db.execute('SELECT reservation_id,action FROM simulation_reservation_events ORDER BY sequence LIMIT 2001').fetchall()
     if len(rows)>1000 or len(events)>2000: raise PortfolioError('simulation_reservation_history_limit')
@@ -78,7 +120,8 @@ def active_holds(db):
         if replay[identifier]!=status:
             raise PortfolioError('simulation_reservation_audit_mismatch')
         if status=='active':held.append({'id':identifier,'symbol':data['symbol'],'total_usd':str(notional+fee),
-                                          'notional_usd':str(notional),'fee_usd':str(fee)})
+                                          'notional_usd':str(notional),'fee_usd':str(fee),
+                                          'allocation_limits':profiles[identifier]['allocation'] if identifier in profiles else None})
     return held
 
 
@@ -105,6 +148,8 @@ class Reservations:
             action TEXT NOT NULL,created REAL NOT NULL);
         CREATE TABLE IF NOT EXISTS simulation_reservation_fills (
             fill_id TEXT PRIMARY KEY,reservation_id TEXT NOT NULL,proposal_sha256 TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS simulation_reservation_limits (
+            reservation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,digest TEXT NOT NULL);
         ''')
 
     def reserve(self,data,policy,allocation):
@@ -112,28 +157,29 @@ class Reservations:
         digest=hashlib.sha256(canonical(data)).hexdigest()
         self.db.execute('BEGIN IMMEDIATE')
         try:
-            policy.assert_current();active_holds(self.db)
+            policy.assert_current();holds=active_holds(self.db);profiles=limit_profiles(self.db)
             old=self.db.execute('SELECT digest,status,policy_digest FROM simulation_reservations WHERE id=?',(data['id'],)).fetchone()
             if old:
                 if old[0]!=digest:raise PortfolioError('conflicting_reservation_id')
                 if old[1]=='active' and old[2]!=policy.digest:raise PortfolioError('active_reservation_policy_changed')
+                if old[1]=='active':
+                    if data['id'] not in profiles:raise PortfolioError('legacy_reservation_limits_missing')
+                    if profiles[data['id']]['allocation']!=settings:raise PortfolioError('active_reservation_limits_changed')
                 self.db.rollback()
                 return {'status':'already_'+old[1],'id':data['id'],'execution_authorized':False,'broker_funds_reserved':False}
             if self.db.execute('SELECT 1 FROM simulation_reservations WHERE status=? AND policy_digest!=?',('active',policy.digest)).fetchone():
                 raise PortfolioError('active_reservation_policy_changed')
             snapshot=self.ledger.snapshot()
-            reasons=allocation_reasons(snapshot,[{'symbol':data['symbol'],'allocation_usd':format(total,'f')}],policy)
+            reasons=allocation_reasons(snapshot,[{'symbol':data['symbol'],'allocation_usd':format(total,'f')}],policy,
+                                       projected_fee_usd=amount(data['fee_usd']))
             if reasons:raise PortfolioError(reasons[0])
-            committed=Decimal(snapshot['simulation_planning_reserved_usd'])
-            costs=Decimal(snapshot['api_expense_estimate_or_reserved_usd'])
-            cap,buffer=Decimal(settings['capital_usd']),Decimal(settings['fee_reserve_usd'])
-            gross=Decimal(snapshot['gross_risk_exposure_usd'])
-            if gross+committed+total+costs+buffer>cap:
-                raise PortfolioError('simulation_allocation_cap_exceeded')
-            if Decimal(snapshot['available_cash_after_api_estimate_usd'])-total-buffer<amount(policy.document()['min_cash_reserve_usd']):
-                raise PortfolioError('simulation_fee_buffer_or_cash_reserve_breached')
+            if any(hold['id'] not in profiles for hold in holds):raise PortfolioError('legacy_reservation_limits_missing')
+            enforce_commitment_limits(snapshot,policy,[settings,*(profiles[hold['id']]['allocation'] for hold in holds)],total)
             self.db.execute('INSERT INTO simulation_reservations VALUES(?,?,?,?,?,?)',
                             (data['id'],json.dumps(data,sort_keys=True),digest,'active',policy.digest,snapshot['revision']))
+            profile={'reservation_id':data['id'],'request_sha256':digest,'allocation':settings,'risk_model_version':1}
+            self.db.execute('INSERT INTO simulation_reservation_limits VALUES(?,?,?)',
+                            (data['id'],json.dumps(profile,sort_keys=True),hashlib.sha256(canonical(profile)).hexdigest()))
             self.db.execute('INSERT INTO simulation_reservation_events(reservation_id,action,created) VALUES(?,?,?)',
                             (data['id'],'reserve',time.time()))
             policy.assert_current();self.ledger.assert_revision(snapshot['revision'])
@@ -193,7 +239,10 @@ class Reservations:
             hold=holds[identifier]
             if notional>Decimal(hold['notional_usd']) or fee>Decimal(hold['fee_usd']):
                 raise PortfolioError('reserved_fill_budget_exceeded')
-            result=self.ledger._record_fill(fill,policy,reservation_credit=notional+fee)
+            profiles=limit_profiles(self.db)
+            if any(active not in profiles for active in holds):raise PortfolioError('legacy_reservation_limits_missing')
+            enforce_commitment_limits(self.ledger.snapshot(),policy,[profiles[active]['allocation'] for active in holds])
+            result=self.ledger._record_fill(fill,policy,reservation_credit=notional+fee,reservation_fee_credit=fee)
             self.db.execute('INSERT INTO simulation_reservation_fills VALUES(?,?,?)',(fill['id'],identifier,proposal))
             self.db.execute('INSERT INTO simulation_reservation_events(reservation_id,action,created) VALUES(?,?,?)',
                             (identifier,'fill:'+fill['id'],time.time()))

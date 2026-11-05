@@ -85,6 +85,9 @@ class Portfolio:
         from .reservations import active_holds
         holds=active_holds(self.db)
         reserved=sum((Decimal(h['total_usd']) for h in holds),Decimal(0))
+        envelopes=[h['allocation_limits'] for h in holds if h['allocation_limits'] is not None]
+        net_cap=min((Decimal(item['capital_usd'])-Decimal(item['fee_reserve_usd']) for item in envelopes),default=None)
+        buffer=max((Decimal(item['fee_reserve_usd']) for item in envelopes),default=Decimal(0))
         by_symbol={}
         for hold in holds:by_symbol[hold['symbol']]=str(Decimal(by_symbol.get(hold['symbol'],'0'))+Decimal(hold['total_usd']))
         equity = cash+unsettled+value-api if complete else None
@@ -94,6 +97,9 @@ class Portfolio:
                 'simulation_planning_reserved_usd':str(reserved),'simulation_planning_reserved_by_symbol':by_symbol,
                 'simulation_planning_notional_usd':str(sum((Decimal(h['notional_usd']) for h in holds),Decimal(0))),
                 'simulation_planning_fee_usd':str(sum((Decimal(h['fee_usd']) for h in holds),Decimal(0))),
+                'simulation_commitment_limits_complete':len(envelopes)==len(holds),
+                'simulation_commitment_net_cap_usd':str(net_cap) if net_cap is not None else None,
+                'simulation_commitment_fee_buffer_usd':str(buffer),
                 'positions': positions, 'realized_pnl_usd': str(realized), 'simulation_fees_usd': str(fees),
                 'api_expense_estimate_or_reserved_usd': str(api), 'valuation_complete': complete,
                 'net_equity_estimate_usd': str(equity) if equity is not None else None,
@@ -101,7 +107,8 @@ class Portfolio:
                 'gross_risk_exposure_usd': str(gross), 'peak_observed_net_equity_usd': str(peak),
                 'drawdown_fraction': str(drawdown) if drawdown is not None else None, 'revision': state[5],
                 'annual_net_target': 0.15, 'annual_net_return_established': False,
-                'risk_limits':{'max_gross_usd':str(MAX_GROSS),'max_drawdown_fraction':str(MAX_DRAWDOWN)},
+                'risk_limits':{'max_gross_usd':str(MAX_GROSS),'max_drawdown_fraction':str(MAX_DRAWDOWN),
+                               'new_risk_model_version':1,'new_risk_stress_decline_fraction':'0.50','max_stressed_drawdown_fraction':'0.10'},
                 'tax_and_fx_model_complete': False, 'execution_enabled': False,
                 'simulation_internal_reconciliation':True, 'broker_reconciliation':False,
                 'accounting_mode': 'USD_simulation_only'}
@@ -167,7 +174,7 @@ class Portfolio:
             self.db.rollback()
             raise
 
-    def _record_fill(self, data, policy, reservation_credit=None):
+    def _record_fill(self, data, policy, reservation_credit=None, reservation_fee_credit=Decimal(0)):
         """Record within the caller's transaction; credit only a validated own hold."""
         if not self.db.in_transaction:
             raise PortfolioError('simulation_fill_transaction_required')
@@ -201,6 +208,10 @@ class Portfolio:
                     -Decimal(snapshot['simulation_planning_reserved_usd'])+credit))
             snapshot['simulation_planning_reserved_usd'] = str(
                 Decimal(snapshot['simulation_planning_reserved_usd'])-credit)
+            snapshot['simulation_planning_notional_usd']=str(
+                Decimal(snapshot['simulation_planning_notional_usd'])-credit+reservation_fee_credit)
+            snapshot['simulation_planning_fee_usd']=str(
+                Decimal(snapshot['simulation_planning_fee_usd'])-reservation_fee_credit)
             by_symbol = dict(snapshot['simulation_planning_reserved_by_symbol'])
             by_symbol[data['symbol']] = str(Decimal(by_symbol[data['symbol']])-credit)
             snapshot['simulation_planning_reserved_by_symbol'] = by_symbol
@@ -214,7 +225,7 @@ class Portfolio:
             if notional>Decimal('1000000000000'): raise PortfolioError('bounded_simulated_notional_required')
             notional=notional.quantize(QUANTUM,rounding=ROUND_UP if data['side']=='buy' else ROUND_DOWN)
             if data['side']=='buy':
-                reasons=allocation_reasons(snapshot,[{'symbol':data['symbol'],'allocation_usd':format(notional+fee,'f')}],policy)
+                reasons=allocation_reasons(snapshot,[{'symbol':data['symbol'],'allocation_usd':format(notional+fee,'f')}],policy,projected_fee_usd=fee)
                 if reasons: raise PortfolioError(reasons[0])
                 cash-=notional+fee
                 held+=qty
@@ -293,7 +304,7 @@ class Portfolio:
             raise
 
 
-def allocation_reasons(snapshot, allocations, policy):
+def allocation_reasons(snapshot, allocations, policy, *, projected_fee_usd=Decimal(0)):
     document=policy.document()
     reasons=[]
     total=Decimal(0)
@@ -317,4 +328,15 @@ def allocation_reasons(snapshot, allocations, policy):
     if allocations and snapshot['positions'] and not snapshot['valuation_complete']: reasons.append('fresh_portfolio_valuation_required')
     if allocations and snapshot['drawdown_fraction'] is not None and Decimal(snapshot['drawdown_fraction'])>=MAX_DRAWDOWN:
         reasons.append('drawdown_limit_exceeded')
+    if allocations:
+        if snapshot.get('simulation_commitment_limits_complete') is False:reasons.append('legacy_reservation_limits_missing')
+        cap=snapshot.get('simulation_commitment_net_cap_usd')
+        if cap is not None and gross+total+Decimal(snapshot['api_expense_estimate_or_reserved_usd'])>Decimal(cap):
+            reasons.append('simulation_allocation_cap_exceeded')
+        buffer=Decimal(snapshot.get('simulation_commitment_fee_buffer_usd','0'))
+        if buffer and Decimal(snapshot['available_cash_after_api_estimate_usd'])-total-buffer<amount(document['min_cash_reserve_usd']):
+            reasons.append('simulation_fee_buffer_or_cash_reserve_breached')
+    if allocations:
+        from .portfolio_risk import projected_stress_reasons
+        reasons.extend(projected_stress_reasons(snapshot,total,projected_fee_usd))
     return sorted(set(reasons))
