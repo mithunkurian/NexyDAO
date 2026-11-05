@@ -25,7 +25,7 @@ implementation order: independent work can proceed while broker access is blocke
 | R4 | Portfolio liquidity/stress enforcement and complete aggregate-risk acceptance | In progress; PR #32 stress/commitment limits, PR #33 immutable quote spread guard; executable depth/full-book liquidity and complete acceptance remain |
 | E1 | Narrow paper executor with permits, price/quantity bounds and idempotency | Locked until prerequisites |
 | E2 | Execution ambiguity, partial fills, cancellation and crash/restart recovery | Locked until E1 |
-| O1 | Bounded scheduling, health/alerts and tested backup/restore | In progress; PR #36 backups, PR #37 health/local alerts, PR #38 finite maintenance ticks; notification delivery, scheduled activation and deployed recovery acceptance remain open |
+| O1 | Bounded scheduling, health/alerts and tested backup/restore | In progress; PR #36 backups, PR #37 health, PR #38 finite ticks, PR #39 bounded Gmail alerts; live credential/delivery, activation and recovery acceptance remain open |
 | O2 | VM/authentication reliability, resource limits and operational reporting | Planned |
 | O3 | Sustained paper evaluation, outcome learning and readiness review | Planned; requires elapsed observation |
 
@@ -43,7 +43,7 @@ certifying executable depth or full-book liquidity. PR #34 adds opt-in market
 public-key consumption and temporary role acceptance; production broker-key
 deployment still remains open. PR #35 adds fresh paired state/execution delta
 diagnostics without certifying interval attribution or closing D3. Updated estimate
-after PR #38: **13–14 further PRs**,
+after PR #39: **about 13 further PRs at minimum**,
 with 13 open delivery packages; this replaces the earlier 13-PR point estimate.
 PR #26 was an additional
 corrective PR inside S2: inactive one-shot services lost their systemd timestamps,
@@ -52,13 +52,11 @@ S3 is split because funding/reconciliation and independent authorization inputs
 are not yet accepted: PR #27 exercises the protocol without granting orders; its
 remaining accepted-evidence integration and deployed identity acceptance stay open.
 The correction, two S3 foundation slices and D2/D3 data foundations have consumed
-fifteen PRs after #23 while closing two packages. At least one further PR per remaining
-package projects 28 total after #23; allowing further integration/failure splits
-gives about 28–29 total, beyond the original 12–18 range. PR #38 consumes one
-of the previous 13–15 remaining allowance without closing O1; with 13 packages
-still open, the revised remaining range is 13–14 rather than simply subtracting
-one from both ends. The projected total lower bound rises from 27 to 28; its
-upper bound remains 29. The scope has not expanded;
+sixteen PRs after #23 while closing two packages. At least one further PR per remaining
+package projects 29 total after #23, beyond the original 12–18 range. PR #39 consumes
+the last split allowance from the previous 13–14 estimate without closing O1.
+Thirteen remaining is now a baseline, with no contingency for further integration
+or acceptance failures. The scope has not expanded;
 the estimate underestimated implementation/acceptance splits. Report future changes
 explicitly rather than count partial packages as complete.
 Proceed with data acceptance before further signer deployment. Scope is unchanged. Boot/sustained recovery stay
@@ -68,6 +66,8 @@ and isolated restore work; PR #37 adds health and local alert diagnostics. Neith
 enables a timer, notification delivery or recurring automation.
 PR #38 adds finite maintenance-only scheduling ticks with durable claims and caps;
 no daemon/timer, paid advisory scheduling or production activation is enabled.
+PR #39 adds the owner's selected Gmail alert path with mocked SMTP validation.
+Private credential provisioning, live delivery and activation remain separate.
 
 Sequencing refinement on 5 November (no scope/count increase): remaining broker
 receipt key migration is paired with D2/D3's broker-data schema integration. S2

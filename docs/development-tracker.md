@@ -55,7 +55,8 @@ open. PR #35 adds fresh paired-delta diagnostics without closing D3.
 PR #36 adds verified audit backups/isolated restore without closing O1.
 PR #37 adds consistent health/local alerts while leaving O1 commissioning open.
 PR #38 adds finite maintenance ticks without closing O1 commissioning.
-**13–14 further PRs after PR #38**, with **13 packages open**. Observed splits project 28–29 total
+PR #39 adds bounded Gmail alert delivery with synthetic transport acceptance.
+**At least 13 further PRs after PR #39**, with **13 packages open**. Observed splits project at least 29 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -63,6 +64,16 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### O1 bounded critical Gmail alerts — 5 November 2026
+
+Branch `codex/critical-operations-email` adds a stopped private delivery ledger,
+pinned Gmail self-alert mailbox, verified TLS and redacted critical code/count
+messages from fresh local health. Durable claims prevent overlap; daily limits,
+cooldown, duplicate suppression and unknown-outcome stop prevent retry spam.
+Fifteen synthetic transport tests; Windows 485 tests, 475 passed/ten Unix-only
+skips. Exact Ubuntu acceptance follows. No email, credential, timer or real source
+access is used in testing. See [delivery scope and prerequisites](operations-email.md).
 
 ### O1 finite maintenance scheduling ticks — 5 November 2026
 
