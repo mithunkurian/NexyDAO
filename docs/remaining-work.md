@@ -1,6 +1,6 @@
 # Remaining work and planned PR packages
 
-Planning snapshot: 29 October 2026, Europe/Stockholm.
+Planning snapshot: 5 November 2026, Europe/Stockholm.
 
 Estimate: **8 substantial implementation PR packages to autonomous paper operation**,
 then **3 separate live-readiness packages**. This is a scope estimate, not a promise
@@ -11,7 +11,7 @@ PR #14 documents completed acceptance and is separate from this future estimate.
 
 ## Autonomous paper operation: eight packages
 
-Checklist status: **P1 blocked/in progress; P3 and P4 in progress**; P2 and P5–P8 planned (existing partial components
+Checklist status: **P1 blocked/in progress; P3, P4 and P5 in progress**; P2 and P6–P8 planned (existing partial components
 remain recorded in the development tracker). No package is struck off yet. After
 each merge, link the PR and strike a package only when all its acceptance gates pass.
 
@@ -52,6 +52,11 @@ broader sources, quote-backed allocation acceptance and autonomous revision
 orchestration remain open. See [revision scope](proposal-revisions.md).
 Implementation `4017611` passed 234 local/Ubuntu tests and an isolated six-review
 synthetic revision fixture; live paid revision acceptance remains pending.
+
+P5's first slice adds a dedicated controller UID egress guard, strict operator
+audit and an offline sandboxed service template. Local tests pass; real service
+installation and full key/identity separation remain open. See
+[controller isolation scope](controller-isolation.md).
 
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |

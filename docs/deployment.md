@@ -15,6 +15,9 @@ file for editable rules. Built-in mandatory constraints apply when unset. See
 The [USD portfolio trial](portfolio.md) uses the same persistent SQLite database and
 cost ledger. Never point simulation fixture commands at real broker execution; these
 commands have no broker capability. Preserve this database across release upgrades.
+The [controller egress/service foundation](controller-isolation.md) supplies a
+separate offline demo identity/template. It is not a migration of this runtime or
+proof of full collector/controller/key isolation.
 
 ## Install and verify
 
