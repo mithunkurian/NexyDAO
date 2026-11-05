@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal, localcontext
 from dataclasses import replace
 from pathlib import Path
+from unittest.mock import patch
 
 from nexydao.cli import DemoProvider
 from nexydao.ibkr import BrokerConfig
@@ -132,6 +133,17 @@ class PortfolioTests(unittest.TestCase):
 
         with self.assertRaisesRegex(PortfolioError, 'older_portfolio_mark'):
             self.mark(bid='95', event=event - 10)
+
+        self.assertEqual(self.ledger.snapshot(), before)
+
+    def test_quote_expiring_after_validation_rolls_back_the_mark(self):
+        self.ledger.fill(self.fill(), self.policy)
+        before = self.ledger.snapshot()
+        event = int(time.time())
+        with patch('nexydao.portfolio.time') as clock:
+            clock.time.return_value = event + 60
+            with self.assertRaisesRegex(PortfolioError, 'portfolio_mark_expired_before_commit'):
+                self.mark(event=event)
 
         self.assertEqual(self.ledger.snapshot(), before)
 
