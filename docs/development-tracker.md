@@ -57,9 +57,12 @@ and acceptance criteria. Small documentation updates accompany those packages.
 Branch `codex/service-isolation-audit` adds a plan-first no-overwrite installer and
 root/operator effective-service audit. It checks identity, protected code/config,
 no private consumer keys, actual successful starts, hardening and kernel egress.
-Local suite: 271 tests, 266 passes/five Unix-only skips on Windows. Ubuntu and real
-service start/restart acceptance remain pending. Existing private runtime is not
-migrated. See [concrete operation/scope](service-isolation-audit.md).
+Local suite: 271 tests, 266 passes/five Unix-only skips on Windows. Ubuntu passed
+all 271 tests on `b310cd6`, and the read-only fresh-install plan passed. Automatic
+approval review rejected persistent root installation pending specific owner
+authorization; no installer mutation ran. Actual service start/restart acceptance
+remains open. Existing private runtime is not migrated.
+See [concrete operation/scope](service-isolation-audit.md).
 
 ### S1/P5 collector-consumer publication — 5 November 2026
 
