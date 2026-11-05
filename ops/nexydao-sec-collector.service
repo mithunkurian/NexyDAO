@@ -5,6 +5,7 @@ After=network-online.target
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 User=nexydao-collector
 Group=nexydao-collector
 WorkingDirectory=/opt/nexydao

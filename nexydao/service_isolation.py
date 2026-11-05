@@ -20,6 +20,7 @@ PRIVATE = Path('/var/lib/nexydao-collector')
 SHARED = Path('/var/lib/nexydao-evidence')
 UNITS = ('nexydao-controller-firewall.service','nexydao-sec-collector.service','nexydao-research-consumer.service')
 PROPERTIES = ('User','Group','SupplementaryGroups','WorkingDirectory','ProtectSystem','ProtectHome',
+              'RemainAfterExit','ActiveState','SubState',
               'NoNewPrivileges','PrivateTmp','PrivateDevices','CapabilityBoundingSet','RestrictAddressFamilies',
               'FragmentPath','DropInPaths','LoadState','Result','ExecMainStatus','ExecMainStartTimestampMonotonic',
               'ExecMainExitTimestampMonotonic')
@@ -49,7 +50,7 @@ def hardened_service(properties,role):
     user='nexydao-collector' if role=='collector' else 'nexydao-controller'
     expected={'User':user,'Group':user,'WorkingDirectory':str(CODE),'ProtectSystem':'strict',
               'ProtectHome':'yes','NoNewPrivileges':'yes','PrivateTmp':'yes','PrivateDevices':'yes',
-              'CapabilityBoundingSet':'','DropInPaths':'','LoadState':'loaded'}
+              'CapabilityBoundingSet':'','DropInPaths':'','LoadState':'loaded','RemainAfterExit':'yes'}
     if any(properties.get(key)!=value for key,value in expected.items()):return False
     families=set(properties.get('RestrictAddressFamilies','').split())
     wanted={'AF_UNIX','AF_INET','AF_INET6'} if role=='collector' else {'AF_UNIX'}
@@ -61,7 +62,8 @@ def last_start_succeeded(properties):
     try:
         start=int(properties['ExecMainStartTimestampMonotonic'])
         end=int(properties['ExecMainExitTimestampMonotonic'])
-        return start>0 and end>=start and properties['Result']=='success' and properties['ExecMainStatus']=='0'
+        return (start>0 and end>=start and properties['Result']=='success' and properties['ExecMainStatus']=='0'
+                and properties['ActiveState']=='active' and properties['SubState']=='exited')
     except (KeyError,ValueError,TypeError):return False
 
 
