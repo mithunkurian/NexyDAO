@@ -12,40 +12,59 @@ import re
 import socket
 import struct
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass,field
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from .ibkr import BrokerConfig, ProbeError, Wire, check_error, paper_account, save_snapshot
+from . import research_signatures as signatures
 
 CONTRACT_REQUEST = 9201
 QUOTE_REQUEST = 9202
 MAX_AGE = 60
 SOURCE = "ibkr_paper_tick_by_tick_bid_ask"
+DOMAIN = b'NexyDAO:market-quote:ed25519:v1\x00'
 
 
 @dataclass(frozen=True)
 class MarketConfig:
     broker: BrokerConfig
-    key_path: Path
+    key_path: Path|None=field(repr=False)
     symbol: str = "SPY"
     snapshot: Path = Path("data/market-quote.json")
+    receipt_mode:str='hmac-sha256'
+    public_path:Path|None=None
+    public_sha256:str=''
+    signing_path:Path|None=field(default=None,repr=False)
+    openssl_path:Path=signatures.DEFAULT_OPENSSL
 
     def __post_init__(self):
         if not self.broker.expected_account:
             raise ValueError("Exact paper-account pin required for market collection")
         if not re.fullmatch(r"[A-Z][A-Z0-9.]{0,11}", self.symbol):
             raise ValueError("Invalid US equity symbol")
+        if self.receipt_mode not in ('hmac-sha256','ed25519'):raise ValueError('Unsupported market receipt mode')
+        if self.receipt_mode=='hmac-sha256' and self.key_path is None:raise ValueError('Private evidence key required')
+        if self.receipt_mode=='ed25519' and (self.public_path is None or not isinstance(self.public_sha256,str)
+                or not re.fullmatch('[0-9a-f]{64}',self.public_sha256)):
+            raise ValueError('Pinned market public key required')
 
     @classmethod
     def from_env(cls):
-        key = os.environ.get("NEXYDAO_EVIDENCE_KEY_FILE", "")
-        if not key:
-            raise ValueError("Private evidence key file required")
-        return cls(BrokerConfig.from_env(), Path(key),
-                   os.environ.get("NEXYDAO_MARKET_SYMBOL", "SPY"),
-                   Path(os.environ.get("NEXYDAO_MARKET_SNAPSHOT", "data/market-quote.json")))
+        mode=os.environ.get('NEXYDAO_MARKET_RECEIPT_MODE','hmac-sha256')
+        if mode not in ('hmac-sha256','ed25519'):raise ValueError('Unsupported market receipt mode')
+        broker=BrokerConfig.from_env();symbol=os.environ.get('NEXYDAO_MARKET_SYMBOL','SPY')
+        snapshot=Path(os.environ.get('NEXYDAO_MARKET_SNAPSHOT','data/market-quote.json'))
+        if mode=='hmac-sha256':
+            key=os.environ.get('NEXYDAO_EVIDENCE_KEY_FILE','')
+            if not key:raise ValueError('Private evidence key file required')
+            return cls(broker,Path(key),symbol,snapshot)
+        public=os.environ.get('NEXYDAO_MARKET_PUBLIC_KEY_FILE','')
+        private=os.environ.get('NEXYDAO_MARKET_SIGNING_KEY_FILE','')
+        return cls(broker,None,symbol,snapshot,mode,Path(public) if public else None,
+                   os.environ.get('NEXYDAO_MARKET_PUBLIC_KEY_SHA256',''),Path(private) if private else None,
+                   Path(os.environ.get('NEXYDAO_OPENSSL_PATH',str(signatures.DEFAULT_OPENSSL))))
 
 
 def canonical(value):
@@ -209,17 +228,34 @@ def collect(config, connector=socket.create_connection, clock=time.time):
 
 
 def run_market_check(config):
-    key = read_key(config.key_path)  # Validate private key before opening a socket.
+    if config.receipt_mode=='ed25519':
+        try:signatures.check_signer(config.signing_path,config.public_path,config.public_sha256,config.openssl_path)
+        except signatures.ReceiptSignatureError:raise ProbeError('market_signer_unavailable') from None
+    else:key=read_key(config.key_path)  # Validate private capability before opening a socket.
     payload = collect(config)
-    receipt = {'payload': payload, 'signature': hmac.new(key, canonical(payload), hashlib.sha256).hexdigest()}
+    if config.receipt_mode=='ed25519':
+        try:receipt=signatures.sign(payload,config.signing_path,config.public_path,config.public_sha256,config.openssl_path,domain=DOMAIN)
+        except signatures.ReceiptSignatureError:raise ProbeError('market_signing_failed') from None
+    else:receipt={'payload':payload,'signature':hmac.new(key,canonical(payload),hashlib.sha256).hexdigest()}
+    if len(json.dumps(receipt,sort_keys=True,indent=2).encode())>16000:raise ProbeError('evidence_size_limit')
+    validate_payload(payload,config.broker.expected_account)
     digest = save_snapshot(config.snapshot, receipt)
     return {'status': 'fresh_paper_quote_collected', 'symbol': config.symbol,
+            'receipt_mode':config.receipt_mode,
             'expires_at': payload['expires_at'], 'snapshot_sha256': digest, 'execution_authorized': False}
 
 
 def load_market_evidence(path, config, now=None):
-    with path.open('rb') as f:
-        raw = f.read(16001)
+    if config.receipt_mode=='ed25519':
+        try:raw=signatures._read(path,16000)
+        except signatures.ReceiptSignatureError:raise ProbeError('market_public_receipt_unavailable') from None
+    else:
+        with path.open('rb') as f:raw=f.read(16001)
+    return market_evidence_from_bytes(raw,config,now)
+
+
+def market_evidence_from_bytes(raw,config,now=None):
+    if not isinstance(raw,bytes) or not raw:raise ProbeError('invalid_market_receipt_json')
     if len(raw) > 16000:
         raise ProbeError('evidence_size_limit')
     def unique(pairs):
@@ -230,11 +266,14 @@ def load_market_evidence(path, config, now=None):
         return result
     try:receipt=json.loads(raw,object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(ValueError()))
     except (ValueError,TypeError,RecursionError):raise ProbeError('invalid_market_receipt_json') from None
-    if not isinstance(receipt, dict) or set(receipt) != {'payload', 'signature'}:
-        raise ProbeError('unsigned_evidence')
-    expected = hmac.new(read_key(config.key_path), canonical(receipt['payload']), hashlib.sha256).hexdigest()
-    if not isinstance(receipt['signature'], str) or not hmac.compare_digest(expected, receipt['signature']):
-        raise ProbeError('evidence_signature_mismatch')
+    if config.receipt_mode=='ed25519':
+        try:signatures.verify(receipt,config.public_path,config.public_sha256,config.openssl_path,domain=DOMAIN)
+        except signatures.ReceiptSignatureError:raise ProbeError('market_public_signature_denied') from None
+    else:
+        if not isinstance(receipt,dict) or set(receipt)!={'payload','signature'}:raise ProbeError('unsigned_evidence')
+        expected=hmac.new(read_key(config.key_path),canonical(receipt['payload']),hashlib.sha256).hexdigest()
+        if not isinstance(receipt['signature'],str) or not hmac.compare_digest(expected,receipt['signature']):
+            raise ProbeError('evidence_signature_mismatch')
     payload = receipt['payload']
     validate_payload(payload, config.broker.expected_account, now)
     if payload['contract']['symbol'] != config.symbol:

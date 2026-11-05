@@ -55,8 +55,9 @@ python3 -m nexydao quote-liquidity-report --market-evidence /private/signed-quot
 ```
 
 This authenticates an existing quote with the exact account/symbol and protected
-HMAC key, then reports the partial screen. No application DB, provider, socket or
-collector is invoked. This is not a public-key quote consumer. Normal advisory
+receipt key or public-key pin, then reports the partial screen. No application DB, provider, socket or
+collector is invoked. PR #34 adds [optional public-key consumption](public-market-quotes.md)
+through explicit market receipt mode selection. Normal advisory
 workflows include the report and independently enforce it despite model prose or
 positive votes. Empty plans/holds can remain valid when no new allocation passes.
 

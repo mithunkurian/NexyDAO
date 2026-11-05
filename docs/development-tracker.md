@@ -50,7 +50,8 @@ lifecycle or monetary-reservation acceptance.
 PR #32 advances R4/D3 simulation enforcement without closing market liquidity or
 actual monetary reservations. PR #33 adds a prospective quote-spread guard while
 leaving executable/full-book liquidity unverified. Updated estimate:
-**13–18 further PRs after PR #33**, with **13 packages open**. Observed splits project 23–28 total
+PR #34 adds opt-in public market receipts; remaining deployment/key boundaries stay
+open. **13–18 further PRs after PR #34**, with **13 packages open**. Observed splits project 24–29 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -58,6 +59,16 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### P5/D3 public market quote consumer — 5 November 2026
+
+Branch `codex/public-market-quotes` adds explicit Ed25519 mode with a dedicated
+domain, independent public DER pin and collector-only signer. Public quote consumers
+ignore legacy/signing secrets, preserving quote evidence and existing read/mark/
+advisory/spread checks. Unknown modes or invalid envelopes fail without fallback.
+Local suite: 389 tests, 382 passed/seven Unix-only skips. Ubuntu and temporary
+two-UID report/mark/advisory acceptance follow. No production deployment or broker
+access is included. See [scope and remaining gates](public-market-quotes.md).
 
 ### R4 quote-backed spread screen — 5 November 2026
 
