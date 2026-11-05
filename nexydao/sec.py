@@ -20,6 +20,7 @@ from pathlib import Path
 
 from .ibkr import save_snapshot
 from .market import canonical, read_key
+from .research_signatures import DEFAULT_OPENSSL, ReceiptSignatureError
 
 HOST = 'data.sec.gov'
 CONCEPTS = ('Assets', 'NetIncomeLoss')
@@ -58,13 +59,25 @@ def universe(value):
 @dataclass(frozen=True)
 class ResearchConfig:
     issuers: list
-    key_path: Path
+    key_path: Path | None
     user_agent: str = field(default='', repr=False)
     snapshot: Path = Path('data/sec-research.json')
     concepts: tuple = CONCEPTS
+    receipt_mode: str = 'hmac-sha256'
+    signing_key_path: Path | None = field(default=None, repr=False)
+    public_key_path: Path | None = None
+    public_key_sha256: str = ''
+    openssl_path: Path = DEFAULT_OPENSSL
 
     def __post_init__(self):
         universe(self.issuers)
+        if self.receipt_mode not in ('hmac-sha256','ed25519'):
+            raise ValueError('Unsupported research receipt mode')
+        if self.receipt_mode == 'hmac-sha256' and self.key_path is None:
+            raise ValueError('Research HMAC key required')
+        if self.receipt_mode == 'ed25519' and (self.public_key_path is None
+                or not re.fullmatch('[0-9a-f]{64}',self.public_key_sha256)):
+            raise ValueError('Pinned research public key required')
         if (not isinstance(self.concepts, (tuple, list)) or not self.concepts
                 or any(not isinstance(c, str) or c not in APPROVED_CONCEPTS for c in self.concepts)
                 or len(set(self.concepts)) != len(self.concepts)
@@ -77,12 +90,17 @@ class ResearchConfig:
     def from_env(cls):
         raw = os.environ.get('NEXYDAO_RESEARCH_UNIVERSE', '[]')
         key = os.environ.get('NEXYDAO_EVIDENCE_KEY_FILE', '')
+        mode = os.environ.get('NEXYDAO_RESEARCH_RECEIPT_MODE','hmac-sha256')
         concepts = os.environ.get('NEXYDAO_RESEARCH_CONCEPTS', json.dumps(CONCEPTS))
-        if len(raw) > 2048 or len(concepts) > 1024 or not key:
+        if len(raw) > 2048 or len(concepts) > 1024 or (mode == 'hmac-sha256' and not key):
             raise ValueError('Bounded research universe and evidence key required')
-        return cls(json.loads(raw), Path(key), os.environ.get('NEXYDAO_SEC_USER_AGENT', ''),
+        return cls(json.loads(raw), Path(key) if key and mode == 'hmac-sha256' else None, os.environ.get('NEXYDAO_SEC_USER_AGENT', ''),
                    Path(os.environ.get('NEXYDAO_RESEARCH_SNAPSHOT', 'data/sec-research.json')),
-                   json.loads(concepts))
+                   json.loads(concepts), mode,
+                   Path(os.environ['NEXYDAO_RESEARCH_SIGNING_KEY_FILE']) if os.environ.get('NEXYDAO_RESEARCH_SIGNING_KEY_FILE') else None,
+                   Path(os.environ['NEXYDAO_RESEARCH_PUBLIC_KEY_FILE']) if os.environ.get('NEXYDAO_RESEARCH_PUBLIC_KEY_FILE') else None,
+                   os.environ.get('NEXYDAO_RESEARCH_PUBLIC_KEY_SHA256',''),
+                   Path(os.environ.get('NEXYDAO_OPENSSL_PATH',str(DEFAULT_OPENSSL))))
 
 
 def source_path(cik, concept=None):
@@ -253,7 +271,11 @@ def extract(raw, issuer, concept, now):
 
 
 def collect(config, getter=fetch, clock=time.time, sleeper=time.sleep):
-    read_key(config.key_path)  # Reject bad/private-key permissions before network.
+    if config.receipt_mode == 'ed25519':
+        from .research_signatures import check_signer
+        check_signer(config.signing_key_path,config.public_key_path,config.public_key_sha256,config.openssl_path)
+    else:
+        read_key(config.key_path)  # Reject bad/private-key permissions before network.
     started = int(clock())
     facts, sources = [], []
     def get(path):
@@ -324,8 +346,13 @@ def validate_receipt(payload, config, now):
 
 def run_source_check(config):
     payload = collect(config)
-    signature = hmac.new(read_key(config.key_path), canonical(payload), hashlib.sha256).hexdigest()
-    digest = save_snapshot(config.snapshot, {'payload': payload, 'signature': signature})
+    if config.receipt_mode == 'ed25519':
+        from .research_signatures import sign
+        receipt=sign(payload,config.signing_key_path,config.public_key_path,config.public_key_sha256,config.openssl_path)
+    else:
+        signature = hmac.new(read_key(config.key_path), canonical(payload), hashlib.sha256).hexdigest()
+        receipt={'payload':payload,'signature':signature}
+    digest = save_snapshot(config.snapshot, receipt)
     return {'status': 'sec_filing_observations_collected', 'issuers': len(config.issuers),
             'facts': len(payload['facts']), 'snapshot_sha256': digest, 'execution_authorized': False}
 
@@ -336,12 +363,17 @@ def load_research_evidence(path, config, now=None):
         raw = f.read(64001)
     if len(raw) > 64000:
         raise SourceError('research_receipt_size_limit')
-    receipt = json.loads(raw)
-    if not isinstance(receipt, dict) or set(receipt) != {'payload', 'signature'}:
-        raise SourceError('unsigned_research_receipt')
-    signature = hmac.new(read_key(config.key_path), canonical(receipt['payload']), hashlib.sha256).hexdigest()
-    if not isinstance(receipt['signature'], str) or not hmac.compare_digest(signature, receipt['signature']):
-        raise SourceError('research_signature_mismatch')
+    receipt = decode(raw)
+    if config.receipt_mode == 'ed25519':
+        from .research_signatures import verify
+        try:verify(receipt,config.public_key_path,config.public_key_sha256,config.openssl_path)
+        except ReceiptSignatureError:raise SourceError('research_public_signature_rejected') from None
+    else:
+        if not isinstance(receipt, dict) or set(receipt) != {'payload', 'signature'}:
+            raise SourceError('unsigned_research_receipt')
+        signature = hmac.new(read_key(config.key_path), canonical(receipt['payload']), hashlib.sha256).hexdigest()
+        if not isinstance(receipt['signature'], str) or not hmac.compare_digest(signature, receipt['signature']):
+            raise SourceError('research_signature_mismatch')
     payload = receipt['payload']
     validate_receipt(payload, config, now)
     hashes = {s['path']: s['sha256'] for s in payload['sources']}
@@ -349,6 +381,7 @@ def load_research_evidence(path, config, now=None):
              'source_url': 'https://' + HOST + source_path(f['cik'], f['concept']),
              'observed_at': f['filed'], 'summary': json.dumps(f, sort_keys=True), 'fact': f,
              'verification': 'verified_filing_observation', 'expires_at': payload['expires_at'],
+             'receipt_authentication': config.receipt_mode,
              'raw_sha256': hashes[source_path(f['cik'], f['concept'])]} for f in payload['facts']]
 
 

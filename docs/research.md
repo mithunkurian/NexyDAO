@@ -30,7 +30,10 @@ days and its period end at most 550 days before filing. Signed receipts expire a
 
 Only typed observations enter model context. Source names, labels, descriptions, HTML
 and arbitrary prose are excluded. SHA256 digests record retrieved bytes. Local HMAC
-integrity is not an SEC signature, an external audit or independent economic truth.
+integrity (or the opt-in collector Ed25519 signature) is not an SEC signature,
+an external audit or independent economic truth. See
+[public-key research receipt scope](public-key-research-receipts.md) for verification
+without sharing the collector signing secret with a SEC consumer.
 
 Researchers receive the same facts and prior memory, without each other's report.
 Every candidate requires known evidence IDs, a matching issuer, numeric value
