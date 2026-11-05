@@ -66,7 +66,8 @@ feed allocation and cash/position diagnostics; unmatched/conflicting/changed ord
 add blockers and all activity still forces zero planning. Configured typed input
 is never replaced by legacy fallback. No broker commands are added beyond the
 existing nonbinding current-order query. Local suite: 330 tests run, 324 passed
-with six Unix-only skips; Ubuntu evidence follows. No real account/history query,
+with six Unix-only skips. Implementation `bf0ad13` passed all 330 Ubuntu tests in
+an isolated release, including all 20 typed/integration tests. No real account/history query,
 paid call or deployed/runtime change is included.
 See [scope and remaining acceptance](typed-order-visibility.md).
 

@@ -471,3 +471,23 @@ calls, installed service, broker writes, production key/budget or simulation sta
 was changed. D2 remains open for live/coverage acceptance, order/manual/transfer
 data and remaining public-key integration. S3, funding, reconciliation and execution
 remain gated. See [exact tested archive and scope](execution-observations.md).
+
+## Typed order-prefix/status diagnostic integration, 2026-11-05
+
+PR #30 implementation `bf0ad13` passed all 330 Ubuntu tests; Windows passed 324
+with six Unix-only skips. Twenty new synthetic-session tests cover stable stock
+order prefixes, complete status-message decoding, exact positive-permanent/client/
+order identity links, cross-client order-ID reuse, duplicates/reordering, unmatched
+or conflicting status observations, quantity/version changes, activity-index/digest
+binding, scope/freshness, dedicated Ed25519/public-only verification, cross-domain/
+legacy rejection and failed-save preservation. Allocation persists receipt/link
+provenance and blockers; cash/position reconciliation reports the same diagnostics.
+Stale order evidence is rejected even with fresh state; activity stays zero-plan.
+
+Advanced order fields are count/digest only and deliberately unverified. Synthetic
+tails are not proof of complete open-order wire validity. Manual/reservation/full
+account/atomic/funding/execution gates remain false. No real account query, owner
+history review, paid call, deployed service or production runtime change occurred.
+D2 still needs complete semantics/coverage, transfers and appropriate live/read-only
+acceptance; D3 owns actual monetary reservations and lifecycle reconciliation.
+See [exact archive, operator selection and limits](typed-order-visibility.md).

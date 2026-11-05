@@ -94,8 +94,13 @@ quantity/version changes, schema/digest/index binding, expiry, public-only and
 cross-domain verification, signer-before-query rejection, failed-save preservation,
 host guard, database/provider/socket-free reports, typed-input preference without
 fallback and conservative persisted allocation/reconciliation diagnostics.
-Windows: 330 tests run, 324 passed and six Unix-only skips. Ubuntu and exact tested
-commit/archive evidence follow after acceptance.
+Windows: 330 tests run, 324 passed and six Unix-only skips. Implementation
+`bf0ad13` passed all 330 Ubuntu tests in isolated release
+`releases/typed-orders-bf0ad13`, including all 20 new typed/integration tests.
+Exact tested source archive SHA-256:
+`d4c55dd35c41ad928a54d55414220fe37d3fddd800954ca49141c902e75a2810`.
+This validates synthetic stable-prefix/status and signature/diagnostic behavior,
+not real broker compatibility, the complete advanced order layout or manual coverage.
 
 No account history, real broker query, paid call, runtime key, deployed service or
 production budget is used in this development slice. D2 still needs complete order
