@@ -115,6 +115,13 @@ Research first, then collect a quote and use `deliberate --market-evidence PATH
 --research-evidence PATH`. Completed research is available in bounded AI memory.
 That second cycle has six calls and cannot execute. Manual `--evidence` stays unverified.
 
+For advisory commands, repeat `--research-evidence` to supply up to three signed
+receipts under the same configured issuer and concept scope. If receipts share a
+fact, the CLI keeps the verified observation with the latest expiry. The combined
+input is limited to ten items. Conflicting values for the same reporting context
+stop the run before model calls. Receipt inspection and publication each take one
+receipt.
+
 ## Acceptance and deployment
 
 On 29 October 2026, merged PR #17 (`c28a0ec`) was deployed into the isolated VM
