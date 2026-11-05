@@ -234,7 +234,8 @@ def extract(raw, issuer, concept, now):
     if (not isinstance(data, dict) or type(data.get('cik')) is not int or data['cik'] != int(issuer['cik'])
             or data.get('taxonomy') != 'us-gaap' or data.get('tag') != concept):
         raise SourceError('source_identity_mismatch')
-    rows = data.get('units', {}).get('USD')
+    units = data.get('units')
+    rows = units.get('USD') if isinstance(units, dict) else None
     if not isinstance(rows, list) or not 1 <= len(rows) <= 5000:
         raise SourceError('bounded_usd_facts_required')
     candidates = []
@@ -259,12 +260,14 @@ def extract(raw, issuer, concept, now):
                     raise
                 continue
             raise
-        candidates.append(fact)
+        # Compare parsed dates while preserving the source fields in the receipt.
+        start = date.fromisoformat(fact['start']) if fact['start'] else date.min
+        context = (date.fromisoformat(fact['end']), date.fromisoformat(fact['filed']), start)
+        candidates.append((context, fact))
     if not candidates:
         raise SourceError('no_recent_filing_fact')
-    latest = max(candidates, key=lambda f: (f['end'], f['filed'], f['start']))
-    context = (latest['end'], latest['filed'], latest['start'])
-    same = [f for f in candidates if (f['end'], f['filed'], f['start']) == context]
+    latest_context = max(context for context, _ in candidates)
+    same = [fact for context, fact in candidates if context == latest_context]
     if len({numeric(f['value']) for f in same}) != 1:
         raise SourceError('contradictory_source_facts')
     return max(same, key=lambda f: f['accession'])

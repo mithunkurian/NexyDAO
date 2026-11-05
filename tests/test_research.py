@@ -187,6 +187,7 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(result['start'], self.start)
         duplicate = copy.deepcopy(document['units']['USD'][0])
         duplicate['val'] += 1
+        duplicate['filed'] = duplicate['filed'].replace('-', '')
         document['units']['USD'].append(duplicate)
         with self.assertRaisesRegex(SourceError, 'contradictory_source_facts'):
             extract(json.dumps(document).encode(), self.issuer, 'NetIncomeLoss', self.now)
