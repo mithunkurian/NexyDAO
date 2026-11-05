@@ -89,6 +89,25 @@ class Tests(unittest.TestCase):
             provider.decide(self.store.start(), "ceo", "", {}, PROPOSAL)
         self.assertEqual(calls, [])
 
+    def test_api_settlement_retry_cannot_replace_reported_charge(self):
+        ticket = self.store.reserve(self.store.start(), 'ceo', 'test', Decimal('0.2'), Decimal('1'))
+        usage = {'input_tokens': 10, 'output_tokens': 5}
+        self.store.settle(ticket, Decimal('0.1'), usage, 'response')
+
+        other = Store(self.path)
+        try:
+            other.settle(ticket, Decimal('0.10'), dict(reversed(list(usage.items()))), 'response')
+            with self.assertRaisesRegex(ValueError, 'Conflicting API settlement'):
+                other.settle(ticket, Decimal('0.01'), usage, 'response')
+            with self.assertRaisesRegex(ValueError, 'Unknown API reservation'):
+                other.settle('missing', Decimal('0.01'), usage, 'response')
+            with self.assertRaisesRegex(ValueError, 'Lifetime API budget exhausted'):
+                other.reserve('later', 'ceo', 'test', Decimal('0.05'), Decimal('0.12'))
+        finally:
+            other.close()
+
+        self.assertEqual(Decimal(self.store.costs()['estimated_or_reserved_usd']), Decimal('0.1'))
+
     def test_transport_failure_retains_reservation(self):
         def transport(*args):
             raise TimeoutError()
