@@ -88,6 +88,7 @@ def decode(raw):
 def _validate_payload(payload, intent, policy, now):
     if not isinstance(payload,dict) or set(payload)!=PAYLOAD_FIELDS:
         raise PermitError('invalid_shadow_payload')
+    validate_intent(payload['intent'],policy)
     if (type(payload['schema_version']) is not int or payload['schema_version']!=1
             or payload['purpose']!=PURPOSE or payload['mode']!='paper'
             or payload['intent']!=intent or payload['policy_sha256']!=policy.digest

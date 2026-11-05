@@ -66,7 +66,8 @@ Tests use generated temporary keys, a fabricated account/contract and synthetic
 digests. They cover public-only verification, SEC domain separation, exact-field
 binding, malformed/duplicate JSON, forged signatures, policy changes, expiry
 after verification, stopped/default/rearmed state, persistent replay denial,
-six concurrent redemption attempts with one winner, capacity and unchanged order
+six concurrent redemption attempts with one winner, strict signed integer types,
+capacity and unchanged order
 locks. No paid call, production key, service installation, broker or cost DB is used.
 
 Before S3 can close: independently validate accepted evidence and votes, bind actual
