@@ -15,7 +15,7 @@ implementation order: independent work can proceed while broker access is blocke
 | --- | --- | --- |
 | S1 | SEC collector/consumer identity boundary, publication and protected configuration | Complete; PR #24 merged, 262 Ubuntu tests and two-UID acceptance |
 | S2 | SEC role service deployment, protected configuration and bounded startup/restart audit | Complete; PR #25/#26 merged, all 12 installed audit checks passed |
-| S3 | Independent policy authorizer, signed permits, nonce/replay checks and kill switch | In progress; PR #27 shadow protocol, separate authorizer/evidence integration still required |
+| S3 | Independent policy authorizer, signed permits, nonce/replay checks and kill switch | In progress; PR #27 shadow protocol, PR #28 external owner control/identity fixture; accepted evidence and deployed authorizer still required |
 | D1 | Verified current cash, currencies/fees and funding gate closure | Blocked by broker acceptance |
 | D2 | Full orders/fills/commissions/transfers, manual visibility and public-key broker receipt integration | Planned; partial readers exist |
 | D3 | Broker cash/position lifecycle reconciliation, remaining broker key boundaries and actual monetary reservations | Planned |
@@ -30,16 +30,19 @@ implementation order: independent work can proceed while broker access is blocke
 | O3 | Sustained paper evaluation, outcome learning and readiness review | Planned; requires elapsed observation |
 
 Current planning count: **2/15 packages closed** after PR #26 merged, leaving
-**13 delivery packages**. PR #27 adds a shadow permit foundation inside S3; it
-does not close S3 or reduce that remaining count. Assuming one further PR per
-remaining package, about **13 PRs remain after PR #27**. PR #26 was an additional
+**13 delivery packages**. PR #27/#28 add a shadow permit foundation and temporary
+identity/owner-control acceptance inside S3; they do not close S3 or reduce that
+remaining count. Assuming one further PR per remaining package, about **13 PRs
+remain after PR #28**. PR #26 was an additional
 corrective PR inside S2: inactive one-shot services lost their systemd timestamps,
 so retained successful completion state and stricter state checks were necessary.
 S3 is split because funding/reconciliation and independent authorization inputs
 are not yet accepted: PR #27 exercises the protocol without granting orders; its
-remaining integration/identity acceptance stays open. These two extra PRs bring
-the projected total after PR #23 to about 17, within the original 12–18 range;
-further findings may change it. Scope is unchanged. Boot/sustained recovery stay
+remaining accepted-evidence integration and deployed identity acceptance stay open.
+The correction plus two S3 foundation slices bring the projected total after
+PR #23 to about 18, at the top of the original 12–18 range; this assumes one more
+PR for S3 and may be optimistic. Further splits/findings will increase it explicitly.
+Proceed with data acceptance before further signer deployment. Scope is unchanged. Boot/sustained recovery stay
 in O2, and live advisory model gates stay in R1. Execution remains off.
 
 Sequencing refinement on 5 November (no scope/count increase): remaining broker

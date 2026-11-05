@@ -51,8 +51,11 @@ Unix ledger files must be regular, single-link, current-UID-owned 0600 files und
 a current-UID-owned 0700 direct parent, without symlink path components. Windows
 ACLs remain an operator requirement. The code and ledger are trusted; administrators,
 same-UID actors and writable ancestors are not isolated by this check. The shadow
-issuer and consumer currently use the same ledger authority. This is not proof of
-separate OS identities, an IPC boundary or an independent production kill switch.
+issuer and consumer share the same ledger authority in the original local mode.
+PR #28 adds an optional protected external owner-control mechanism and separate
+signer/consumer fixture; see [its exact scope](permit-authority-boundary.md).
+Neither mode establishes a deployed authorizer, IPC boundary or hardened
+independent production kill switch.
 
 Wall-clock rollback and restoring/replacing a ledger can revive expired or unused
 state. Independent time/rollback/restore controls, protected role provisioning,

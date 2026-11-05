@@ -107,8 +107,9 @@ class ShadowLedger:
     File protection is enforced on Unix; Windows ACLs require operator setup.
     The database and code are trusted; rollback/restore is not prevented here.
     """
-    def __init__(self,path):
+    def __init__(self,path,*,authority=None):
         self.path=Path(path).absolute()
+        self.authority=authority
 
     def _metadata(self, file=True):
         parent=self.path.parent
@@ -149,10 +150,12 @@ class ShadowLedger:
             connection.execute('CREATE TABLE consumed (nonce TEXT PRIMARY KEY, payload_sha256 TEXT NOT NULL, consumed_at INTEGER NOT NULL)')
 
     def stop(self):
+        if self.authority is not None:raise PermitError('shadow_external_owner_control_required')
         with self._transaction() as connection:
             connection.execute('UPDATE control SET killed=1,epoch=?,policy=? WHERE id=1',(secrets.token_hex(16),''))
 
     def arm(self,policy):
+        if self.authority is not None:raise PermitError('shadow_external_owner_control_required')
         policy.assert_current()
         with self._transaction() as connection:
             connection.execute('UPDATE control SET killed=0,epoch=?,policy=? WHERE id=1',(secrets.token_hex(16),policy.digest))
@@ -165,15 +168,25 @@ class ShadowLedger:
         return rows[0][1]
 
     def epoch(self,policy):
+        if self.authority is not None:return self.authority.epoch(policy)
         with self._transaction() as connection:return self._active(connection,policy)
+
+    @contextmanager
+    def _epoch_guard(self,policy):
+        if self.authority is None:yield None
+        else:
+            with self.authority.locked_epoch(policy) as epoch:yield epoch
 
     def _consume(self,payload,intent,policy,now=None):
         # A post-verification private operation; public entry point is consume_shadow.
-        with self._transaction() as connection:
+        # The external shared lock spans the SQLite commit, so a successful
+        # owner stop cannot interleave between the final check and consumption.
+        with self._epoch_guard(policy) as external_epoch, self._transaction() as connection:
             policy.assert_current()
             validate_intent(intent,policy)
             _validate_payload(payload,intent,policy,_now(now))
-            if self._active(connection,policy)!=payload['epoch']:raise PermitError('shadow_epoch_revoked')
+            epoch=external_epoch if external_epoch is not None else self._active(connection,policy)
+            if epoch!=payload['epoch']:raise PermitError('shadow_epoch_revoked')
             if connection.execute('SELECT count(*) FROM consumed').fetchone()[0]>=10000:
                 raise PermitError('shadow_ledger_capacity_stop')
             digest=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hexdigest()

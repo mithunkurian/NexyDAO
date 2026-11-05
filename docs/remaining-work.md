@@ -12,8 +12,9 @@ PR #24 closed S1 after 262 Ubuntu tests and real two-UID acceptance. PR #25 merg
 and S2 passed real installation/startup/restart acceptance with merged PR #26's
 bounded state-retention correction. **2/15 packages are closed**. PR #27 adds an
 S3 shadow permit foundation; its separate authorizer/evidence integration remains
-open. About **13 delivery PRs remain after PR #27**, assuming one per open package.
-The correction and S3 split project about 17 PRs against the original 12–18 range,
+open. PR #28 adds external owner-control and a temporary separate-identity fixture.
+About **13 delivery PRs remain after PR #28**, assuming one per open package.
+The correction and two S3 foundations project about 18 PRs against the original 12–18 range,
 without expanding package scope. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
 or increasing the baseline count. See [service audit scope](service-isolation-audit.md).
