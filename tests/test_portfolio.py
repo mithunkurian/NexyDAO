@@ -6,7 +6,7 @@ import tempfile
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from dataclasses import replace
 from pathlib import Path
 
@@ -90,6 +90,19 @@ class PortfolioTests(unittest.TestCase):
         self.assertEqual(self.ledger.fill(fill)['status'],'already_recorded')
         self.assertEqual(self.ledger.revision(),revision)
         with self.assertRaises(PortfolioError): self.ledger.fill({**fill,'price':'101'})
+
+    def test_sale_and_settlement_preserve_amounts_under_low_caller_precision(self):
+        self.ledger.fill(self.fill(), self.policy)
+        sale = self.fill('precise-sale', side='sell', quantity='1', price='110.12345678', fee='0.00000001')
+        with localcontext() as context:
+            context.prec = 4
+            self.ledger.fill(sale, self.policy)
+            self.ledger.settle(sale['id'])
+
+        snapshot = self.ledger.snapshot()
+        self.assertEqual(Decimal(snapshot['settled_cash_usd']), Decimal('4909.12345677'))
+        self.assertEqual(Decimal(snapshot['unsettled_cash_usd']), Decimal(0))
+        self.assertEqual(Decimal(snapshot['simulation_fees_usd']), Decimal('1.00000001'))
 
     def test_short_leveraged_foreign_and_invalid_fills_do_not_change_cash(self):
         for changes in ({'side':'sell'}, {'asset_type':'CFD'}, {'currency':'SEK'},

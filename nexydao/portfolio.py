@@ -224,6 +224,7 @@ class Portfolio:
             notional=qty*price
             if notional>Decimal('1000000000000'): raise PortfolioError('bounded_simulated_notional_required')
             notional=notional.quantize(QUANTUM,rounding=ROUND_UP if data['side']=='buy' else ROUND_DOWN)
+            proceeds = Decimal(0)
             if data['side']=='buy':
                 reasons=allocation_reasons(snapshot,[{'symbol':data['symbol'],'allocation_usd':format(notional+fee,'f')}],policy,projected_fee_usd=fee)
                 if reasons: raise PortfolioError(reasons[0])
@@ -238,9 +239,10 @@ class Portfolio:
                 removed = basis if qty==held else (basis*qty/held).quantize(QUANTUM,rounding=ROUND_DOWN)
                 held-=qty
                 basis-=removed
-                realized+=notional-fee-removed
-                pending+=notional-fee
-        fees+=fee
+                proceeds = notional - fee
+                realized += proceeds - removed
+                pending += proceeds
+            fees += fee
         if held==0:
             self.db.execute('DELETE FROM simulated_positions WHERE symbol=?',(data['symbol'],))
         else:
@@ -250,7 +252,7 @@ class Portfolio:
         self.db.execute('UPDATE portfolio_state SET cash=?,unsettled=?,realized=?,fees=?,revision=revision+1 WHERE id=1',
                         (str(cash),str(pending),str(realized),str(fees)))
         self.db.execute('INSERT INTO simulation_fills(id,payload,settled,proceeds) VALUES(?,?,?,?)',
-                        (data['id'],serialized,int(data['side']=='buy'),str(notional-fee) if data['side']=='sell' else '0'))
+                        (data['id'],serialized,int(data['side']=='buy'),str(proceeds)))
         policy.assert_current()
         return {'status':'simulated_fixture_recorded','id':data['id'],'execution_authorized':False}
 
@@ -266,8 +268,12 @@ class Portfolio:
                 proceeds=Decimal(row[2])
                 cash,pending=self.db.execute('SELECT cash,unsettled FROM portfolio_state WHERE id=1').fetchone()
                 if proceeds>Decimal(pending): raise PortfolioError('settlement_reconciliation_failed')
+                with localcontext() as context:
+                    context.prec = 50
+                    settled_cash = Decimal(cash) + proceeds
+                    unsettled_cash = Decimal(pending) - proceeds
                 self.db.execute('UPDATE portfolio_state SET cash=?,unsettled=?,revision=revision+1 WHERE id=1',
-                                (str(Decimal(cash)+proceeds),str(Decimal(pending)-proceeds)))
+                                (str(settled_cash),str(unsettled_cash)))
                 self.db.execute('UPDATE simulation_fills SET settled=1 WHERE id=?',(fill_id,))
             self.db.commit()
             return {'status':'simulation_settled','id':fill_id,'execution_authorized':False}
