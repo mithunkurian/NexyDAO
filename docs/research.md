@@ -122,6 +122,12 @@ input is limited to ten items. Conflicting values for the same reporting context
 stop the run before model calls. Receipt inspection and publication each take one
 receipt.
 
+The research agents receive computed higher, lower or equal comparisons for the
+latest two eligible observations of an issuer, concept and unit. Duration facts
+also require equal-length, non-overlapping periods. Each comparison identifies
+both source facts by citation ID. It describes the reported values and leaves
+business interpretation to the advisory review.
+
 ## Acceptance and deployment
 
 On 29 October 2026, merged PR #17 (`c28a0ec`) was deployed into the isolated VM

@@ -479,6 +479,30 @@ class ResearchTests(unittest.TestCase):
 
                 self.assertEqual(provider.calls, [])
 
+    def test_research_context_compares_instants_and_skips_overlapping_durations(self):
+        payload = self.payload()
+        current = self.receipt(payload)
+        for fact in payload['facts']:
+            fact['end'] = (self.today - timedelta(days=30)).isoformat()
+            if fact['start']:
+                fact['start'] = (self.today - timedelta(days=120)).isoformat()
+            fact['value'] = '123455'
+        prior = self.receipt(payload)
+        evidence = current + prior
+        store = Store(self.root / 'period-comparisons.sqlite3')
+        self.addCleanup(store.close)
+        provider = self.provider(evidence)
+
+        run_cycle(store, provider, evidence, research=True)
+
+        def assets(items):
+            return next(item['id'] for item in items if item['fact']['concept'] == 'Assets')
+
+        expected = [{'earlier_evidence_id': assets(prior), 'later_evidence_id': assets(current),
+                     'reported_value_direction': 'higher'}]
+        for _, context in provider.calls[:2]:
+            self.assertEqual(context['filing_comparisons'], expected)
+
     def test_wrong_claim_context_stops_before_manager_and_ceo(self):
         evidence = self.receipt()
         store = Store(self.root/'context-failure.sqlite3')
