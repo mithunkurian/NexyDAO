@@ -491,3 +491,23 @@ history review, paid call, deployed service or production runtime change occurre
 D2 still needs complete semantics/coverage, transfers and appropriate live/read-only
 acceptance; D3 owns actual monetary reservations and lifecycle reconciliation.
 See [exact archive, operator selection and limits](typed-order-visibility.md).
+
+## Public cash/position and three-view diagnostics, 2026-11-05
+
+PR #31 implementation `7b2b031` passed all 349 Ubuntu tests; Windows passed 343
+with six Unix-only skips. Nineteen new tests verify dedicated-domain schema-3
+cash/position receipts, public-only reads after signer deletion (including obsolete
+private-path settings), signature/schema/domain/freshness rejection, signer
+preflight and failed-save preservation. An actual three-signed-receipt report
+verifies without signer/HMAC/provider/socket/application DB access, then rechecks
+all input freshness after reading the last source. Identity, contract, side,
+cumulative quantity, fee currency and non-atomic-window diagnostics were tested.
+Unlinked fills are not automatically conflicts or position reconstructions.
+
+Existing funding/allocation/reconciliation paths can explicitly select public
+state without an HMAC key; no legacy fallback occurs on failure and denials remain.
+All authority, import, actual reservation and account-reconciliation flags remain
+false. Only synthetic sessions, generated temporary keys and private test audit
+DBs were used. No owner account/history, production runtime key/budget, paid call,
+broker write or deployed service changed. D2/D3, D1 funding and S3 remain open.
+See [exact archive, selection rules and remaining gates](public-broker-observations.md).
