@@ -62,8 +62,9 @@ consumption and a stopped-by-default ledger with epoch revocation. A valid shado
 permit never grants broker authority. Separate signer/stop identities and accepted
 funding/reconciliation/risk/review/reservation inputs remain required to close S3.
 Local suite: 288 tests run, 283 passed with five Unix-only skips; 17 new permit
-tests passed. Ubuntu evidence follows after validation. No production service,
-signer or cost database is modified.
+tests passed. Final implementation `2b73201` passed all 288 Ubuntu tests in an
+isolated release, including six concurrent consumers with exactly one winner.
+No production service, signer or cost database was modified; no paid calls ran.
 See [protocol scope and limitations](paper-permits.md).
 
 ### S2/P5 SEC service installation audit — 5 November 2026
