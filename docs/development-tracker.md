@@ -48,8 +48,9 @@ eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
 S3. PR #29/#30 advance D2 and PR #31 advances D3 without closing full data,
 lifecycle or monetary-reservation acceptance.
 PR #32 advances R4/D3 simulation enforcement without closing market liquidity or
-actual monetary reservations. Updated estimate: **13–18 further PRs after PR #32**,
-with **13 packages open**. Observed splits project 22–27 total
+actual monetary reservations. PR #33 adds a prospective quote-spread guard while
+leaving executable/full-book liquidity unverified. Updated estimate:
+**13–18 further PRs after PR #33**, with **13 packages open**. Observed splits project 23–28 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -57,6 +58,18 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### R4 quote-backed spread screen — 5 November 2026
+
+Branch `codex/quote-spread-risk-guard` freezes application-authenticated quote views,
+rechecks content/identity/freshness across roles and enforces a fixed 1%-of-bid
+spread ceiling on proposed allocations and final CEO investment proposals. Positive
+votes cannot override it. A local report authenticates a quote without DB/provider/
+socket access. Size units, executable depth and full-book exit capacity remain
+unverified; no share-capacity multiplier is guessed. Local suite: 377 tests, 371
+passed/six Unix-only skips; Ubuntu evidence follows. No paid calls, subscriptions,
+broker/history queries or production changes are included.
+See [screen scope and remaining gates](quote-liquidity.md).
 
 ### R4/D3 simulation stress and active commitment limits — 5 November 2026
 

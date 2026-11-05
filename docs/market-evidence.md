@@ -1,5 +1,10 @@
 # Read-only market evidence trial
 
+PR #33 adds a [quote-backed spread guard](quote-liquidity.md) to advisory allocations
+and final policy, with immutable observation/freshness checks. It does not verify
+size units, executable depth or full portfolio liquidity. Market receipt loading
+rejects duplicate JSON; sanitized quote views now include collection time.
+
 `market-check` is an operator command, never an agent tool. It connects only to
 127.0.0.1:4002, requires an exact paper-account pin, resolves exactly one SMART/USD
 stock contract and subscribes to live tick-by-tick `BidAsk` data. SPY is a configurable

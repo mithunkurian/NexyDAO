@@ -30,7 +30,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "quote-liquidity-report", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -67,7 +67,7 @@ def main():
         if args.fill and args.command!='sim-fill' or args.settlement_id and args.command!='sim-settle':
             raise ValueError('Simulation arguments apply only to their accounting commands')
         if args.with_research and args.command!='portfolio': raise ValueError('Research modifier requires portfolio command')
-        if (args.evidence or args.market_evidence or args.research_evidence) and args.command not in {"demo", "deliberate", "research", "portfolio", "portfolio-mark", "research-receipt-check", "research-publish"}:
+        if (args.evidence or args.market_evidence or args.research_evidence) and args.command not in {"demo", "deliberate", "research", "portfolio", "portfolio-mark", "quote-liquidity-report", "research-receipt-check", "research-publish"}:
             raise ValueError("Evidence arguments apply only to deliberation")
         if args.command=='portfolio-mark' and (not args.market_evidence or args.evidence or args.research_evidence):
             raise ValueError('Portfolio marking requires one signed market receipt')
@@ -76,6 +76,13 @@ def main():
         if args.command == 'owner-policy':
             print(json.dumps({'policy': owner_policy.document(), 'sha256': owner_policy.digest,
                               'execution_authorized': False}, indent=2))
+            return
+        if args.command=='quote-liquidity-report':
+            if not args.market_evidence or args.evidence or args.research_evidence:
+                raise ValueError('One explicit signed market quote required')
+            from .market import MarketConfig,load_market_evidence
+            from .quote_liquidity import QuoteLiquidity
+            print(json.dumps(QuoteLiquidity(load_market_evidence(args.market_evidence,MarketConfig.from_env())).report(),indent=2))
             return
         if args.command == 'source-check':
             from .sec import ResearchConfig, run_source_check

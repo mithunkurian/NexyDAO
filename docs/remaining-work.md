@@ -18,8 +18,9 @@ PR #30 adds order-prefix/status visibility and conservative diagnostic integrati
 PR #31 adds public cash/position receipts and partial three-view cross-checks.
 Full D2 data and D3 lifecycle/reservation acceptance remain open. **13 packages remain**;
 PR #32 adds projected stress and retained simulation commitment envelopes; actual
-reservations and market liquidity remain unverified. Revised planning estimate is
-**13–18 further PRs after PR #32** (22–27 total after #23 versus the
+reservations and market liquidity remain unverified.
+PR #33 adds immutable quote-backed spread screening, leaving executable/full-book
+liquidity unverified. Revised estimate: **13–18 further PRs after PR #33** (23–28 total after #23 versus the
 original 12–18). Implementation/acceptance splits exceeded that estimate; project
 scope has not grown. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
