@@ -30,7 +30,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "quote-liquidity-report", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-transition-report", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "quote-liquidity-report", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -42,11 +42,17 @@ def main():
     parser.add_argument('--with-research',action='store_true')
     parser.add_argument('--revise-run')
     parser.add_argument('--published-evidence',type=Path)
+    parser.add_argument('--before-state',type=Path)
+    parser.add_argument('--before-executions',type=Path)
     args = parser.parse_args()
     store = None
     try:
         config = Config.from_env()
         owner_policy = owner_policy_from_env()
+        if args.before_state or args.before_executions:
+            if args.command!='broker-transition-report':raise ValueError('Prior receipts apply only to transition reporting')
+        if args.command=='broker-transition-report' and (not args.before_state or not args.before_executions):
+            raise ValueError('Two explicit prior public receipts required')
         if args.published_evidence and args.command!='research-publish':
             raise ValueError('Published evidence applies only to research-publish')
         if args.command in {'research-publish','research-receipt-check'}:
@@ -133,6 +139,10 @@ def main():
             print(json.dumps(result,indent=2))
             if not result['controller_broker_port_egress_denied']:parser.exit(1)
             return
+        if args.command=='broker-transition-report':
+            from .broker_transitions import load_transition_report
+            from .ibkr import BrokerConfig
+            print(json.dumps(load_transition_report(BrokerConfig.from_env(),args.before_state,args.before_executions),indent=2));return
         if args.command=='broker-observations-report':
             from .broker_observations import load_observation_report
             from .ibkr import BrokerConfig
