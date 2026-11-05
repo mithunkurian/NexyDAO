@@ -95,8 +95,15 @@ Eighteen tests cover stopped/exclusive initialization, verified work, persistent
 cadence/caps, concurrency, process interruption, uncertain capacity, failed health,
 stop during work, plan/clock/disk changes, corrupt schema/stop records, private
 state and actual CLI configuration binding without provider/socket access.
-Windows: 470 tests, 461 passed/nine Unix-only skips. Exact Ubuntu source/archive
-and subprocess acceptance evidence follow validation.
+Windows: 470 tests, 461 passed/nine Unix-only skips. Implementation `a626dd8`
+passed all 470 Ubuntu tests in isolated release `releases/maintenance-jobs-a626dd8`.
+Exact tested source archive SHA-256:
+`9ab76ff2196eb42bd56c9fc4647dcad237bf8ef4c607c8489123c65b715aa411`.
+A separate Ubuntu subprocess CLI fixture passed stopped initialization, arm,
+verified tick, early-cadence no-op and persistent stop. An interrupted separate
+process retained its 64 MiB claim; subsequent status/tick returned attention and
+blocked retry. Source costs and partially consumed simulation holds stayed intact.
+Zero paid calls, real broker queries, production runtime use or installed triggers.
 
 All trials use synthetic application DBs and temporary job state/archive roots.
 No production source, service, key, budget, broker data or recurring trigger changes.

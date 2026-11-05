@@ -72,7 +72,13 @@ Durable claims prevent overlap; interruption retains worst-case archive capacity
 failure, caps and changed/backwards state stop further work without retries.
 No source/budget reset, paid/model/broker job, installed timer or notification
 delivery is supported. Eighteen new tests; Windows suite: 470 tests,
-461 passed/nine Unix-only skips. Exact Ubuntu acceptance follows.
+461 passed/nine Unix-only skips. Implementation `a626dd8` passed all 470 Ubuntu
+tests; archive SHA-256
+`9ab76ff2196eb42bd56c9fc4647dcad237bf8ef4c607c8489123c65b715aa411`.
+A separate subprocess CLI fixture passed stopped/arm/tick/cadence/stop and retained
+an interrupted process's capacity claim across restart, blocking retry. Source
+charges and partial holds stayed unchanged; no paid/broker call, production runtime
+or installed recurring trigger was used.
 See [finite-runner scope and commissioning gates](maintenance-jobs.md).
 
 ### O1 read-only health and local alerts — 5 November 2026
