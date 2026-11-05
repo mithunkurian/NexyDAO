@@ -3,7 +3,7 @@ import json
 import sqlite3
 import uuid
 from datetime import datetime, timezone
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING, localcontext
 
 
 def now():
@@ -73,9 +73,10 @@ class Store:
         ticket = str(uuid.uuid4())
         self.db.execute("BEGIN IMMEDIATE")
         try:
-            total = sum((Decimal(r[0]) for r in self.db.execute("SELECT charged FROM costs")), Decimal(0))
-            if total + amount > budget:
-                raise ValueError("Lifetime API budget exhausted")
+            with localcontext(prec=100, rounding=ROUND_CEILING):
+                total = sum((Decimal(r[0]) for r in self.db.execute("SELECT charged FROM costs")), Decimal(0))
+                if total + amount > budget:
+                    raise ValueError("Lifetime API budget exhausted")
             self.db.execute("INSERT INTO costs VALUES(?,?,?,?,?,?, 'reserved',NULL,NULL)",
                             (ticket, run, role, now(), model, str(amount)))
             self.db.commit()
@@ -110,5 +111,7 @@ class Store:
 
     def costs(self):
         rows = self.db.execute("SELECT charged,status FROM costs").fetchall()
-        return {"estimated_or_reserved_usd": str(sum((Decimal(r[0]) for r in rows), Decimal(0))),
+        with localcontext(prec=100, rounding=ROUND_CEILING):
+            total = sum((Decimal(r[0]) for r in rows), Decimal(0))
+        return {"estimated_or_reserved_usd": str(total),
                 "calls": len(rows), "unsettled_calls": sum(r[1] == "reserved" for r in rows)}
