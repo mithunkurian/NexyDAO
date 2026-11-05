@@ -80,7 +80,10 @@ in the existing public receipt loaders.
 The existing account-audit tests now use a fixed fixture timestamp and clock,
 removing a Windows cross-clock timing failure without relaxing production TTL or
 future-time rejection. Windows: 409 tests, 402 passed/seven Unix-only skips.
-Exact Ubuntu archive evidence follows testing.
+Implementation `e2b6913` passed all 409 Ubuntu tests in isolated release
+`releases/broker-transitions-e2b6913`, including the 20 new transition/public CLI
+tests. Exact tested source archive SHA-256:
+`b03f9dc3f2f3a00cef701463257f9ae5d673180acd610563ef8334bfa809a6b0`.
 
 All fixtures are synthetic and generate temporary keys. No real account/history
 queries, paid calls, host provisioning, production deployment or budget changes.
