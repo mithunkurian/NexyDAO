@@ -45,9 +45,10 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
 eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
 **2/15 delivery packages complete**. S3's shadow protocol in PR #27 does not close
-S3. PR #29/#30 advance D2 without closing full order/fee/transfer/visibility acceptance.
-Updated estimate: **13–18 further PRs after PR #30**, with **13 packages open**.
-This revises the earlier 13-PR point estimate: observed splits project 20–25 total
+S3. PR #29/#30 advance D2 and PR #31 advances D3 without closing full data,
+lifecycle or monetary-reservation acceptance.
+Updated estimate: **13–18 further PRs after PR #31**, with **13 packages open**.
+This revises the earlier 13-PR point estimate: observed splits project 21–26 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -55,6 +56,20 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### D3/P2 public state and cross-observation diagnostics — 5 November 2026
+
+Branch `codex/public-broker-state-crosschecks` adds dedicated-domain public-key
+cash/position receipts, explicit no-fallback modern state selection and a local
+three-public-receipt report. Contract metadata, positive-permanent/client/order
+identity, side, cumulative quantities and fee-currency presence are cross-checked.
+Closed-order fills can remain unlinked without becoming false conflicts. Matching
+metadata/windows never establish account atomicity or usable funds. Public state
+can feed existing funding/allocation/reconciliation diagnostics without an HMAC key;
+legacy dependencies remain explicit. All authority/import/reservation flags stay
+false. Local suite: 349 tests run, 343 passed and six Unix-only skips; Ubuntu evidence
+follows. No live account/history query, paid call or deployment is included.
+See [scope and remaining acceptance](public-broker-observations.md).
 
 ### D2/P2 typed order visibility and diagnostics — 5 November 2026
 

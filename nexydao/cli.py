@@ -30,7 +30,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -126,6 +126,21 @@ def main():
             print(json.dumps(result,indent=2))
             if not result['controller_broker_port_egress_denied']:parser.exit(1)
             return
+        if args.command=='broker-observations-report':
+            from .broker_observations import load_observation_report
+            from .ibkr import BrokerConfig
+            print(json.dumps(load_observation_report(BrokerConfig.from_env()),indent=2));return
+        if args.command in {'broker-state-public','broker-state-report'}:
+            from .state_receipts import StateReceiptConfig,save_public_state,load_public_state,state_report
+            from .ibkr import BrokerConfig
+            settings=StateReceiptConfig.from_env();broker=BrokerConfig.from_env()
+            path=Path(os.environ.get('NEXYDAO_PUBLIC_BROKER_STATE_SNAPSHOT','data/broker-state-public.json'))
+            if args.command=='broker-state-public':
+                from .access import run_access_check
+                if not run_access_check()['non_loopback_tcp_ingress_denied']:raise ProbeError('host_guard_unverified')
+                result=save_public_state(broker,settings,path)
+            else:result=state_report(load_public_state(broker,settings,path))
+            print(json.dumps(result,indent=2));return
         if args.command in {'broker-orders-typed','broker-orders-report'}:
             from .order_visibility import OrderReceiptConfig,save_typed_orders,load_typed_orders,typed_order_report
             from .ibkr import BrokerConfig
@@ -163,7 +178,9 @@ def main():
             from .ibkr import BrokerConfig
             from .portfolio import Portfolio
             key = os.environ.get('NEXYDAO_EVIDENCE_KEY_FILE', '')
-            if not key: raise ValueError('Private evidence key required')
+            public_state_path=os.environ.get('NEXYDAO_PUBLIC_BROKER_STATE_SNAPSHOT','')
+            use_public_state=args.command in {'broker-reconcile','funding-check','allocation-check'} and bool(public_state_path)
+            if not key and not use_public_state: raise ValueError('Private evidence key required')
             broker = BrokerConfig.from_env()
             path = Path(os.environ.get('NEXYDAO_BROKER_STATE_SNAPSHOT', 'data/broker-state.json'))
             if args.command in {'broker-state','broker-orders','settlement-check'}:
@@ -178,7 +195,10 @@ def main():
                     result=save_orders(broker,Path(key),Path(os.environ.get('NEXYDAO_ORDERS_SNAPSHOT','data/broker-orders.json')))
                 else: result = save_state(broker, Path(key), path)
             else:
-                payload = load_state(broker, Path(key), path)
+                if use_public_state:
+                    from .state_receipts import StateReceiptConfig,load_public_state
+                    payload=load_public_state(broker,StateReceiptConfig.from_env(),Path(public_state_path))
+                else:payload=load_state(broker,Path(key),path)
                 store = Store(config.db)
                 if args.command=='allocation-check':
                     from .allocation import AllocationConfig, record_allocation_review
@@ -188,9 +208,12 @@ def main():
                     if typed_orders_path:
                         from .order_visibility import OrderReceiptConfig,load_typed_orders
                         orders=load_typed_orders(broker,OrderReceiptConfig.from_env(),Path(typed_orders_path))
-                    else:orders=load_orders(broker,Path(key),Path(orders_path)) if orders_path else None
+                    else:
+                        if orders_path and not key:raise ValueError('Legacy order receipt requires private evidence key')
+                        orders=load_orders(broker,Path(key),Path(orders_path)) if orders_path else None
                     web_path=os.environ.get('NEXYDAO_WEB_LEDGER_SNAPSHOT','')
                     if web_path:
+                        if not key:raise ValueError('Legacy Web ledger requires private evidence key')
                         from .web_ledger import WebConfig,load_web_ledger
                         web=load_web_ledger(WebConfig.from_env(),Path(key),Path(web_path))
                     else:web=None
