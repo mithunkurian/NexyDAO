@@ -352,3 +352,22 @@ hash/depth link and AI memory persisted after reopening SQLite; execution remain
 denied. Paid call count stayed zero. No credentials, persistent runtime, broker
 access or schedules were used. This is offline workflow acceptance, not paid model
 acceptance, verified thesis prose, autonomous revisions or complete P3 acceptance.
+
+## P5 controller egress foundation, 2026-11-05
+
+Implementation `bd7ed90` passed all 243 tests locally and in isolated Ubuntu release
+`releases/controller-guard-bd7ed90`, plus the isolated local demo. Both the existing
+ingress audit and the new UID egress audit reject dormant tables. The guard script
+passed Ubuntu shell syntax checking.
+
+An explicitly authorized root test ran only in a separate network namespace. It
+applied the installer's rule body for a fixture UID and denied all 14 protected
+loopback TCP probes (ports 22, 4001, 4002, 5000, 5901, 7496, 7497 over IPv4/IPv6).
+The operator/root UID and allowed control ports still connected; actual kernel
+JSON passed the UID audit. No host account, service, firewall rule, persistent
+runtime, credential, paid API or broker connection was used/changed.
+
+This validates the guard mechanism in isolation. Real controller-account/service
+installation, startup/boot/recovery acceptance, alternate egress boundaries,
+signing-key separation, independent authorization and full P5 remain open.
+Funding and execution stay disabled.
