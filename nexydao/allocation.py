@@ -74,6 +74,12 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, o
     reasons.add('manual_order_visibility_and_reservations_unverified')
     if orders is None: reasons.add('api_open_order_observation_missing')
     elif orders['activity_frame_digests']: reasons.add('api_order_activity_requires_reconciliation')
+    typed_orders=orders is not None and orders['schema_version']==2
+    if typed_orders:
+        if not orders['status_links_complete']:reasons.add('order_status_identity_links_incomplete')
+        if orders['ambiguous_order_identity_observed']:reasons.add('order_identity_ambiguity')
+        if orders['quantity_disagreement_observed']:reasons.add('order_quantity_disagreement')
+        if orders['order_versions_changed_observed']:reasons.add('order_changed_during_query')
     if not complete:
         reasons.add('explicit_usd_cash_fields_incomplete')
     if snapshot['positions'] or Decimal(snapshot['unsettled_cash_usd']) != 0:
@@ -119,6 +125,10 @@ def evaluate_allocation(payload, broker, ledger, policy, allocation, now=None, o
             'api_order_activity_observed': bool(orders['activity_frame_digests']) if orders is not None else None,
             'orders_payload_sha256': hashlib.sha256(canonical(orders)).hexdigest() if orders is not None else None,
             'orders_evidence_expires_at': orders['expires_at'] if orders is not None else None,
+            'typed_order_prefix_observed':typed_orders,
+            'order_status_links_complete':orders['status_links_complete'] if typed_orders else None,
+            'unmatched_order_status_count':orders['unmatched_status_count'] if typed_orders else None,
+            'complete_order_layout_verified':False,
             'manual_order_coverage_verified':False, 'reservation_amounts_verified':False,
             'account_observation_atomic':False}
 
