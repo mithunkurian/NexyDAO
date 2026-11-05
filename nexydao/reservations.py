@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import time
+from contextlib import contextmanager
 from decimal import Decimal, localcontext, ROUND_UP
 
 from .market import canonical
@@ -11,6 +12,12 @@ from .portfolio import PortfolioError, allocation_reasons, QUANTUM
 from .ibkr import ProbeError
 
 FIELDS={'id','proposal_sha256','symbol','notional_usd','fee_usd','fee_currency'}
+
+
+@contextmanager
+def _reservation_precision():
+    with localcontext(prec=50):
+        yield
 
 
 def limit_profiles(db):
@@ -65,6 +72,7 @@ def validate_request(data):
     return notional+fee
 
 
+@_reservation_precision()
 def active_holds(db):
     if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='simulation_reservations'").fetchone():
         for evidence in ('simulation_reservation_limits','simulation_reservation_events','simulation_reservation_fills'):
@@ -156,6 +164,7 @@ class Reservations:
             reservation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,digest TEXT NOT NULL);
         ''')
 
+    @_reservation_precision()
     def reserve(self,data,policy,allocation):
         total=validate_request(data);settings=allocation.document()
         digest=hashlib.sha256(canonical(data)).hexdigest()
@@ -211,6 +220,7 @@ class Reservations:
                     'id':identifier,'execution_authorized':False,'broker_funds_reserved':False}
         except Exception:self.db.rollback();raise
 
+    @_reservation_precision()
     def fill(self,data,policy):
         """Operator simulation fixture, not an order or permission to trade."""
         if not isinstance(data,dict) or set(data)!={'reservation_id','proposal_sha256','fill'}:

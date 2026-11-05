@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 import unittest
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 from unittest.mock import patch
@@ -16,7 +16,7 @@ from nexydao.market import MarketConfig
 from nexydao.allocation import AllocationConfig
 from nexydao.owner_policy import load_policy,OwnerPolicyError
 from nexydao.portfolio import Portfolio,PortfolioError
-from nexydao.reservations import Reservations
+from nexydao.reservations import Reservations, active_holds
 from nexydao.store import Store
 
 
@@ -268,6 +268,16 @@ class ReservationTests(unittest.TestCase):
             self.book.fill(self.held_fill('second',quantity='0.00000001',price='0.1',fee='0'),self.policy)
         self.book.release('plan',self.policy)
         self.assertEqual(Decimal(self.ledger.snapshot()['simulation_planning_reserved_usd']),Decimal(0))
+
+    def test_reserved_fill_and_replay_preserve_fractional_remainder(self):
+        with localcontext(prec=4):
+            self.reserve(self.request(notional='100.12345679', fee='0.00000002'))
+            self.book.fill(self.held_fill(quantity='1', price='100.12345678', fee='0.00000001'), self.policy)
+            hold, = active_holds(self.store.db)
+
+        self.assertEqual(Decimal(hold['notional_usd']), Decimal('0.00000001'))
+        self.assertEqual(Decimal(hold['fee_usd']), Decimal('0.00000001'))
+        self.assertEqual(Decimal(hold['total_usd']), Decimal('0.00000002'))
 
     def test_legacy_hold_database_upgrades_without_releasing_capital(self):
         self.reserve(self.request(notional='200',fee='1'))
