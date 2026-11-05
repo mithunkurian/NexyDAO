@@ -68,7 +68,8 @@ corrupt contexts stop replay. The fixed 50% stress/10% projected-drawdown guard 
 blocks new risk while preserving reductions and explicit releases. Partial fills
 credit only their own notional/fee budgets. Missing main hold tables with surviving
 audit evidence fail closed. Local suite: 362 tests, 356 passed and
-six Unix-only skips; Ubuntu acceptance follows. No actual broker funds or production
+six Unix-only skips. Final implementation `83e9f0a` passed all 362 Ubuntu tests,
+including 13 new risk/reservation acceptance tests. No actual broker funds or production
 runtime is used. See [enforcement and remaining scope](commitment-risk.md).
 
 ### D3/P2 public state and cross-observation diagnostics — 5 November 2026

@@ -511,3 +511,20 @@ false. Only synthetic sessions, generated temporary keys and private test audit
 DBs were used. No owner account/history, production runtime key/budget, paid call,
 broker write or deployed service changed. D2/D3, D1 funding and S3 remain open.
 See [exact archive, selection rules and remaining gates](public-broker-observations.md).
+
+## Incremental simulation risk and retained commitment limits, 2026-11-05
+
+PR #32 final implementation `83e9f0a` passed all 362 Ubuntu tests; Windows passed
+356 with six Unix-only skips. Thirteen new tests exercise binding 50% projected
+stress/10% drawdown limits, upward boundary rounding, fee/API treatment, persistent
+active caps/buffers, restart and concurrent writes, different-default non-relaxation,
+partial hold-to-position conversion, legacy missing-context release/replan, corrupt/
+orphan profiles and missing main tables with surviving audit evidence. New risk
+is blocked without forcing sells or releasing encumbered funds. Actual monetary
+reservations and broker execution remain disabled.
+
+Only synthetic fills/quotes/holds, generated keys, API-cost estimates and isolated
+test databases were used. No real account/history query, paid call, deployed
+service or production runtime database changed. R4 remains open for market
+liquidity/full aggregate acceptance; D3 still needs actual reservations/lifecycle
+reconstruction. See [exact archive and model scope](commitment-risk.md).

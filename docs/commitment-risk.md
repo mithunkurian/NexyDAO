@@ -69,7 +69,10 @@ idempotent-ID changes, partial-fill budget conversion, legacy-context migration,
 corrupt/orphan profiles, missing main tables with surviving audit evidence, exact
 combined envelopes, concurrent cap enforcement and continued position reductions.
 Windows: 362 tests run, 356 passed and six Unix-only
-skips. Ubuntu and exact tested commit/archive follow after validation.
+skips. Final implementation `83e9f0a` passed all 362 Ubuntu tests in isolated
+release `releases/commitment-risk-83e9f0a`, including all 13 new acceptance tests.
+Exact tested archive SHA-256:
+`f96048e3d96c4937679783a38993687652268a350b17bed1022741336cd58691`.
 
 All fills, holds, marks and API estimates in these tests are synthetic and use
 separate temporary databases/keys. No paid calls, actual account/history query,
