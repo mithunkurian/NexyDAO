@@ -69,6 +69,12 @@ Twelve new tests cover mode/pin configuration, no fallback in both directions,
 cross-domain/forgery/schema/size/duplicate/freshness denial, signer preflight,
 save preservation, report/mark/advisory consumption after deleting private keys
 and Unix unsafe-file rejection. Windows: 389 tests, 382 passed/seven Unix-only
-skips. Ubuntu and exact tested archive/role-fixture evidence follow validation.
+skips. Implementation `ec89a34` passed all 389 Ubuntu tests in isolated release
+`releases/public-market-ec89a34`. Exact tested source archive SHA-256:
+`f2248c121e22bb23d1c491af589db4644eac67906e7625a881cb15c401f69957`.
+The temporary two-UID fixture passed report/mark/advisory consumption, denied all
+five consumer protected accesses and denied signer access to the consumer DB.
+It reported zero paid calls, zero real broker queries and no production runtime
+or host account/service/firewall changes.
 Size units, executable depth, price impact, full-book exit capacity, funding and
 execution remain unverified/disabled in either mode.

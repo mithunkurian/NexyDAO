@@ -66,8 +66,12 @@ Branch `codex/public-market-quotes` adds explicit Ed25519 mode with a dedicated
 domain, independent public DER pin and collector-only signer. Public quote consumers
 ignore legacy/signing secrets, preserving quote evidence and existing read/mark/
 advisory/spread checks. Unknown modes or invalid envelopes fail without fallback.
-Local suite: 389 tests, 382 passed/seven Unix-only skips. Ubuntu and temporary
-two-UID report/mark/advisory acceptance follow. No production deployment or broker
+Local suite: 389 tests, 382 passed/seven Unix-only skips. All 389 Ubuntu tests passed
+for implementation `ec89a34`; archive SHA-256
+`f2248c121e22bb23d1c491af589db4644eac67906e7625a881cb15c401f69957`.
+Temporary two-UID report/mark/advisory acceptance passed, including five consumer
+protected-access denials and signer denial of consumer DB access. Zero paid calls
+or real broker queries; no host service/account/rule changes. No production deployment or broker
 access is included. See [scope and remaining gates](public-market-quotes.md).
 
 ### R4 quote-backed spread screen — 5 November 2026
