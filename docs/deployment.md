@@ -102,6 +102,10 @@ with explicit CLI commands. Use the SQLite backup API rather than copying only a
 live main DB. These recovery copies cannot resume the application or reset its
 lifetime API budget; production recovery acceptance remains open.
 
+PR #37 adds [read-only local health alerts](operations-health.md) with
+`operations-health --backup-dir /private/backup-directory`. Critical findings return
+exit 1 without retries, record repair or external notification delivery.
+
 Stop the service for upgrades. Back up SQLite via `sqlite3.Connection.backup` or SQLite
 backup tooling; copying a live database without its WAL can lose records. Restrict
 backup access. Monitor disk, failures, abandoned `running` runs and unsettled API costs.

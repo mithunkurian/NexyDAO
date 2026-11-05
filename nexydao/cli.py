@@ -10,6 +10,7 @@ from .owner_policy import OwnerPolicyError, from_env as owner_policy_from_env
 from .portfolio import PortfolioError
 from .research_publication import PublicationError
 from .audit_backups import BackupError
+from .operations_health import HealthError
 from .provider import OpenAIProvider
 from .records import PROPOSAL, REVIEW
 from .store import Store
@@ -31,7 +32,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-transition-report", "audit-backup", "audit-backup-check", "audit-restore-inspection", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "quote-liquidity-report", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-state-public", "broker-state-report", "broker-observations-report", "broker-transition-report", "audit-backup", "audit-backup-check", "audit-restore-inspection", "operations-health", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "quote-liquidity-report", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -53,12 +54,18 @@ def main():
         config = Config.from_env()
         owner_policy = owner_policy_from_env()
         backup_commands={'audit-backup','audit-backup-check','audit-restore-inspection'}
-        if args.command in backup_commands:
-            if not args.backup_dir:raise ValueError('Explicit backup directory required')
+        if args.command in backup_commands or args.command=='operations-health':
+            if not args.backup_dir and args.command!='operations-health':raise ValueError('Explicit backup directory required')
             if bool(args.restore_dir)!=(args.command=='audit-restore-inspection'):
                 raise ValueError('Explicit new inspection destination required only for restore')
             if any((args.evidence,args.market_evidence,args.research_evidence,args.before_state,args.before_executions,args.fill,args.held_fill,args.reservation,args.reservation_id,args.settlement_id,args.with_research,args.revise_run,args.published_evidence)):
                 raise ValueError('Backup commands do not accept workflow inputs')
+            if args.command=='operations-health':
+                from .operations_health import operations_health
+                result=operations_health(config.db,config.budget,args.backup_dir)
+                print(json.dumps(result,indent=2))
+                if not result['local_health_checks_passed']:parser.exit(1)
+                return
             from .audit_backups import create_backup,verify_backup,restore_inspection
             if args.command=='audit-backup':result=create_backup(config.db,args.backup_dir)
             elif args.command=='audit-backup-check':result=verify_backup(args.backup_dir)
@@ -316,7 +323,7 @@ def main():
             result = run_cycle(store, provider, evidence, research=args.command == 'research' or args.with_research,
                                  owner_policy=owner_policy,portfolio=args.command=='portfolio',revise_run=args.revise_run)
         print(json.dumps(result, indent=2))
-    except (ProbeError, SourceError, OwnerPolicyError, PortfolioError, PublicationError, BackupError) as exc:
+    except (ProbeError, SourceError, OwnerPolicyError, PortfolioError, PublicationError, BackupError, HealthError) as exc:
         # All ProbeError messages are fixed local codes, never vendor response text.
         parser.exit(1, f"NexyDAO stopped safely ({exc}). Execution remains disabled.\n")
     except Exception as exc:

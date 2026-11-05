@@ -53,7 +53,8 @@ leaving executable/full-book liquidity unverified. Updated estimate:
 PR #34 adds opt-in public market receipts; remaining deployment/key boundaries stay
 open. PR #35 adds fresh paired-delta diagnostics without closing D3.
 PR #36 adds verified audit backups/isolated restore without closing O1.
-**13–16 further PRs after PR #36**, with **13 packages open**. Observed splits project 26–29 total
+PR #37 adds consistent health/local alerts while leaving O1 commissioning open.
+**13–15 further PRs after PR #37**, with **13 packages open**. Observed splits project 27–29 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -61,6 +62,18 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### O1 read-only health and local alerts — 5 November 2026
+
+Branch `codex/operations-health-report` reports stale/failed runs, uncertain API
+costs, lifetime budget headroom, DB-volume free space and backup validity/age.
+A consistent read transaction and full bounded content fingerprint prevent mixed
+source reads or same-count backup changes from appearing current. Critical local
+findings return exit 1; source state/costs/holds remain unchanged. No scheduler,
+provider/broker call, notification delivery or production deployment is enabled.
+Twenty-two synthetic tests cover the new health paths. Windows: 452 tests,
+444 passed/eight Unix-only skips. Exact Ubuntu acceptance follows.
+See [operator use and remaining gates](operations-health.md).
 
 ### O1 verified audit backup and inspection-only recovery — 5 November 2026
 
