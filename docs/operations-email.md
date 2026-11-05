@@ -82,10 +82,18 @@ trusted; a replacement or rollback of the separate state DB is not defended here
 Fifteen new tests cover private configuration, TLS/envelope, redaction, warning
 suppression, binding, rate limits, concurrent claims, stop, process interruption,
 ambiguous delivery and CLI health recomputation. All SMTP tests use mocked
-transport. Windows: 485 tests, 475 passed/ten Unix-only skips. Exact Ubuntu
-evidence follows validation. No email, credential setup,
+transport. Windows: 485 tests, 475 passed/ten Unix-only skips. Implementation
+`d9ec236` passed all 485 Ubuntu tests in isolated release `releases/operations-email-d9ec236`.
+Exact tested source archive SHA-256:
+`bb9febe9dcf6b75d0964e88fd4989fd5eb10ca95077ef65bf1e73ddab051393d`.
+An independent subprocess CLI fixture passed stopped defaults, simulated SMTP
+acceptance, redaction and duplicate suppression across processes, preserving the
+source costs. Network access was blocked in the fixture. No email, credential setup,
 recurring trigger, production DB read or broker/paid model call occurs in testing.
 
 Live Gmail authentication/delivery needs the owner's private credential and an
 explicitly commissioned alert process. O1 deployment, resource/boot checks and
 sustained unattended operation are still open.
+The selected mailbox's private VM profile and stopped state were prepared with
+zero attempts and no password. No production DB contents, host service or timer
+were accessed or changed by that preparation.
