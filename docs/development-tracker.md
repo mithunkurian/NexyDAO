@@ -72,8 +72,13 @@ pinned Gmail self-alert mailbox, verified TLS and redacted critical code/count
 messages from fresh local health. Durable claims prevent overlap; daily limits,
 cooldown, duplicate suppression and unknown-outcome stop prevent retry spam.
 Fifteen synthetic transport tests; Windows 485 tests, 475 passed/ten Unix-only
-skips. Exact Ubuntu acceptance follows. No email, credential, timer or real source
-access is used in testing. See [delivery scope and prerequisites](operations-email.md).
+skips. Implementation `d9ec236` passed all 485 Ubuntu tests; archive SHA-256
+`bb9febe9dcf6b75d0964e88fd4989fd5eb10ca95077ef65bf1e73ddab051393d`.
+Separate subprocess CLI fixture passed simulated SMTP, redaction and restart
+duplicate suppression with network denied. The private VM mailbox profile/state
+is staged stopped, with zero attempts and no password. No email, paid call, broker
+query, real source DB content read, service or timer. Live Gmail credential
+provisioning remains an owner action. See [scope](operations-email.md).
 
 ### O1 finite maintenance scheduling ticks — 5 November 2026
 
