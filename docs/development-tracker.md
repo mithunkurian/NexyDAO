@@ -45,15 +45,29 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
 eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
 **2/15 delivery packages complete**. S3's shadow protocol in PR #27 does not close
-S3. About **13 delivery PRs remain after PR #28**, assuming one per remaining
-package. The S2 correction and two S3 foundation slices project 18 total after
-PR #23, the top of the original range; more splits would increase that estimate.
+S3. PR #29 advances D2 without closing full order/fee/transfer/visibility acceptance.
+Updated estimate: **13–18 further PRs after PR #29**, with **13 packages open**.
+This revises the earlier 13-PR point estimate: observed splits project 19–24 total
+after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
 time. See the [remaining-work checklist](remaining-work.md) for scope, dependencies
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### D2/P2 typed execution and fee observations — 5 November 2026
+
+Branch `codex/execution-fee-observations` adds a bounded, account-pinned stock
+execution reader checked against official API 10.51.01 source. It links exactly
+one commission per observed fill, supports reordered/late fees, retains partial
+fills/corrections and flags pending price/currency mismatches. Dedicated-domain
+Ed25519 receipts verify using only a pinned public key. CLI reporting opens no
+application DB, provider or broker socket. No broker history query is run for
+development acceptance; the owner's prior-transaction exclusion remains in force.
+Local suite: 310 tests run, 304 passed and six Unix-only skips. Ubuntu evidence
+follows after acceptance. D2 and S3 remain open; no balances/fills are imported and
+execution remains disabled. See [scope and coverage](execution-observations.md).
 
 ### S3/P5 external owner-control and shadow identities — 5 November 2026
 

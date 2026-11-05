@@ -30,7 +30,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -126,6 +126,18 @@ def main():
             print(json.dumps(result,indent=2))
             if not result['controller_broker_port_egress_denied']:parser.exit(1)
             return
+        if args.command in {'broker-executions','broker-executions-report'}:
+            from .executions import ExecutionReceiptConfig,save_executions,load_executions,execution_report
+            from .ibkr import BrokerConfig
+            settings=ExecutionReceiptConfig.from_env()
+            broker=BrokerConfig.from_env()
+            path=Path(os.environ.get('NEXYDAO_EXECUTIONS_SNAPSHOT','data/broker-executions.json'))
+            if args.command=='broker-executions':
+                from .access import run_access_check
+                if not run_access_check()['non_loopback_tcp_ingress_denied']:raise ProbeError('host_guard_unverified')
+                result=save_executions(broker,settings,path)
+            else:result=execution_report(load_executions(broker,settings,path))
+            print(json.dumps(result,indent=2));return
         if args.command in {'broker-audit', 'broker-audit-report'}:
             from .account_audit import collect_audit, load_audit
             from .ibkr import BrokerConfig
