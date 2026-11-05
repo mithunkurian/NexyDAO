@@ -25,7 +25,7 @@ implementation order: independent work can proceed while broker access is blocke
 | R4 | Portfolio liquidity/stress enforcement and complete aggregate-risk acceptance | In progress; PR #32 stress/commitment limits, PR #33 immutable quote spread guard; executable depth/full-book liquidity and complete acceptance remain |
 | E1 | Narrow paper executor with permits, price/quantity bounds and idempotency | Locked until prerequisites |
 | E2 | Execution ambiguity, partial fills, cancellation and crash/restart recovery | Locked until E1 |
-| O1 | Bounded scheduling, health/alerts and tested backup/restore | In progress; PR #36 backups, PR #37 health, PR #38 finite ticks, PR #39 bounded Gmail alerts; live credential/delivery, activation and recovery acceptance remain open |
+| O1 | Bounded scheduling, health/alerts and tested backup/restore | In progress. Live Gmail inbox delivery, timer activation and an inspection restore from a pilot backup are verified. Unattended timer execution and sustained pilot acceptance remain open. |
 | O2 | VM/authentication reliability, resource limits and operational reporting | Planned |
 | O3 | Sustained paper evaluation, outcome learning and readiness review | Planned; requires elapsed observation |
 

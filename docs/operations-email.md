@@ -97,3 +97,37 @@ sustained unattended operation are still open.
 The selected mailbox's private VM profile and stopped state were prepared with
 zero attempts and no password. No production DB contents, host service or timer
 were accessed or changed by that preparation.
+
+## Hourly VM pilot
+
+On 5 November 2026, the owner confirmed inbox receipt of the one-time test
+submitted over Gmail SMTP from the VM. The user timer is enabled and active
+with linger enabled for the VM account. The pilot plan permits up to 24
+maintenance attempts, one hour apart, and caps retained or reserved backup
+database bytes at 256 MiB.
+
+The first service run was started manually. It created a verified backup and
+returned `mail_no_critical_alert`. A recovery drill restored that backup into
+a temporary inspection copy, matched its digest and audit summary, and confirmed
+that `Store` refused to open it. The restored copy also passed verification after
+the refusal. The first unattended timer trigger and sustained pilot operation
+remain acceptance checks.
+
+On the VM, check the timer, the last timer trigger and the service outcome.
+
+```bash
+systemctl --user list-timers nexydao-alert-pilot.timer --no-pager
+systemctl --user show nexydao-alert-pilot.timer -p LastTriggerUSec
+journalctl --user -u nexydao-alert-pilot.service -n 20 --no-pager
+```
+
+An empty `LastTriggerUSec` means the timer has yet to trigger the service. A
+successful service journal entry by itself can reflect a manual start. For an
+unattended pass, confirm a timer trigger and its matching service outcome.
+
+To stop future pilot triggers, run this command on the VM. It retains the pilot
+state and archives for inspection. A service run already in progress can finish.
+
+```bash
+systemctl --user disable --now nexydao-alert-pilot.timer
+```
