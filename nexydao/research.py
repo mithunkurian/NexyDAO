@@ -1,5 +1,6 @@
 """Two independent advisory researchers; application checks numeric claim bindings."""
 import copy
+from datetime import date
 from .records import TEXT, schema, validate
 from .sec import SourceError, numeric, check_research_freshness
 
@@ -77,6 +78,17 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
     facts = [e for e in evidence if e.get('verification') == 'verified_filing_observation']
     if not facts:
         raise SourceError('verified_filing_observations_required')
+    check_research_freshness(facts)
+    if len({item['id'] for item in facts}) != len(facts):
+        raise SourceError('duplicate_research_evidence_id')
+    values_by_period = {}
+    for item in facts:
+        fact = item['fact']
+        start = date.fromisoformat(fact['start']) if fact['start'] else None
+        period = (fact['cik'], fact['concept'], fact['unit'], start, date.fromisoformat(fact['end']))
+        value = numeric(fact['value'])
+        if values_by_period.setdefault(period, value) != value:
+            raise SourceError('contradictory_research_observations')
     context = {'filing_observations': facts, 'memory': store.memory(),
                'scope': 'Filing observations only; no current valuation or investment authorization.',
                'owner_policy': owner_policy.document(), 'owner_policy_sha256': owner_policy.digest}
