@@ -270,8 +270,12 @@ def load_state(config, key_path, path):
     return validate_state(receipt['payload'],config.expected_account)
 
 
-def reconcile_state(payload, config, ledger, now=None):
+def reconcile_state(payload, config, ledger, now=None, *, orders=None):
     validate_state(payload,config.expected_account,now)
+    if orders is not None:
+        from .orders import validate_orders
+        validate_orders(orders,config.expected_account,now)
+    typed=orders is not None and orders['schema_version']==2
     snapshot = ledger.snapshot()
     cash = {(r['tag'],r['currency']):number(r['value']) for r in payload['cash']}
     currencies = {c for _,c in cash}
@@ -294,6 +298,17 @@ def reconcile_state(payload, config, ledger, now=None):
             'short_position_observed':any(number(p['quantity'])<0 for p in payload['positions']),
             'unsupported_instrument_observed':any(p['security_type']!='STK' for p in payload['positions']),
             'ledger_revision':snapshot['revision'], 'broker_reconciliation':False,
+            'api_order_query_observed':orders is not None,
+            'api_order_activity_observed':bool(orders['activity_frame_digests']) if orders is not None else None,
+            'typed_order_prefix_observed':typed,
+            'order_status_links_complete':orders['status_links_complete'] if typed else None,
+            'unmatched_order_status_count':orders['unmatched_status_count'] if typed else None,
+            'order_quantity_disagreement_observed':orders['quantity_disagreement_observed'] if typed else None,
+            'order_versions_changed_observed':orders['order_versions_changed_observed'] if typed else None,
+            'order_identity_ambiguity_observed':orders['ambiguous_order_identity_observed'] if typed else None,
+            'orders_payload_sha256':hashlib.sha256(canonical(orders)).hexdigest() if orders is not None else None,
+            'orders_evidence_expires_at':orders['expires_at'] if orders is not None else None,
+            'complete_order_layout_verified':False,
             'broker_funding_verified':False, 'broker_balances_imported':False,
             'observation_atomic':False, 'fx_conversion_performed':False,
             'missing_checks': ([] if complete else ['per_currency_settled_cash']) + ([] if scope else ['per_currency_cash_scope']) + ['open_orders_and_reservations','fills_fees_and_external_transfers',

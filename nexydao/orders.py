@@ -23,11 +23,12 @@ def query_message(command):
     return b'16\x001\x00'
 
 
-def collect_orders(config, connector=socket.create_connection, clock=time.time):
+def collect_orders(config, connector=socket.create_connection, clock=time.time, *, typed=False):
     if not config.expected_account: raise ProbeError('exact_account_pin_required')
     started = clock()
     deadline = time.monotonic() + config.timeout
     activity = []
+    cores, statuses = [], []
     with connector((config.host, config.port), timeout=config.timeout) as sock:
         sock.sendall(b'API\0' + struct.pack('!I', 9) + b'v100..178')
         wire = Wire(sock, deadline)
@@ -57,6 +58,12 @@ def collect_orders(config, connector=socket.create_connection, clock=time.time):
                 # Never infer accounts, quantities, prices or cash reservations.
                 if len(fields) < 2: raise ProbeError('invalid_order_activity_frame')
                 if len(activity) >= 200: raise ProbeError('order_activity_limit')
+                if typed:
+                    from .order_visibility import open_order_core,order_status
+                    target=cores if fields[0]=='5' else statuses
+                    if len(target)>=100:raise ProbeError('typed_order_row_limit')
+                    target.append(open_order_core(fields,account,len(activity)) if fields[0]=='5'
+                                  else order_status(fields,len(activity)))
                 activity.append(hashlib.sha256(canonical(fields)).hexdigest())
             elif fields[0] == '53':
                 if fields != ['53','1']: raise ProbeError('invalid_open_order_end')
@@ -69,6 +76,9 @@ def collect_orders(config, connector=socket.create_connection, clock=time.time):
                'started_at':started, 'received_at':clock(), 'expires_at':started+TTL,
                'query_complete':True, 'scope':SCOPE, 'manual_order_coverage_verified':False,
                'reservation_amounts_verified':False, 'activity_frame_digests':activity}
+    if typed:
+        from .order_visibility import detail_payload
+        payload.update(schema_version=2,**detail_payload(cores,statuses))
     return validate_orders(payload,config.expected_account,clock())
 
 
@@ -77,8 +87,12 @@ def validate_orders(payload, account, now=None):
     keys = {'schema_version','source','protocol_version','account_sha256','started_at',
             'received_at','expires_at','query_complete','scope','manual_order_coverage_verified',
             'reservation_amounts_verified','activity_frame_digests'}
+    version=payload.get('schema_version') if isinstance(payload,dict) else None
+    if type(version) is int and version==2:
+        from .order_visibility import DETAIL_FIELDS
+        keys |= DETAIL_FIELDS
     if not isinstance(payload,dict) or set(payload) != keys: raise ProbeError('invalid_orders_schema')
-    if (type(payload['schema_version']) is not int or payload['schema_version'] != 1
+    if (type(payload['schema_version']) is not int or payload['schema_version'] not in (1,2)
             or payload['source'] != SOURCE or type(payload['protocol_version']) is not int
             or payload['protocol_version'] != 178 or not account
             or payload['account_sha256'] != hashlib.sha256(account.encode()).hexdigest()
@@ -94,6 +108,9 @@ def validate_orders(payload, account, now=None):
     if not isinstance(digests,list) or len(digests)>200 or any(
             not isinstance(d,str) or not re.fullmatch(r'[0-9a-f]{64}',d) for d in digests):
         raise ProbeError('invalid_order_activity_digests')
+    if version==2:
+        from .order_visibility import validate_details
+        validate_details(payload)
     return payload
 
 

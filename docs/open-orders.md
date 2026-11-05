@@ -1,5 +1,10 @@
 # Read-only API-visible orders
 
+PR #30 adds optional schema-2 [typed stock prefix/status diagnostics](typed-order-visibility.md)
+and dedicated Ed25519 public-only receipts. The legacy opaque/HMAC path below
+remains supported. Typed data still leaves complete layout/manual coverage and
+reservation verification false; all activity retains the planning block.
+
 `broker-orders` sends one bounded `reqAllOpenOrders` request after exact-pin paper
 identity validation, with a nonzero client ID. No submission, modification,
 cancellation or client-0/automatic binding command is available. Unsupported

@@ -30,7 +30,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "service-isolation-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "broker-orders-typed", "broker-orders-report", "broker-executions", "broker-executions-report", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -126,6 +126,17 @@ def main():
             print(json.dumps(result,indent=2))
             if not result['controller_broker_port_egress_denied']:parser.exit(1)
             return
+        if args.command in {'broker-orders-typed','broker-orders-report'}:
+            from .order_visibility import OrderReceiptConfig,save_typed_orders,load_typed_orders,typed_order_report
+            from .ibkr import BrokerConfig
+            settings=OrderReceiptConfig.from_env();broker=BrokerConfig.from_env()
+            path=Path(os.environ.get('NEXYDAO_TYPED_ORDERS_SNAPSHOT','data/broker-orders-typed.json'))
+            if args.command=='broker-orders-typed':
+                from .access import run_access_check
+                if not run_access_check()['non_loopback_tcp_ingress_denied']:raise ProbeError('host_guard_unverified')
+                result=save_typed_orders(broker,settings,path)
+            else:result=typed_order_report(load_typed_orders(broker,settings,path))
+            print(json.dumps(result,indent=2));return
         if args.command in {'broker-executions','broker-executions-report'}:
             from .executions import ExecutionReceiptConfig,save_executions,load_executions,execution_report
             from .ibkr import BrokerConfig
@@ -173,7 +184,11 @@ def main():
                     from .allocation import AllocationConfig, record_allocation_review
                     from .orders import load_orders
                     orders_path=os.environ.get('NEXYDAO_ORDERS_SNAPSHOT','')
-                    orders=load_orders(broker,Path(key),Path(orders_path)) if orders_path else None
+                    typed_orders_path=os.environ.get('NEXYDAO_TYPED_ORDERS_SNAPSHOT','')
+                    if typed_orders_path:
+                        from .order_visibility import OrderReceiptConfig,load_typed_orders
+                        orders=load_typed_orders(broker,OrderReceiptConfig.from_env(),Path(typed_orders_path))
+                    else:orders=load_orders(broker,Path(key),Path(orders_path)) if orders_path else None
                     web_path=os.environ.get('NEXYDAO_WEB_LEDGER_SNAPSHOT','')
                     if web_path:
                         from .web_ledger import WebConfig,load_web_ledger
@@ -183,7 +198,13 @@ def main():
                 elif args.command=='funding-check':
                     from .funding import record_funding_review
                     result=record_funding_review(payload,broker,Portfolio(store),owner_policy)
-                else: result = reconcile_state(payload, broker, Portfolio(store))
+                else:
+                    typed_orders_path=os.environ.get('NEXYDAO_TYPED_ORDERS_SNAPSHOT','')
+                    if typed_orders_path:
+                        from .order_visibility import OrderReceiptConfig,load_typed_orders
+                        orders=load_typed_orders(broker,OrderReceiptConfig.from_env(),Path(typed_orders_path))
+                    else:orders=None
+                    result=reconcile_state(payload,broker,Portfolio(store),orders=orders)
             print(json.dumps(result, indent=2))
             return
         if args.command == "market-check":

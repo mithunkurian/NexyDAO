@@ -79,6 +79,7 @@ three revisions. Abstaining or asking for research is a valid outcome. See
 - `cli`: offline demo fixture, real AI deliberation, cost inspection.
 - `ibkr` / `market`: bounded read-only paper snapshots/quotes, local integrity and freshness checks.
 - `executions`: bounded typed stock fills/linked commissions, dedicated Ed25519 public-only verification and limited-coverage reports; no ledger import or order writes.
+- `order_visibility`: typed stable stock order prefixes/status identity links and dedicated public receipts, feeding conservative allocation/reconciliation diagnostics; advanced order fields stay unverified.
 - `sec`: fixed public filing endpoints, typed source observations and signed receipts.
 - `research`: two independent reports, strict schemas and application-enforced numeric bindings.
 - `owner_policy`: protected, versioned owner constraints, immutable cycle snapshot and independent cash/short/leverage preflight denial.

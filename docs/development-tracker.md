@@ -45,9 +45,9 @@ Passing M2A does not mean NexyDAO is autonomously investing.
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
 eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
 **2/15 delivery packages complete**. S3's shadow protocol in PR #27 does not close
-S3. PR #29 advances D2 without closing full order/fee/transfer/visibility acceptance.
-Updated estimate: **13–18 further PRs after PR #29**, with **13 packages open**.
-This revises the earlier 13-PR point estimate: observed splits project 19–24 total
+S3. PR #29/#30 advance D2 without closing full order/fee/transfer/visibility acceptance.
+Updated estimate: **13–18 further PRs after PR #30**, with **13 packages open**.
+This revises the earlier 13-PR point estimate: observed splits project 20–25 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -55,6 +55,20 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### D2/P2 typed order visibility and diagnostics — 5 November 2026
+
+Branch `codex/typed-open-order-visibility` adds opt-in stock open-order prefixes,
+full order-status decoding and exact client/order/positive-permanent-ID links.
+Advanced order fields remain count/digest only; complete layout/manual/reservation
+and atomic-account verification stay false. Dedicated Ed25519 public-only receipts
+feed allocation and cash/position diagnostics; unmatched/conflicting/changed orders
+add blockers and all activity still forces zero planning. Configured typed input
+is never replaced by legacy fallback. No broker commands are added beyond the
+existing nonbinding current-order query. Local suite: 330 tests run, 324 passed
+with six Unix-only skips; Ubuntu evidence follows. No real account/history query,
+paid call or deployed/runtime change is included.
+See [scope and remaining acceptance](typed-order-visibility.md).
 
 ### D2/P2 typed execution and fee observations — 5 November 2026
 
