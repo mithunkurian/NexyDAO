@@ -242,6 +242,22 @@ class PortfolioTests(unittest.TestCase):
         self.assertEqual(self.ledger.snapshot()['positions'],[])
         self.assertEqual(result['portfolio_plan']['allocations'],[])
 
+    def test_manager_cash_target_cannot_round_away_recorded_api_cost(self):
+        self.store.reserve(self.store.start(), 'fixture', 'test', Decimal('0.125'), Decimal('1'))
+        calls = []
+
+        class Manager(DemoProvider):
+            def decide(self, run, role, instructions, context, schema):
+                calls.append(role)
+                return {'allocations': [], 'cash_target_usd': 5000, 'alternatives': 'Wait',
+                        'portfolio_risks': 'No verified quote', 'abstain_reason': 'Insufficient evidence'}
+
+        with localcontext(prec=3):
+            with self.assertRaisesRegex(PortfolioError, 'portfolio_cash_target_not_reconciled'):
+                run_cycle(self.store, Manager(), [], portfolio=True)
+
+        self.assertEqual(calls, ['portfolio_manager'])
+
     def test_quote_supported_manager_plan_does_not_mutate_positions(self):
         self.ledger.fill(self.fill())
         self.mark()
