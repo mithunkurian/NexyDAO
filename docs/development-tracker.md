@@ -67,8 +67,9 @@ Closed-order fills can remain unlinked without becoming false conflicts. Matchin
 metadata/windows never establish account atomicity or usable funds. Public state
 can feed existing funding/allocation/reconciliation diagnostics without an HMAC key;
 legacy dependencies remain explicit. All authority/import/reservation flags stay
-false. Local suite: 349 tests run, 343 passed and six Unix-only skips; Ubuntu evidence
-follows. No live account/history query, paid call or deployment is included.
+false. Local suite: 349 tests run, 343 passed and six Unix-only skips. Implementation
+`7b2b031` passed all 349 Ubuntu tests in an isolated release, including 19 new
+receipt/integration tests. No live account/history query, paid call or deployment occurred.
 See [scope and remaining acceptance](public-broker-observations.md).
 
 ### D2/P2 typed order visibility and diagnostics — 5 November 2026

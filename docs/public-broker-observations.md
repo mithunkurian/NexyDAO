@@ -103,8 +103,13 @@ preflight and failed-save preservation, post-read freshness rechecking, matching
 unlinked/conflicting observations, incomplete/negative cash and pending prices,
 non-atomic windows, actual three-receipt reporting without secrets/DB/socket,
 and public-state funding/allocation/reconciliation without weakening denials.
-Windows: 349 tests run, 343 passed and six Unix-only skips. Ubuntu and exact tested
-commit/archive evidence follow after acceptance.
+Windows: 349 tests run, 343 passed and six Unix-only skips. Implementation
+`7b2b031` passed all 349 Ubuntu tests in isolated release
+`releases/public-state-7b2b031`, including all 19 new receipt/integration tests.
+Exact tested source archive SHA-256:
+`06790275a735098d4ccbecb9179e15834d7bdb220ef1231931c4e20bccd7a9d1`.
+This is synthetic receipt/diagnostic acceptance, not real broker, full lifecycle,
+reservation, deployed-role or authorizer acceptance.
 
 All development inputs are synthetic sessions, fabricated accounts/holdings and
 temporary signing keys. No owner account/history query or production runtime key,
