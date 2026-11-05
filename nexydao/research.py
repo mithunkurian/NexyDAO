@@ -2,7 +2,7 @@
 import copy
 from datetime import date
 from .records import TEXT, schema, validate
-from .sec import SourceError, numeric, check_research_freshness
+from .sec import SourceError, numeric, check_research_freshness, universe
 
 CLAIM_CONTEXT = ('concept', 'unit', 'start', 'end', 'filed', 'form', 'accession')
 CLAIM = schema({'evidence_id': {'type': 'string', 'maxLength': 80},
@@ -79,6 +79,12 @@ def check_research_observations(evidence):
     check_research_freshness(facts)
     if len({item['id'] for item in facts}) != len(facts):
         raise SourceError('duplicate_research_evidence_id')
+    issuers = {(item['fact']['symbol'], item['fact']['cik']) for item in facts}
+    if issuers:
+        try:
+            universe([{'symbol': symbol, 'cik': cik} for symbol, cik in sorted(issuers)])
+        except ValueError:
+            raise SourceError('invalid_combined_research_issuer_scope') from None
     values_by_period = {}
     for item in facts:
         fact = item['fact']
