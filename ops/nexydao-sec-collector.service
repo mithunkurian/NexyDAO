@@ -1,0 +1,35 @@
+[Unit]
+Description=NexyDAO bounded SEC collector and verified publication
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=nexydao-collector
+Group=nexydao-collector
+WorkingDirectory=/opt/nexydao
+EnvironmentFile=/etc/nexydao-research/collector.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=NEXYDAO_BROKER_MODE=paper
+Environment=NEXYDAO_EXECUTION_ENABLED=false
+ExecStart=/usr/bin/python3 -m nexydao source-check
+ExecStartPost=/usr/bin/python3 -m nexydao research-publish --research-evidence /var/lib/nexydao-collector/sec-research.json --published-evidence /var/lib/nexydao-evidence/sec-research.json
+StateDirectory=nexydao-collector
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/nexydao-evidence
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0077
+MemoryMax=256M
+TasksMax=16
+TimeoutStartSec=5min

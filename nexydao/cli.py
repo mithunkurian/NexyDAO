@@ -8,6 +8,7 @@ from .ibkr import ProbeError
 from .sec import SourceError
 from .owner_policy import OwnerPolicyError, from_env as owner_policy_from_env
 from .portfolio import PortfolioError
+from .research_publication import PublicationError
 from .provider import OpenAIProvider
 from .records import PROPOSAL, REVIEW
 from .store import Store
@@ -29,7 +30,7 @@ class DemoProvider:
 
 def main():
     parser = argparse.ArgumentParser(description="NexyDAO advisory deliberation; execution disabled")
-    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
+    parser.add_argument("command", choices=["demo", "deliberate", "costs", "broker-check", "broker-access-check", "controller-access-check", "web-access-check", "broker-audit", "broker-audit-report", "broker-state", "broker-reconcile", "funding-check", "allocation-check", "broker-orders", "settlement-check", "web-ledger-check", "sim-reserve", "sim-release", "market-check", "source-check", "research-receipt-check", "research-publish", "research", "owner-policy", "portfolio", "portfolio-report", "sim-fill", "sim-settle", "portfolio-mark"])
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--market-evidence", type=Path)
     parser.add_argument("--research-evidence", type=Path)
@@ -40,11 +41,19 @@ def main():
     parser.add_argument('--held-fill',type=Path)
     parser.add_argument('--with-research',action='store_true')
     parser.add_argument('--revise-run')
+    parser.add_argument('--published-evidence',type=Path)
     args = parser.parse_args()
     store = None
     try:
         config = Config.from_env()
         owner_policy = owner_policy_from_env()
+        if args.published_evidence and args.command!='research-publish':
+            raise ValueError('Published evidence applies only to research-publish')
+        if args.command in {'research-publish','research-receipt-check'}:
+            if not args.research_evidence or args.evidence or args.market_evidence:
+                raise ValueError('One explicit signed research receipt required')
+            if args.command=='research-publish' and not args.published_evidence:
+                raise ValueError('Explicit public receipt destination required')
         if args.revise_run and args.command not in {'deliberate','research','portfolio'}:
             raise ValueError('Revisions require an explicit AI advisory command')
         if args.held_fill and args.command!='sim-fill':
@@ -58,7 +67,7 @@ def main():
         if args.fill and args.command!='sim-fill' or args.settlement_id and args.command!='sim-settle':
             raise ValueError('Simulation arguments apply only to their accounting commands')
         if args.with_research and args.command!='portfolio': raise ValueError('Research modifier requires portfolio command')
-        if (args.evidence or args.market_evidence or args.research_evidence) and args.command not in {"demo", "deliberate", "research", "portfolio", "portfolio-mark"}:
+        if (args.evidence or args.market_evidence or args.research_evidence) and args.command not in {"demo", "deliberate", "research", "portfolio", "portfolio-mark", "research-receipt-check", "research-publish"}:
             raise ValueError("Evidence arguments apply only to deliberation")
         if args.command=='portfolio-mark' and (not args.market_evidence or args.evidence or args.research_evidence):
             raise ValueError('Portfolio marking requires one signed market receipt')
@@ -72,6 +81,18 @@ def main():
             from .sec import ResearchConfig, run_source_check
             print(json.dumps(run_source_check(ResearchConfig.from_env()), indent=2))
             return
+        if args.command in {'research-publish','research-receipt-check'}:
+            from .sec import ResearchConfig,load_research_evidence
+            settings=ResearchConfig.from_env()
+            if args.command=='research-publish':
+                from .research_publication import publish_research
+                result=publish_research(args.research_evidence,args.published_evidence,settings,
+                                        os.environ.get('NEXYDAO_RESEARCH_READ_GROUP',''))
+            else:
+                facts=load_research_evidence(args.research_evidence,settings)
+                result={'status':'research_receipt_verified','facts':len(facts),
+                        'receipt_mode':settings.receipt_mode,'execution_authorized':False}
+            print(json.dumps(result,indent=2));return
         if args.command=='web-ledger-check':
             from .access import run_access_check
             from .web_ledger import WebConfig,save_web_ledger
@@ -200,7 +221,7 @@ def main():
             result = run_cycle(store, provider, evidence, research=args.command == 'research' or args.with_research,
                                  owner_policy=owner_policy,portfolio=args.command=='portfolio',revise_run=args.revise_run)
         print(json.dumps(result, indent=2))
-    except (ProbeError, SourceError, OwnerPolicyError, PortfolioError) as exc:
+    except (ProbeError, SourceError, OwnerPolicyError, PortfolioError, PublicationError) as exc:
         # All ProbeError messages are fixed local codes, never vendor response text.
         parser.exit(1, f"NexyDAO stopped safely ({exc}). Execution remains disabled.\n")
     except Exception as exc:

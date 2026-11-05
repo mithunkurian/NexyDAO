@@ -1,0 +1,33 @@
+[Unit]
+Description=NexyDAO public-only offline research receipt verification
+Requires=nexydao-controller-firewall.service
+After=nexydao-controller-firewall.service
+
+[Service]
+Type=oneshot
+User=nexydao-controller
+Group=nexydao-controller
+SupplementaryGroups=nexydao-evidence
+WorkingDirectory=/opt/nexydao
+EnvironmentFile=/etc/nexydao-research/consumer.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=NEXYDAO_BROKER_MODE=paper
+Environment=NEXYDAO_EXECUTION_ENABLED=false
+ExecStart=/usr/bin/python3 -m nexydao research-receipt-check --research-evidence /var/lib/nexydao-evidence/sec-research.json
+InaccessiblePaths=/var/lib/nexydao-collector
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX
+UMask=0077
+MemoryMax=256M
+TasksMax=16
+TimeoutStartSec=1min

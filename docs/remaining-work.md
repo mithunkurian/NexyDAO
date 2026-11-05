@@ -2,14 +2,20 @@
 
 Planning snapshot: 5 November 2026, Europe/Stockholm.
 
-Estimate: **8 substantial implementation PR packages to autonomous paper operation**,
-then **3 separate live-readiness packages**. This is a scope estimate, not a promise
-of exactly 11 PRs. Broker compatibility, source availability, security findings and
+Estimate after PR #23: **about 15 further PRs (12–18 range)** across eight paper
+workstreams. The [delivery baseline](delivery-plan.md) tracks finite packages and
+scope changes. Live readiness is separate. Broker compatibility, source availability, security findings and
 acceptance failures may need extra fixes or splits. Ongoing evaluation also takes
 elapsed observation time; a PR merge cannot substitute for that evidence.
 PR #14 documents completed acceptance and is separate from this future estimate.
 
-## Autonomous paper operation: eight packages
+The next S1/P5 package connects Ed25519 receipt publication to distinct collector
+and consumer identities. It includes strict shared-directory ownership/modes,
+protected configuration templates and a two-UID permission fixture. Production
+service deployment and full P5 acceptance remain separate gates; see
+[collector/consumer boundary](collector-consumer-boundary.md).
+
+## Autonomous paper operation: eight workstreams
 
 Checklist status: **P1 blocked/in progress; P3, P4 and P5 in progress**; P2 and P6–P8 planned (existing partial components
 remain recorded in the development tracker). No package is struck off yet. After

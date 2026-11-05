@@ -358,9 +358,13 @@ def run_source_check(config):
 
 
 def load_research_evidence(path, config, now=None):
-    now = time.time() if now is None else now
     with path.open('rb') as f:
         raw = f.read(64001)
+    return research_evidence_from_bytes(raw,config,now)
+
+
+def research_evidence_from_bytes(raw,config,now=None):
+    now = time.time() if now is None else now
     if len(raw) > 64000:
         raise SourceError('research_receipt_size_limit')
     receipt = decode(raw)
