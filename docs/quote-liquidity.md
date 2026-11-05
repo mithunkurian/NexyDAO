@@ -69,7 +69,10 @@ reporting, PM early rejection, final policy despite positive votes, narrow advis
 cycles and expiry after the last vote. The between-call expiry fixture now advances
 time at the first model return rather than counting clock reads; it still requires
 only one role call. Windows: 377 tests run, 371 passed and six Unix-only skips.
-Ubuntu and exact tested commit/archive evidence follow after validation.
+Implementation `1796f81` passed all 377 Ubuntu tests in isolated release
+`releases/quote-liquidity-1796f81`, including all 15 new spread/integrity tests.
+Exact tested source archive SHA-256:
+`aa34e70ada60ac56f93a7501192a10797cbc11a1d50d490e6840702caf3de512`.
 
 All inputs use synthetic quotes/providers and temporary keys/databases. No owner
 account/history query, subscription, paid call, deployed service or production data
