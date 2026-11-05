@@ -311,6 +311,11 @@ class Portfolio:
 
 
 def allocation_reasons(snapshot, allocations, policy, *, projected_fee_usd=Decimal(0)):
+    with localcontext(prec=50):
+        return _allocation_reasons(snapshot, allocations, policy, projected_fee_usd)
+
+
+def _allocation_reasons(snapshot, allocations, policy, projected_fee_usd):
     document=policy.document()
     reasons=[]
     total=Decimal(0)
