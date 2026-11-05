@@ -528,3 +528,20 @@ test databases were used. No real account/history query, paid call, deployed
 service or production runtime database changed. R4 remains open for market
 liquidity/full aggregate acceptance; D3 still needs actual reservations/lifecycle
 reconstruction. See [exact archive and model scope](commitment-risk.md).
+
+## Immutable quote spread screen, 2026-11-05
+
+PR #33 implementation `1796f81` passed all 377 Ubuntu tests; Windows passed 371
+with six Unix-only skips. Fifteen new tests cover the fixed 1%-of-bid spread
+boundary, exact decimal comparisons, locked quotes, conservative multi-quote/
+contract handling, reference/identity/freshness binding, immutable/mutated snapshots,
+duplicate JSON, local authenticated reporting, PM rejection, final CEO denial
+despite positive votes, narrow advisory cycles and expiry after the final vote.
+The prior expiry regression still requires one role call, with clock movement
+bound to that call rather than a fragile clock-read count.
+
+These are synthetic quote/provider/temporary-key tests with zero paid calls,
+subscriptions, broker/history queries, deployed services or production changes.
+Executable depth, size units, price impact, full-book exit capacity, funding and
+execution remain unverified/disabled. The spread screen advances R4 without
+closing full liquidity acceptance. See [exact archive and scope](quote-liquidity.md).

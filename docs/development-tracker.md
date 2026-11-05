@@ -67,7 +67,8 @@ spread ceiling on proposed allocations and final CEO investment proposals. Posit
 votes cannot override it. A local report authenticates a quote without DB/provider/
 socket access. Size units, executable depth and full-book exit capacity remain
 unverified; no share-capacity multiplier is guessed. Local suite: 377 tests, 371
-passed/six Unix-only skips; Ubuntu evidence follows. No paid calls, subscriptions,
+passed/six Unix-only skips. Implementation `1796f81` passed all 377 Ubuntu tests,
+including 15 new spread/integrity tests. No paid calls, subscriptions,
 broker/history queries or production changes are included.
 See [screen scope and remaining gates](quote-liquidity.md).
 
