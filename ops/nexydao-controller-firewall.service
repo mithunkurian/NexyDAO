@@ -1,0 +1,12 @@
+[Unit]
+Description=NexyDAO dedicated controller broker-port egress guard
+After=network-pre.target nftables.service
+Before=network.target nexydao-controller-demo.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nexydao-controller-firewall
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

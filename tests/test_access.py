@@ -31,6 +31,11 @@ class AccessTests(unittest.TestCase):
     def test_exact_ipv4_ipv6_guard(self):
         self.assertTrue(validate_guard(guard()))
 
+    def test_dormant_table_is_not_effective_protection(self):
+        document = guard()
+        document['nftables'][1]['table']['flags'] = ['dormant']
+        self.assertFalse(validate_guard(document))
+
     def test_wrong_scope_or_verdict_fails(self):
         for change in ('family', 'hook', 'priority', 'loopback', 'ports', 'accept', 'extra_rule'):
             document = copy.deepcopy(guard())

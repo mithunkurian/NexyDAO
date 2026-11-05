@@ -22,7 +22,7 @@ def validate_guard(document,web=False):
     if set(table) != {'table'} or set(chain) != {'chain'} or set(rule) != {'rule'}: return False
     table, chain, rule = table['table'], chain['chain'], rule['rule']
     if not all(isinstance(x, dict) for x in (table, chain, rule)): return False
-    if table.get('family') != 'inet' or table.get('name') != 'nexydao_guard': return False
+    if table.get('family') != 'inet' or table.get('name') != 'nexydao_guard' or table.get('flags'): return False
     if any(x.get('family') != 'inet' or x.get('table') != 'nexydao_guard' for x in (chain, rule)): return False
     if (chain.get('name') != 'input' or chain.get('type') != 'filter' or chain.get('hook') != 'input'
             or chain.get('prio') != -20 or chain.get('policy') != 'accept' or rule.get('chain') != 'input'):

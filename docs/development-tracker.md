@@ -1,6 +1,6 @@
 # NexyDAO — Development tracker
 
-Updated: **29 October 2026 · Europe/Stockholm**
+Updated: **5 November 2026 · Europe/Stockholm**
 
 **Current checkpoint:** M2A validated; initial research and USD Portfolio Manager slices validated; host ingress guard verified.
 **Next checkpoint:** Expanded SEC evidence and the nine-role advisory abstention path are validated. Continue P3's remaining evidence/revision work and P4 accounting/risk independently of the blocked Web ledger acceptance. PR #16 remains draft; the owner reports the IBKR support ticket was submitted and no reply received. P1 acceptance is deferred, not passed. Current debit/fee funding, broker allocation ownership and monetary reservations remain open. The owner excluded further investigation of prior transactions.
@@ -47,6 +47,15 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### P5 controller egress foundation — 5 November 2026
+
+PR #22 branch `codex/controller-egress-guard` adds a dedicated-UID outbound broker
+port guard, operator audit and isolated offline service template. Both ingress and
+controller audits reject dormant tables. All 243 offline tests pass locally.
+Ubuntu/kernel validation and real identity/service installation remain pending.
+Receipt signing/verification-key separation, complete OS isolation, permits and
+executor security remain open. See [controller isolation scope](controller-isolation.md).
 
 ### P3 linked advisory revisions — 29 October 2026
 
