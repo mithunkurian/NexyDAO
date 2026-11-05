@@ -63,8 +63,11 @@ signer and consumer to the same owner state without sharing private key/ledger.
 Root alone can transition state; a successful transition cannot interleave with
 nonce commit. Busy transitions fail and are not completed stops. A temporary
 three-role Unix fixture tests real access denials and stop/re-arm/reopen behaviour.
-Local suite: 294 tests run, 288 passed and six Unix-only skips. Ubuntu/UID fixture
-acceptance pending. No persistent identity/service deployment is included.
+Local suite: 294 tests run, 288 passed and six Unix-only skips. Implementation
+`4033bcd` passed all 294 Ubuntu tests and the temporary three-role fixture:
+six consumer/five signer protected accesses and eight control operations denied;
+valid consumption, stop/re-arm/reopen, replay, lock contention and unsafe-file
+checks passed. No paid calls or persistent identity/service deployment occurred.
 See [scope and remaining gates](permit-authority-boundary.md).
 
 ### S3/P5 shadow permit protocol — 5 November 2026

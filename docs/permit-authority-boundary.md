@@ -68,5 +68,12 @@ controls remain open. Root is trusted and can change code, keys and policy.
 S3 and full P5 remain open. Data integration should proceed before more authorizer
 deployment work; further slices must close acceptance rather than merely add APIs.
 
-Validation results and exact tested archive will be recorded after Ubuntu and
-three-role acceptance. Windows cannot demonstrate the Unix identity boundary.
+Implementation `4033bcd` passed all 294 tests on Ubuntu in isolated release
+`releases/permit-authority-4033bcd`. Windows ran 294 tests: 288 passed with six
+Unix-only skips. The root-controlled three-role fixture passed all checks above:
+six consumer protected accesses, five signer protected accesses and eight control
+operations were denied, while valid public-only consumption succeeded.
+Exact tested source archive SHA-256:
+`b23713e1fe1600266da30a8901d79cffa84a5b79e6bf059bc4ba2b0fd10c960f`.
+No paid calls or permanent host/runtime changes occurred. Windows alone cannot
+demonstrate the Unix identity boundary.
