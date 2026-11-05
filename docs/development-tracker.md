@@ -55,7 +55,10 @@ pinned public-key verification and collector-only private signing material.
 HMAC remains the default; neither mode falls back to the other. Consumer tests
 verify receipts after both signing/HMAC secrets are removed and run a nine-role
 synthetic workflow. The local 255-test suite has 254 passes and one Unix-only
-permission skip on Windows. Ubuntu and real OS-identity separation remain pending;
+permission skip on Windows. Implementation `0f27742` passed all 255 tests on Ubuntu,
+plus a separate two-fact/nine-role public-only consumer fixture with both signing
+secrets absent and zero paid calls. Production keys/runtime were untouched.
+Real OS-identity separation and live public-key workflow acceptance remain pending;
 full P5 remains open. See [receipt scope](public-key-research-receipts.md).
 
 ### P5 controller egress foundation — 5 November 2026

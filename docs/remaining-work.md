@@ -63,6 +63,9 @@ The next P5 slice adds opt-in public-key verification for SEC receipts without
 the consumer holding a signing secret. Collector signatures do not certify thesis
 truth, other HMAC receipt types or OS isolation. See
 [public-key receipt scope](public-key-research-receipts.md).
+Implementation `0f27742` passed 255 Ubuntu tests and a generated-key, public-only
+consumer fixture. Local Windows validation has 254 passes/one Unix-only skip.
+Production deployment, separate OS identities and live acceptance remain open.
 
 | Package | Remaining work | Acceptance before closing |
 | --- | --- | --- |

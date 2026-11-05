@@ -86,5 +86,10 @@ Windows. Real fixture keys exercised signing, public-only consumption after both
 signing/HMAC secrets were deleted, tamper/wrong-key rejection, collector preflight,
 expiry/scope checks, failed publication preservation and a nine-role synthetic
 consumer workflow. No real credentials, SEC network access, paid API calls or
-broker requests were used. Ubuntu and a separate collector/consumer identity
-acceptance remain pending. Default HMAC operation stays available.
+broker requests were used. Implementation `0f27742` also passed all 255 tests on
+Ubuntu in isolated release `releases/public-receipts-0f27742`, with no skips. A
+separate generated-key fixture verified two signed facts and completed nine
+synthetic advisory calls after both signing/HMAC secrets were deleted. Paid calls
+stayed zero; no production key, persistent runtime or broker access was used.
+Separate collector/consumer OS identity acceptance and real SEC/public-key paid
+workflow acceptance remain pending. Default HMAC operation stays available.
