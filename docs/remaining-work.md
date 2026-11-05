@@ -26,7 +26,8 @@ interval attribution and complete lifecycle acceptance remain open. Revised esti
 PR #36 adds verified audit backups and inspection-only recovery inside O1 without
 enabling recurring operation or closing its scheduling/alert/recovery gates.
 PR #37 adds read-only health and local alerts; O1 commissioning remains open.
-**13–15 further PRs after PR #37** (27–29 total after #23 versus the
+PR #38 adds finite maintenance-only scheduling ticks; activation/recovery remain open.
+**13–14 further PRs after PR #38** (28–29 total after #23 versus the
 original 12–18). Implementation/acceptance splits exceeded that estimate; project
 scope has not grown. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
