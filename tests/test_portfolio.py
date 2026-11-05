@@ -124,6 +124,17 @@ class PortfolioTests(unittest.TestCase):
         self.assertFalse(self.ledger.snapshot(now=expiry)['valuation_complete'])
         with self.assertRaises(PortfolioError): self.mark('110',conid=999)
 
+    def test_older_fresh_receipt_cannot_replace_newer_position_mark(self):
+        self.ledger.fill(self.fill(), self.policy)
+        event = int(time.time())
+        self.mark(bid='110', event=event)
+        before = self.ledger.snapshot()
+
+        with self.assertRaisesRegex(PortfolioError, 'older_portfolio_mark'):
+            self.mark(bid='95', event=event - 10)
+
+        self.assertEqual(self.ledger.snapshot(), before)
+
     def test_expired_mark_prevents_buy_but_owned_sale_can_reduce_risk(self):
         self.ledger.fill(self.fill())
         with self.assertRaisesRegex(PortfolioError,'fresh_portfolio_valuation_required'):

@@ -292,6 +292,14 @@ class Portfolio:
             row=self.db.execute('SELECT con_id FROM simulated_positions WHERE symbol=?',(contract['symbol'],)).fetchone()
             if not row: raise PortfolioError('mark_requires_existing_simulated_position')
             if row[0] is not None and row[0]!=contract['con_id']: raise PortfolioError('position_contract_mismatch')
+            if row[0] is not None:
+                previous = self.db.execute(
+                    'SELECT expires_at FROM portfolio_marks WHERE symbol=? AND con_id=?',
+                    (contract['symbol'], contract['con_id']),
+                ).fetchone()
+                # Verified receipts use a fixed lifetime from their event time.
+                if previous and item['expires_at'] < previous[0]:
+                    raise PortfolioError('older_portfolio_mark')
             self.db.execute('UPDATE simulated_positions SET con_id=? WHERE symbol=?',(contract['con_id'],contract['symbol']))
             # Fingerprint already derived from the authenticated payload. Do not
             # reread an untrusted file after validation or hash an unbounded body.
