@@ -52,7 +52,8 @@ actual monetary reservations. PR #33 adds a prospective quote-spread guard while
 leaving executable/full-book liquidity unverified. Updated estimate:
 PR #34 adds opt-in public market receipts; remaining deployment/key boundaries stay
 open. PR #35 adds fresh paired-delta diagnostics without closing D3.
-**13–17 further PRs after PR #35**, with **13 packages open**. Observed splits project 25–29 total
+PR #36 adds verified audit backups/isolated restore without closing O1.
+**13–16 further PRs after PR #36**, with **13 packages open**. Observed splits project 26–29 total
 after PR #23 versus the original 12–18 range, without increasing project scope.
 See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
@@ -60,6 +61,19 @@ time. See the [remaining-work checklist](remaining-work.md) for scope, dependenc
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### O1 verified audit backup and inspection-only recovery — 5 November 2026
+
+Branch `codex/verified-audit-backups` adds explicit online SQLite backup, integrity/
+manifest/audit verification and restore into a new private inspection directory.
+Committed WAL records, uncertain API charges and active simulation commitments
+persist. The current application rejects marked copies before WAL/schema setup,
+preventing silent budget rollback through normal runtime commands. No credentials,
+authority ledger, production runtime or recurring service is backed up/deployed.
+Twenty-one synthetic tests include actual CLI backup/check/restore and runtime
+denial. Windows: 430 tests, 422 passed/eight Unix-only skips. Ubuntu acceptance
+follows. O1's scheduling, health/alerts and
+deployed recovery remain open. See [scope and operator use](audit-backups.md).
 
 ### D3 paired cash/position and visible-fill changes — 5 November 2026
 

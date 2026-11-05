@@ -97,6 +97,11 @@ separate broker identity and egress enforcement are required for the future exec
 
 ## Operations
 
+PR #36 supplies [verified audit backups and inspection-only restore](audit-backups.md)
+with explicit CLI commands. Use the SQLite backup API rather than copying only a
+live main DB. These recovery copies cannot resume the application or reset its
+lifetime API budget; production recovery acceptance remains open.
+
 Stop the service for upgrades. Back up SQLite via `sqlite3.Connection.backup` or SQLite
 backup tooling; copying a live database without its WAL can lose records. Restrict
 backup access. Monitor disk, failures, abandoned `running` runs and unsettled API costs.

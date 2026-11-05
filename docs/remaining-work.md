@@ -23,7 +23,9 @@ PR #33 adds immutable quote-backed spread screening, leaving executable/full-boo
 liquidity unverified. PR #34 adds opt-in public-key market quotes without completing
 broker-role deployment. PR #35 adds fresh paired state/execution delta diagnostics;
 interval attribution and complete lifecycle acceptance remain open. Revised estimate:
-**13–17 further PRs after PR #35** (25–29 total after #23 versus the
+PR #36 adds verified audit backups and inspection-only recovery inside O1 without
+enabling recurring operation or closing its scheduling/alert/recovery gates.
+**13–16 further PRs after PR #36** (26–29 total after #23 versus the
 original 12–18). Implementation/acceptance splits exceeded that estimate; project
 scope has not grown. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
