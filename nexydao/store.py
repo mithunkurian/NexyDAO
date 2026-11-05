@@ -85,9 +85,28 @@ class Store:
         return ticket
 
     def settle(self, ticket, amount, usage, response_id):
+        charge = Decimal(str(amount))
+        if not charge.is_finite() or charge < 0:
+            raise ValueError("Invalid API charge")
+        encoded_usage = json.dumps(usage, allow_nan=False)
         with self.db:
-            self.db.execute("UPDATE costs SET charged=?,status='reported',usage=?,response_id=? WHERE id=?",
-                            (str(amount), json.dumps(usage), response_id, ticket))
+            updated = self.db.execute(
+                "UPDATE costs SET charged=?,status='reported',usage=?,response_id=? "
+                "WHERE id=? AND status='reserved'",
+                (str(charge), encoded_usage, response_id, ticket),
+            )
+            if updated.rowcount == 1:
+                return
+            existing = self.db.execute(
+                "SELECT charged,status,usage,response_id FROM costs WHERE id=?", (ticket,)
+            ).fetchone()
+            if existing is None:
+                raise ValueError("Unknown API reservation")
+            previous_charge, status, previous_usage, previous_response = existing
+            if (status != 'reported' or Decimal(previous_charge) != charge
+                    or previous_response != response_id
+                    or json.loads(previous_usage) != json.loads(encoded_usage)):
+                raise ValueError("Conflicting API settlement")
 
     def costs(self):
         rows = self.db.execute("SELECT charged,status FROM costs").fetchall()
