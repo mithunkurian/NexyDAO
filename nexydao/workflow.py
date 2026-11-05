@@ -88,6 +88,9 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             from .research import run_research
             reports = run_research(store, provider, run, evidence, owner_policy, revision_context=revision_context)
             context['research_reports'] = reports
+        else:
+            from .research import check_research_observations
+            check_research_observations(evidence)
         plan=None
         if portfolio:
             from .portfolio_manager import run_manager

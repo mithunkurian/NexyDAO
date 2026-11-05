@@ -414,22 +414,25 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(store.db.execute('SELECT status FROM runs').fetchone()[0], 'failed')
         self.assertEqual(store.memory(), [])
 
-    def test_conflicting_observations_stop_before_research_provider(self):
+    def test_conflicting_observations_stop_before_any_advisory_provider_call(self):
         evidence = self.receipt()
         conflicting = copy.deepcopy(evidence[0])
         conflicting['id'] = 'sec-conflicting-fixture'
         conflicting['fact']['accession'] = '0000000001-26-000999'
         conflicting['fact']['value'] = str(Decimal(conflicting['fact']['value']) + 1)
-        store = Store(self.root / 'conflict.sqlite3')
-        self.addCleanup(store.close)
-        provider = self.provider(evidence)
+        modes = ({'research': True}, {}, {'portfolio': True})
+        for index, options in enumerate(modes):
+            with self.subTest(options=options):
+                store = Store(self.root / f'conflict-{index}.sqlite3')
+                self.addCleanup(store.close)
+                provider = self.provider(evidence)
 
-        with self.assertRaisesRegex(SourceError, 'contradictory_research_observations'):
-            run_cycle(store, provider, evidence + [conflicting], research=True)
+                with self.assertRaisesRegex(SourceError, 'contradictory_research_observations'):
+                    run_cycle(store, provider, evidence + [conflicting], **options)
 
-        self.assertEqual(provider.calls, [])
-        self.assertEqual(store.costs()['calls'], 0)
-        self.assertEqual(store.db.execute('SELECT status FROM runs').fetchone()[0], 'failed')
+                self.assertEqual(provider.calls, [])
+                self.assertEqual(store.costs()['calls'], 0)
+                self.assertEqual(store.db.execute('SELECT status FROM runs').fetchone()[0], 'failed')
 
     def test_nine_call_research_manager_review_preserves_owner_constraints(self):
         self.config = replace(self.config, concepts=APPROVED_CONCEPTS)

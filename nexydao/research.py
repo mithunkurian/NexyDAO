@@ -74,10 +74,8 @@ def report_schema(evidence):
     return spec
 
 
-def run_research(store, provider, run, evidence, owner_policy, revision_context=None):
+def check_research_observations(evidence):
     facts = [e for e in evidence if e.get('verification') == 'verified_filing_observation']
-    if not facts:
-        raise SourceError('verified_filing_observations_required')
     check_research_freshness(facts)
     if len({item['id'] for item in facts}) != len(facts):
         raise SourceError('duplicate_research_evidence_id')
@@ -89,6 +87,13 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
         value = numeric(fact['value'])
         if values_by_period.setdefault(period, value) != value:
             raise SourceError('contradictory_research_observations')
+    return facts
+
+
+def run_research(store, provider, run, evidence, owner_policy, revision_context=None):
+    facts = check_research_observations(evidence)
+    if not facts:
+        raise SourceError('verified_filing_observations_required')
     context = {'filing_observations': facts, 'memory': store.memory(),
                'scope': 'Filing observations only; no current valuation or investment authorization.',
                'owner_policy': owner_policy.document(), 'owner_policy_sha256': owner_policy.digest}
