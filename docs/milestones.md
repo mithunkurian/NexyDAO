@@ -454,3 +454,20 @@ broker operations were changed. This is shadow mechanism/identity-fixture eviden
 not deployed authorizer or hardened emergency-stop acceptance. S3 remains open
 for accepted broker/risk/review/reservation inputs and protected deployment.
 See [exact archive, acceptance and limitations](permit-authority-boundary.md).
+
+## Typed execution/commission observation foundation, 2026-11-05
+
+PR #29 implementation `f5ae699` passed all 310 Ubuntu tests; Windows passed 304
+with six Unix-only skips. Sixteen new tests cover the protocol-178 account-filtered
+read-only request, stock fill/fee parsing, exact identity/end/completion checks,
+reordered and late commissions, partial fills/corrections, bounds, pending-price
+and currency flags, dedicated Ed25519 signatures, public-only verification after
+removing the signer, failed-save preservation and database/provider/socket-free
+reporting. Wire layouts were checked against official API 10.51.01 source.
+
+Tests use synthetic broker sessions, fabricated account/contract data and generated
+temporary keys. No real query or owner transaction-history review occurred; no paid
+calls, installed service, broker writes, production key/budget or simulation state
+was changed. D2 remains open for live/coverage acceptance, order/manual/transfer
+data and remaining public-key integration. S3, funding, reconciliation and execution
+remain gated. See [exact tested archive and scope](execution-observations.md).

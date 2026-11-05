@@ -95,7 +95,12 @@ missing events, typed schemas, freshness, signature/domain rejection, public-onl
 verification after deleting the private key, signer rejection before networking,
 failed-save preservation and database/provider/socket-free report execution.
 Local suite: 310 tests run, 304 passed and six Unix-only skips on Windows.
-Ubuntu validation and exact tested commit/archive follow after acceptance.
+Implementation `f5ae699` passed all 310 Ubuntu tests in isolated release
+`releases/execution-fees-f5ae699`, including all 16 new execution tests. Exact
+tested archive SHA-256:
+`d8f46db31a7a165e75903b5c2b2c295888a5d050a840573fc684851d416d4945`.
+These are synthetic-session/API-layout and public-signature acceptance results,
+not evidence of a real account query, complete broker coverage or live compatibility.
 
 D2 remains open for real read-only compatibility/coverage acceptance under an
 appropriate data-access scope, typed open/completed orders and manual visibility,
