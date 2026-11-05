@@ -371,3 +371,20 @@ This validates the guard mechanism in isolation. Real controller-account/service
 installation, startup/boot/recovery acceptance, alternate egress boundaries,
 signing-key separation, independent authorization and full P5 remain open.
 Funding and execution stay disabled.
+
+## Public-key SEC receipt offline acceptance, 2026-11-05
+
+Implementation `0f27742` passed a 255-test suite locally (254 passed, one Unix-only
+permission skip on Windows) and all 255 tests in isolated Ubuntu release
+`releases/public-receipts-0f27742`. The isolated local demo also passed. Tests use
+real Ed25519 fixture signatures to cover public-only consumption, payload/key/
+algorithm tampering, no HMAC fallback, expiry/scope, duplicate JSON, pre-network
+signer rejection, protected Unix paths and failed-publication preservation.
+
+A separate Ubuntu fixture generated fresh test keys, signed a two-fact receipt,
+deleted both private signing/HMAC secrets and verified with the pinned public key.
+A synthetic nine-role advisory consumer cycle completed with zero paid calls and
+execution denied. No production key, persistent runtime, SEC retrieval, broker
+access or service/host-identity change occurred. Separate collector/consumer OS
+identities, migration of other HMAC receipt types, live public-key acceptance and
+complete P5 remain open.
