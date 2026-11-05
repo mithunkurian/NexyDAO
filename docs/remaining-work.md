@@ -27,7 +27,8 @@ PR #36 adds verified audit backups and inspection-only recovery inside O1 withou
 enabling recurring operation or closing its scheduling/alert/recovery gates.
 PR #37 adds read-only health and local alerts; O1 commissioning remains open.
 PR #38 adds finite maintenance-only scheduling ticks; activation/recovery remain open.
-**13–14 further PRs after PR #38** (28–29 total after #23 versus the
+PR #39 adds the selected Gmail alert path with live credential/activation pending.
+**At least 13 further PRs after PR #39** (at least 29 total after #23 versus the
 original 12–18). Implementation/acceptance splits exceeded that estimate; project
 scope has not grown. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate
