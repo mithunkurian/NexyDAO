@@ -20,7 +20,7 @@ implementation order: independent work can proceed while broker access is blocke
 | D2 | Full orders/fills/commissions/transfers, manual visibility and public-key broker receipt integration | In progress; PR #29 fills/fees, PR #30 typed order-prefix/status diagnostics and public receipts; full semantics/coverage/transfers/live acceptance open |
 | D3 | Broker cash/position lifecycle reconciliation, remaining broker key boundaries and actual monetary reservations | In progress; PR #31 public state/cross-checks and PR #35 fresh paired-delta diagnostics; interval attribution, lifecycle/reservations/deployment remain open |
 | R1 | Remaining research/quote-backed advisory and paid revision acceptance | Planned; initial live paths exist |
-| R2 | Broader approved evidence and supported narrative/contradiction checks | Planned; typed SEC checks exist |
+| R2 | Broader approved evidence and supported narrative/contradiction checks | In progress. Verified SEC observations with conflicting values for the same issuer, metric, unit and reporting period stop advisory runs before model calls. Broader source coverage and narrative validation remain open. |
 | R3 | Scoped FX/tax/corporate-action and portfolio accounting completion | Planned; USD simulation exists |
 | R4 | Portfolio liquidity/stress enforcement and complete aggregate-risk acceptance | In progress; PR #32 stress/commitment limits, PR #33 immutable quote spread guard; executable depth/full-book liquidity and complete acceptance remain |
 | E1 | Narrow paper executor with permits, price/quantity bounds and idempotency | Locked until prerequisites |
@@ -94,7 +94,9 @@ engineering workflow does not itself grant broker execution or live-money access
 The owner subsequently directed development to continue automatically after each
 successful merge, without asking to start the next stage. Continue independent
 authorized work and pause only for a necessary decision or external prerequisite.
-Keep providing the PR checklist and progress estimate at each merge milestone.
+At the end of each PR, report what shipped, verification results, the estimated
+overall progress, packages complete and remaining, and the current estimate of
+PRs left. Label estimates separately from verified completion.
 
 After reporting PR #25 merged, the owner explicitly authorized its previously
 blocked root SEC installation. It created the scoped service identities, protected
