@@ -20,7 +20,8 @@ Full D2 data and D3 lifecycle/reservation acceptance remain open. **13 packages 
 PR #32 adds projected stress and retained simulation commitment envelopes; actual
 reservations and market liquidity remain unverified.
 PR #33 adds immutable quote-backed spread screening, leaving executable/full-book
-liquidity unverified. Revised estimate: **13–18 further PRs after PR #33** (23–28 total after #23 versus the
+liquidity unverified. PR #34 adds opt-in public-key market quotes without completing
+broker-role deployment. Revised estimate: **13–18 further PRs after PR #34** (24–29 total after #23 versus the
 original 12–18). Implementation/acceptance splits exceeded that estimate; project
 scope has not grown. Remaining broker
 receipt key migration is paired with D2/D3 integration, without dropping that gate

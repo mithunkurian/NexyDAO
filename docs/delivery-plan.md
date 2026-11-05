@@ -39,7 +39,9 @@ cross-checks inside D3, without closing lifecycle/reservation acceptance.
 PR #32 adds binding simulation stress and retained active-hold limits inside R4/D3,
 without closing market-liquidity or actual monetary-reservation acceptance.
 PR #33 adds immutable quote/spread checks for prospective advisory risk, without
-certifying executable depth or full-book liquidity. Updated estimate after PR #33: **13–18 further PRs**,
+certifying executable depth or full-book liquidity. PR #34 adds opt-in market
+public-key consumption and temporary role acceptance; production broker-key
+deployment still remains open. Updated estimate after PR #34: **13–18 further PRs**,
 with 13 open delivery packages; this replaces the earlier 13-PR point estimate.
 PR #26 was an additional
 corrective PR inside S2: inactive one-shot services lost their systemd timestamps,
@@ -48,9 +50,9 @@ S3 is split because funding/reconciliation and independent authorization inputs
 are not yet accepted: PR #27 exercises the protocol without granting orders; its
 remaining accepted-evidence integration and deployed identity acceptance stay open.
 The correction, two S3 foundation slices and D2/D3 data foundations have consumed
-ten PRs after #23 while closing two packages. At least one further PR per remaining
-package projects 23 total after #23; allowing further integration/failure splits
-gives about 23–28 total, beyond the original 12–18 range. The scope has not expanded;
+eleven PRs after #23 while closing two packages. At least one further PR per remaining
+package projects 24 total after #23; allowing further integration/failure splits
+gives about 24–29 total, beyond the original 12–18 range. The scope has not expanded;
 the estimate underestimated implementation/acceptance splits. Report future changes
 explicitly rather than count partial packages as complete.
 Proceed with data acceptance before further signer deployment. Scope is unchanged. Boot/sustained recovery stay

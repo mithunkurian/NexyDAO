@@ -1,5 +1,10 @@
 # Read-only market evidence trial
 
+PR #34 adds [opt-in public-key market quotes](public-market-quotes.md). Existing
+collector/report/mark/advisory commands use explicit mode selection; Ed25519
+consumers need a pinned public key and never open signing/HMAC secrets. Legacy
+mode stays the default; no automatic fallback or production deployment is added.
+
 PR #33 adds a [quote-backed spread guard](quote-liquidity.md) to advisory allocations
 and final policy, with immutable observation/freshness checks. It does not verify
 size units, executable depth or full portfolio liquidity. Market receipt loading
