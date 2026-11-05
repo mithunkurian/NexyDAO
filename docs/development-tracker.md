@@ -37,16 +37,29 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | M4 | Independent authorization and paper execution | **Planned; locked** | Isolated executor, signed permits, kill switch, exposure reservations and execution failure tests |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
 
-No overall completion percentage is assigned: milestones differ substantially in scope.
+Owner-facing rough progress estimate: **about 45% (40–50%)** toward autonomous paper
+operation. Milestones differ substantially in scope; this is a subjective planning
+guide, not a measured score or evidence of investment readiness.
 Passing M2A does not mean NexyDAO is autonomously investing.
 
-Remaining implementation estimate: **8 substantial PR packages to autonomous paper
-operation**, followed by **3 separately authorized live-readiness packages**.
+Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
+eight paper workstreams; **0/15 delivery packages closed** at this baseline.
+See the [finite delivery plan](delivery-plan.md). Live readiness is a separate phase.
 Compatibility/security fixes may add PRs; observation periods require real elapsed
 time. See the [remaining-work checklist](remaining-work.md) for scope, dependencies
 and acceptance criteria. Small documentation updates accompany those packages.
 
 ## Current work queue
+
+### S1/P5 collector-consumer publication — 5 November 2026
+
+Branch `codex/collector-consumer-boundary` adds Ed25519-only group-readable
+publication, database-free receipt checks, role-specific service templates and a
+two-UID filesystem acceptance fixture. Private keys remain collector-only, while
+the consumer can read but not replace published receipts or trusted configuration.
+Local validation: 262 tests, 257 passed/five Unix-only skips on Windows. Ubuntu,
+cross-UID and actual service/deployment acceptance remain pending. S1 and full P5
+remain open. See [boundary scope](collector-consumer-boundary.md).
 
 ### P5 public-key research receipts — 5 November 2026
 
