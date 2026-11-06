@@ -120,10 +120,15 @@ class MaintenanceJobs:
 
     def _report(self,enabled,reason,plan,attempts,**extra):
         completed_at = max((attempt[2] for attempt in attempts if attempt[3] == 'completed'), default=None)
+        interval = plan['interval_seconds']
+        starts = [attempt[1] for attempt in attempts]
+        gaps = [later - earlier for earlier, later in zip(starts, starts[1:])]
         return {'enabled':enabled,'reason':reason,'attempt_count':len(attempts),
             'incomplete_attempt_count':sum(a[3]=='running' for a in attempts),
             'failed_attempt_count':sum(a[3]=='failed' for a in attempts),
             'last_completed_at':completed_at,
+            'longest_start_gap_seconds':max(gaps, default=None),
+            'unobserved_intervals_between_attempts':sum(max(0, gap // interval - 1) for gap in gaps),
             'retained_or_reserved_backup_bytes':sum(a[4] for a in attempts),
             'max_attempts':plan['max_attempts'],'max_backup_bytes':plan['max_backup_bytes'],
             'recurring_automation_installed':False,'paid_job_supported':False,

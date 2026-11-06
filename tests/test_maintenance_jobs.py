@@ -83,6 +83,19 @@ class MaintenanceJobTests(unittest.TestCase):
             {'attempt_id': attempt, 'reason': 'archive_unverifiable'},
         ])
 
+    def test_cadence_report_counts_full_intervals_between_recorded_starts(self):
+        self.arm()
+        self.assertIsNone(self.jobs.status()['longest_start_gap_seconds'])
+        self.jobs.tick(self.plan)
+        self.clock[0] += 61
+        self.jobs.tick(self.plan)
+        self.assertEqual(self.jobs.status()['unobserved_intervals_between_attempts'], 0)
+        self.clock[0] += 181
+        self.jobs.tick(self.plan)
+        report = self.jobs.status()
+        self.assertEqual(report['longest_start_gap_seconds'], 181)
+        self.assertEqual(report['unobserved_intervals_between_attempts'], 2)
+
     def test_concurrent_tick_cannot_overlap_or_disarm_a_legitimate_running_attempt(self):
         self.arm();entered=threading.Event();release=threading.Event();create=backups.create_backup
         def blocked(*args):
