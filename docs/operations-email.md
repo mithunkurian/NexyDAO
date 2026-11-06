@@ -148,6 +148,18 @@ with zero critical alerts. The full service exited successfully in 5.16 seconds.
 The fixture tests backup size using SQLite free pages. Runtime acceptance under
 the installed unit and boot recovery remain open.
 
+A second isolated run used 65 populated event rows to exercise health-check
+hashing. It passed in 1.74 seconds with a 65,798,144-byte archive and zero
+critical alerts. Repeat this check from the repository root on the Ubuntu VM.
+The transient service uses a fresh synthetic database and deletes its temporary
+files on normal exit. It does not use the pilot ledger or SMTP profile.
+
+```bash
+systemd-run --user --wait --pipe --collect --working-directory="$PWD" \
+  -p Type=oneshot -p CPUQuota=100% -p MemoryMax=256M -p TasksMax=16 \
+  -p TimeoutStartSec=120s /usr/bin/python3 -B - < ops/test-pilot-resource-limits.py
+```
+
 On the VM, check the timer, the last timer trigger and the service outcome.
 
 ```bash
