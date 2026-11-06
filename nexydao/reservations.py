@@ -12,6 +12,8 @@ from .portfolio import PortfolioError, allocation_reasons, QUANTUM
 from .ibkr import ProbeError
 
 FIELDS={'id','proposal_sha256','symbol','notional_usd','fee_usd','fee_currency'}
+MAX_RESERVATIONS = 1_000
+MAX_RESERVATION_EVENTS = 2_000
 
 
 @contextmanager
@@ -81,9 +83,15 @@ def active_holds(db):
                 raise PortfolioError('simulation_reservation_audit_mismatch')
         return []
     profiles=limit_profiles(db)
-    rows=db.execute('SELECT id,CASE WHEN length(payload)<=4000 THEN payload END,digest,status FROM simulation_reservations LIMIT 1001').fetchall()
-    events=db.execute('SELECT reservation_id,action FROM simulation_reservation_events ORDER BY sequence LIMIT 2001').fetchall()
-    if len(rows)>1000 or len(events)>2000: raise PortfolioError('simulation_reservation_history_limit')
+    rows=db.execute('SELECT id,CASE WHEN length(payload)<=4000 THEN payload END,digest,status FROM simulation_reservations LIMIT ?',
+                    (MAX_RESERVATIONS + 1,)).fetchall()
+    # Once ordinary history is full, retain room to release each existing hold.
+    replay_limit = MAX_RESERVATION_EVENTS + MAX_RESERVATIONS
+    events=db.execute('SELECT reservation_id,action FROM simulation_reservation_events ORDER BY sequence LIMIT ?',
+                      (replay_limit + 1,)).fetchall()
+    if (len(rows) > MAX_RESERVATIONS or len(events) > replay_limit
+            or any(action != 'release' for _, action in events[MAX_RESERVATION_EVENTS:])):
+        raise PortfolioError('simulation_reservation_history_limit')
     documents={}
     remaining={}
     for identifier,payload,digest,status in rows:
