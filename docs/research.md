@@ -132,6 +132,13 @@ When these comparisons are available, research reports include a
 `comparison_claims` list. Each claim must match a supplied pair and direction.
 An unsupported or duplicate claim stops the run before advisory review.
 
+Set `NEXYDAO_RESEARCH_PRIOR_ASSETS=true` on both collector and consumer to use
+version 3 receipts. They include the most recent two distinct asset observation
+dates for each selected issuer, drawn from the same approved SEC source response.
+Other metrics still contribute one observation each. Both asset observations must
+meet the existing filing freshness rules, and each counts toward the nine-fact
+cap. The default continues to produce and accept the existing receipt format.
+
 The portfolio manager, CEO, risk reviewers and committee also check common
 affirmative asset-growth wording in rationales. An assertion such as “the filings
 show significant asset growth” requires both citations for comparable SEC asset
