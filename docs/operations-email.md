@@ -119,6 +119,18 @@ completed attempts, one manual and one timer-triggered. Verification of the
 latest archive matched the digest recorded for that attempt. Sustained pilot
 operation remains an acceptance check.
 
+Through 05:28 on 6 November Stockholm time, the pilot ledger held ten completed
+attempts with zero failed or incomplete attempts. The read-only archive audit
+from PR #61 verified all ten bundles against the recorded digests and sizes
+(2,498,560 bytes total). The latest service journal reported
+`mail_no_critical_alert`. The pilot remained armed with its original bounds.
+
+The running service was observed as `Type=oneshot` with a two-minute start
+timeout, `Restart=no`, `UMask=0077` and `NoNewPrivileges=yes`. Its effective
+`TasksMax` was 680, and CPU quota and memory maximum were unlimited at the
+unit level. Explicit CPU and memory bounds and boot acceptance remain O2 work.
+The full pilot window is still in progress.
+
 On the VM, check the timer, the last timer trigger and the service outcome.
 
 ```bash
