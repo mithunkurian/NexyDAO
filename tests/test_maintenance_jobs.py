@@ -51,11 +51,17 @@ class MaintenanceJobTests(unittest.TestCase):
         self.assertNotIn(str(self.source),json.dumps(result))
 
     def test_cadence_is_persistent_across_instances_and_equal_due_time_is_allowed(self):
+        self.assertIsNone(self.jobs.status()['last_completed_at'])
         self.arm();self.jobs.tick(self.plan)
         reopened=MaintenanceJobs(self.path,lambda:self.clock[0])
         self.clock[0]+=59;self.assertFalse(reopened.tick(self.plan)['work_started'])
         self.clock[0]+=1;self.assertTrue(reopened.tick(self.plan)['maintenance_passed'])
         self.assertEqual(reopened.status()['attempt_count'],2)
+        self.assertEqual(reopened.status()['last_completed_at'], self.clock[0])
+        self.clock[0] += 60
+        with patch('nexydao.maintenance_jobs.backups.create_backup', side_effect=OSError):
+            self.assertFalse(reopened.tick(self.plan)['maintenance_passed'])
+        self.assertEqual(reopened.status()['last_completed_at'], self.clock[0] - 60)
 
     def test_archive_audit_detects_missing_and_mismatched_archives_without_writing(self):
         self.arm()

@@ -119,16 +119,18 @@ class MaintenanceJobs:
         return bool(enabled),reason,plan,attempts
 
     def _report(self,enabled,reason,plan,attempts,**extra):
+        completed_at = max((attempt[2] for attempt in attempts if attempt[3] == 'completed'), default=None)
         return {'enabled':enabled,'reason':reason,'attempt_count':len(attempts),
             'incomplete_attempt_count':sum(a[3]=='running' for a in attempts),
             'failed_attempt_count':sum(a[3]=='failed' for a in attempts),
+            'last_completed_at':completed_at,
             'retained_or_reserved_backup_bytes':sum(a[4] for a in attempts),
             'max_attempts':plan['max_attempts'],'max_backup_bytes':plan['max_backup_bytes'],
             'recurring_automation_installed':False,'paid_job_supported':False,
             'alert_delivery_performed':False,'execution_authorized':False,**extra}
 
     def status(self):
-        with self._db() as db:return self._report(*self._read(db))
+        with self._db(readonly=True) as db:return self._report(*self._read(db))
 
     def verify_archives(self):
         with self._db(readonly=True) as db:

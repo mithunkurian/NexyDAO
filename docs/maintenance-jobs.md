@@ -55,6 +55,11 @@ gives a nonzero exit status. The audit does not access the live application data
 change scheduler state, or claim work. Attempts recorded after the snapshot appear
 on the next audit.
 
+Maintenance reports include `last_completed_at`, the Unix timestamp of the most
+recent successful completion, or `null` before the first success. A later failed
+or incomplete attempt leaves this timestamp at the last successful completion.
+The `status` command opens the ledger read-only.
+
 ## Scheduling and failure behaviour
 
 A short SQLite `BEGIN IMMEDIATE` transaction checks cadence, stopped state,
