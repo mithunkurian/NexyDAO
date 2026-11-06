@@ -44,12 +44,15 @@ def main():
     parser.add_argument('--held-fill',type=Path)
     parser.add_argument('--with-research',action='store_true')
     parser.add_argument('--revise-run')
+    parser.add_argument('--summary', action='store_true', help='Show a readable quote-backed advisory report')
     parser.add_argument('--published-evidence',type=Path)
     parser.add_argument('--before-state',type=Path)
     parser.add_argument('--before-executions',type=Path)
     parser.add_argument('--backup-dir',type=Path)
     parser.add_argument('--restore-dir',type=Path)
     args = parser.parse_args()
+    if args.summary and (args.command != 'portfolio' or not args.research_evidence or not args.market_evidence):
+        parser.error('--summary requires portfolio with --research-evidence and --market-evidence')
     store = None
     try:
         config = Config.from_env()
@@ -338,7 +341,11 @@ def main():
             provider = DemoProvider() if args.command == "demo" else OpenAIProvider(config, store)
             result = run_cycle(store, provider, evidence, research=args.command == 'research' or args.with_research,
                                  owner_policy=owner_policy,portfolio=args.command=='portfolio',revise_run=args.revise_run)
-        print(json.dumps(result, indent=2))
+        if args.summary:
+            from .advisory_report import format_summary, read_report
+            print(format_summary(read_report(config.db, result['run_id'])))
+        else:
+            print(json.dumps(result, indent=2))
     except (ProbeError, SourceError, OwnerPolicyError, PortfolioError, PublicationError, BackupError, HealthError) as exc:
         # All ProbeError messages are fixed local codes, never vendor response text.
         parser.exit(1, f"NexyDAO stopped safely ({exc}). Execution remains disabled.\n")
