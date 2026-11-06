@@ -157,6 +157,10 @@ ASSET_GROWTH_ASSERTION = re.compile(
 )
 
 
+class UnsupportedAssetGrowth(SourceError):
+    pass
+
+
 def check_asset_growth_claim(record, symbol, evidence):
     if not ASSET_GROWTH_ASSERTION.search(record['rationale']):
         return
@@ -165,7 +169,7 @@ def check_asset_growth_claim(record, symbol, evidence):
              and item.get('verification') == 'verified_filing_observation'
              and item['fact']['symbol'] == symbol and item['fact']['concept'] == 'Assets']
     if not any(pair['reported_value_direction'] == 'higher' for pair in filing_comparisons(facts)):
-        raise SourceError('unsupported_advisory_asset_growth_claim')
+        raise UnsupportedAssetGrowth('unsupported_advisory_asset_growth_claim')
 
 
 def run_research(store, provider, run, evidence, owner_policy, revision_context=None):

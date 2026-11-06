@@ -17,6 +17,7 @@ from nexydao.market import MarketConfig, SOURCE, canonical, load_market_evidence
 from nexydao.owner_policy import load_policy, OwnerPolicyError
 from nexydao.portfolio import Portfolio, PortfolioError, allocation_reasons
 from nexydao.portfolio_manager import PLAN
+from nexydao.research import UnsupportedAssetGrowth
 from nexydao.store import Store
 from nexydao.workflow import run_cycle
 
@@ -289,6 +290,36 @@ class PortfolioTests(unittest.TestCase):
         self.assertFalse(result['policy']['execution_authorized'])
         self.assertEqual(self.ledger.revision(),revision)
         self.assertEqual(self.ledger.snapshot()['positions'][0]['quantity'],'2')
+
+    def test_manager_gets_one_correction_for_unsupported_asset_growth(self):
+        self.ledger.fill(self.fill())
+        self.mark()
+        evidence = load_market_evidence(self.market.snapshot, self.market)
+
+        class Manager(DemoProvider):
+            def __init__(self, correct):
+                self.correct = correct
+                self.attempts = []
+
+            def decide(self, run, role, instructions, context, schema):
+                if role != 'portfolio_manager':
+                    return super().decide(run, role, instructions, context, schema)
+                self.attempts.append(instructions)
+                rationale = ('Fixture reasoning' if self.correct and len(self.attempts) == 2
+                             else 'The filings show significant asset growth.')
+                return {'allocations': [{'symbol': 'TEST', 'allocation_usd': 100,
+                                         'rationale': rationale, 'evidence_ids': [evidence[0]['id']]}],
+                        'cash_target_usd': 4699, 'alternatives': 'Cash',
+                        'portfolio_risks': 'Uncertainty', 'abstain_reason': ''}
+
+        corrected = Manager(correct=True)
+        self.assertFalse(run_cycle(self.store, corrected, evidence, portfolio=True)['policy']['execution_authorized'])
+        self.assertEqual(len(corrected.attempts), 2)
+        self.assertIn('previous plan failed', corrected.attempts[1])
+        rejected = Manager(correct=False)
+        with self.assertRaises(UnsupportedAssetGrowth):
+            run_cycle(self.store, rejected, evidence, portfolio=True)
+        self.assertEqual(len(rejected.attempts), 2)
 
     def test_manager_cannot_use_unrelated_manual_citation_for_quote_allocation(self):
         self.ledger.fill(self.fill())

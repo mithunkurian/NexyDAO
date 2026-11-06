@@ -151,6 +151,11 @@ match stops the advisory cycle. This targeted check covers the wording observed
 in the first quote-backed MSFT pilot. Other narrative claims and paraphrases still
 require review.
 
+The Portfolio Manager gets one correction attempt for this specific citation
+failure if the quote, filing evidence and policy are still current. The attempt
+uses the remaining API budget and updated funding view. It can supply the missing
+citations, remove the assertion, or abstain. A repeated failure stops the cycle.
+
 ## Acceptance and deployment
 
 On 29 October 2026, merged PR #17 (`c28a0ec`) was deployed into the isolated VM

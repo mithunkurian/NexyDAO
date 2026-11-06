@@ -6,7 +6,7 @@ from .records import TEXT, REFERENCES, schema, validate, validate_references
 from .portfolio import allocation_reasons, PortfolioError
 from .market import check_evidence_freshness
 from .sec import check_research_freshness
-from .research import ASSET_GROWTH_GUIDANCE, check_asset_growth_claim
+from .research import ASSET_GROWTH_GUIDANCE, UnsupportedAssetGrowth, check_asset_growth_claim
 
 ENTRY=schema({'symbol':{'type':'string','maxLength':32},
               'allocation_usd':{'type':'number','minimum':0}, 'rationale':TEXT, 'evidence_ids':REFERENCES})
@@ -54,17 +54,35 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
         spec['properties']['allocations']['items']['properties']['symbol']['enum']=sorted(set(quotes.values()))
     else:
         spec['properties']['abstain_reason']['minLength']=1
-    input_cash = Decimal(context['account']['available_cash_after_api_estimate_usd'])
-    plan=provider.decide(run,'portfolio_manager',instructions,context,spec)
-    validate(plan,spec)
-    seen=set()
-    for allocation in plan['allocations']:
-        validate_references(allocation,evidence)
-        check_asset_growth_claim(allocation, allocation['symbol'], evidence)
-        if (allocation['symbol'] in seen or allocation['allocation_usd']<=0
-                or not any(quotes.get(ref)==allocation['symbol'] for ref in allocation['evidence_ids'])):
-            raise PortfolioError('unique_quote_supported_allocation_required')
-        seen.add(allocation['symbol'])
+    for attempt in range(2):
+        input_cash = Decimal(context['account']['available_cash_after_api_estimate_usd'])
+        plan=provider.decide(run,'portfolio_manager',instructions,context,spec)
+        validate(plan,spec)
+        seen=set()
+        for allocation in plan['allocations']:
+            validate_references(allocation,evidence)
+            if (allocation['symbol'] in seen or allocation['allocation_usd']<=0
+                    or not any(quotes.get(ref)==allocation['symbol'] for ref in allocation['evidence_ids'])):
+                raise PortfolioError('unique_quote_supported_allocation_required')
+            seen.add(allocation['symbol'])
+        try:
+            for allocation in plan['allocations']:
+                check_asset_growth_claim(allocation, allocation['symbol'], evidence)
+        except UnsupportedAssetGrowth as error:
+            store.event(run, 'portfolio_manager:evidence_rejected', {'code': str(error), 'attempt': attempt + 1})
+            if attempt:
+                raise
+            policy.assert_current()
+            ledger.assert_revision(revision)
+            quote_liquidity.assert_current(evidence)
+            check_research_freshness(evidence)
+            context = {**context, 'account': ledger.snapshot(), 'api_costs': store.costs()}
+            instructions += (' Your previous plan failed the asset-growth citation check. Cite both '
+                             'asset evidence IDs from the same higher comparison along with the quote, '
+                             'or omit the growth assertion and use only supported rationale. Abstain '
+                             'if the remaining evidence is insufficient.')
+        else:
+            break
     if not plan['allocations'] and not plan['abstain_reason'].strip():
         raise PortfolioError('portfolio_abstention_reason_required')
     snapshot=ledger.snapshot()
