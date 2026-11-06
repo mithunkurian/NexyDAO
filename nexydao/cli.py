@@ -140,8 +140,11 @@ def main():
                 raise ProbeError('web_host_guard_unverified')
             result=save_web_ledger(WebConfig.from_env(),Path(key),Path(os.environ.get('NEXYDAO_WEB_LEDGER_SNAPSHOT','data/web-ledger.json')))
             print(json.dumps(result,indent=2));return
-        if (args.command == 'research' or args.with_research) and (not args.research_evidence or args.market_evidence):
-            raise ValueError('Research requires a signed filing receipt; run it before collecting short-lived quotes')
+        if args.command == 'research' or args.with_research:
+            if args.market_evidence:
+                parser.error('Run research before collecting a short-lived quote. For quote-backed advisory, use portfolio with --research-evidence and --market-evidence and omit --with-research.')
+            if not args.research_evidence:
+                parser.error('Research requires --research-evidence with a signed filing receipt.')
         if args.command == "broker-check":
             from .ibkr import BrokerConfig, run_check
             print(json.dumps(run_check(BrokerConfig.from_env()), indent=2))
