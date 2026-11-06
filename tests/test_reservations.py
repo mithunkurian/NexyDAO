@@ -72,6 +72,22 @@ class ReservationTests(unittest.TestCase):
         self.assertEqual(self.reserve()['status'],'already_released')
         with self.assertRaises(PortfolioError):self.book.release('unknown',self.policy)
 
+    def test_full_event_history_allows_release_but_rolls_back_new_fill(self):
+        with patch('nexydao.reservations.MAX_RESERVATION_EVENTS', 1):
+            self.reserve()
+            before = self.ledger.snapshot()
+            with self.assertRaisesRegex(PortfolioError, 'simulation_reservation_history_limit'):
+                self.book.fill(self.held_fill(), self.policy)
+            self.assertEqual(self.ledger.snapshot(), before)
+            result = self.book.release('plan', self.policy)
+            self.assertEqual(result['status'], 'simulation_planning_released')
+            self.assertEqual(active_holds(self.ledger.db), [])
+            self.assertEqual(self.book.release('plan', self.policy), result)
+            after = self.ledger.snapshot()
+            with self.assertRaisesRegex(PortfolioError, 'simulation_reservation_history_limit'):
+                self.reserve(self.request('overflow'))
+            self.assertEqual(self.ledger.snapshot(), after)
+
     def test_fee_currency_and_position_limit_fail(self):
         data=self.request();data['fee_currency']='SEK'
         with self.assertRaises(PortfolioError):self.reserve(data)

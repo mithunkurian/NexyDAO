@@ -152,6 +152,11 @@ pin and matching `NEXYDAO_MARKET_SYMBOL`. Owner policy applies to all commands.
 After a policy change, previously recorded fixtures remain history; new funding checks
 use the new constraints. No live ISK account or access change is performed.
 
+Simulation reservation history allows 2,000 ordinary events. Beyond that point,
+only explicit releases of existing holds can add events. The ledger can retain
+up to 1,000 such release events, one for each possible reservation. A database
+that uses the release allowance requires a version that can replay those events.
+
 ## Validation and deployment
 
 PR #32 makes the existing 50% stress scenario/10% drawdown boundary a guard on
