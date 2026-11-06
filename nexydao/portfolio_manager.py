@@ -32,8 +32,8 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
     Each allocation must cite known evidence and a fresh verified quote for that symbol.
     Amounts are incremental committed cash INCLUDING estimated fees. Do not invent fee,
     price, FX or tax data. If evidence, valuation or funding is inadequate, allocations
-    must be empty and abstain_reason nonempty. Cash target must reconcile to available
-    settled cash minus allocations, reserving API expense estimates. Respect aggregate
+    must be empty and abstain_reason nonempty. Supply an estimated cash target; the
+    ledger computes the final cash target after recording API expense. Respect aggregate
     holdings, owner limits and drawdown. All conclusions remain advisory.
     Portfolio stress results are hypothetical simultaneous price shocks, including
     fully deployed planning holds. They are not forecasts or verified liquidity,
@@ -55,7 +55,6 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
     else:
         spec['properties']['abstain_reason']['minLength']=1
     for attempt in range(2):
-        input_cash = Decimal(context['account']['available_cash_after_api_estimate_usd'])
         plan=provider.decide(run,'portfolio_manager',instructions,context,spec)
         validate(plan,spec)
         seen=set()
@@ -96,17 +95,19 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
     reasons=allocation_reasons(snapshot,plan['allocations'],policy)
     quote_liquidity.assert_current(evidence)
     reasons.extend(quote_liquidity.reasons(plan['allocations'],snapshot))
-    # The manager's own call is now charged: reconcile using its input funding
-    # view, then independently check current funding after that actual expense.
+    # The manager's call is now charged. Compute the reported target from the
+    # same ledger snapshot used to check funding.
     with localcontext(prec=50):
-        proposed_cash = input_cash - sum(
+        target = Decimal(snapshot['available_cash_after_api_estimate_usd']) - sum(
             (Decimal(str(a['allocation_usd'])) for a in plan['allocations']), Decimal(0))
-        if abs(Decimal(str(plan['cash_target_usd'])) - proposed_cash) > Decimal('0.01'):
-            reasons.append('portfolio_cash_target_not_reconciled')
+    if target < 0:
+        reasons.append('portfolio_cash_target_not_reconciled')
     if reasons: raise PortfolioError(reasons[0])
+    plan['cash_target_usd'] = float(target)
     policy.assert_current()
     ledger.assert_revision(revision)
     check_evidence_freshness(evidence)
     quote_liquidity.assert_current(evidence)
-    store.event(run,'portfolio_manager',{'plan':plan,'execution_authorized':False})
+    store.event(run,'portfolio_manager',{'plan':plan,'cash_target_source':'ledger_after_manager_api_cost',
+                                        'execution_authorized':False})
     return plan

@@ -258,21 +258,25 @@ class PortfolioTests(unittest.TestCase):
         self.assertEqual(self.ledger.snapshot()['positions'],[])
         self.assertEqual(result['portfolio_plan']['allocations'],[])
 
-    def test_manager_cash_target_cannot_round_away_recorded_api_cost(self):
+    def test_manager_cash_target_is_derived_after_recording_api_cost(self):
         self.store.reserve(self.store.start(), 'fixture', 'test', Decimal('0.125'), Decimal('1'))
         calls = []
 
         class Manager(DemoProvider):
             def decide(self, run, role, instructions, context, schema):
                 calls.append(role)
+                if role != 'portfolio_manager':
+                    return super().decide(run, role, instructions, context, schema)
+                self_store.reserve(run, role, 'test', Decimal('0.125'), Decimal('1'))
                 return {'allocations': [], 'cash_target_usd': 5000, 'alternatives': 'Wait',
                         'portfolio_risks': 'No verified quote', 'abstain_reason': 'Insufficient evidence'}
 
+        self_store = self.store
         with localcontext(prec=3):
-            with self.assertRaisesRegex(PortfolioError, 'portfolio_cash_target_not_reconciled'):
-                run_cycle(self.store, Manager(), [], portfolio=True)
+            result = run_cycle(self.store, Manager(), [], portfolio=True)
 
-        self.assertEqual(calls, ['portfolio_manager'])
+        self.assertEqual(result['portfolio_plan']['cash_target_usd'], 4999.75)
+        self.assertEqual(len(calls), 7)
 
     def test_quote_supported_manager_plan_does_not_mutate_positions(self):
         self.ledger.fill(self.fill())
