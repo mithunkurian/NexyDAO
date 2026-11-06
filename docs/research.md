@@ -205,6 +205,15 @@ even though only one asset period was supplied. PR #78 added a targeted check
 for that wording. The observed outcome establishes the quote-backed advisory
 path, while broader narrative validation and paper execution remain open.
 
+A follow-up live run after PR #85 completed all seven roles with both MSFT
+asset periods and a fresh signed quote. The application added the missing asset
+citation to the portfolio plan and computed the cash target from the ledger.
+The CEO proposed $500, one risk reviewer challenged, and the committee voted
+one approve and two revise. Execution stayed denied and the simulation ledger
+retained $5,000 cash and revision zero. The cycle cost $0.00856875 with zero
+unsettled charges. The signed spread observation did not establish executable
+market depth.
+
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
 and mocked HTTP/OpenAI do not establish real retrieval or paid eight-call acceptance.
 Tests cover DNS/SSRF, redirects, source identity/body limits, contradictions, signatures,
