@@ -144,6 +144,10 @@ After installing the candidate unit and resource drop-in, reload the user
 manager and inspect the unit's effective timeout, CPU quota, memory maximum and
 task limit. Confirm the environment points to the intended release and existing
 private files. Restore the timer only after the installed unit passes its checks.
+Run `python3 ops/check-alert-pilot-service.py --timer-state inactive` before
+enabling the timer and repeat with `--timer-state active` afterward. The command
+checks effective settings and linger without starting the unit or reading its
+environment file. Record a matching unattended service result separately.
 For rollback, disable future triggers, wait for any current job, restore the
 previous unit, drop-in and environment references, and reload the user manager.
 Keep any maintenance or mail attempts written during the cutover in their
