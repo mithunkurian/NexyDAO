@@ -233,6 +233,11 @@ class MaintenanceJobs:
                                 maintenance_passed=passed,critical_alert_count=len(alerts),alerts=alerts)
 
 
+def maintenance_failed(result):
+    return bool(result.get('archive_errors') or result['failed_attempt_count'] or result['incomplete_attempt_count']
+                or result['reason'] in ('attempt_cap','archive_cap','clock_regressed','plan_changed','disk_space_low'))
+
+
 def main():
     parser=argparse.ArgumentParser(description='Explicit finite backup/health ticks; no timer or paid/broker jobs')
     parser.add_argument('action',choices=['init','arm','tick','stop','status','verify-archives'])
@@ -250,7 +255,7 @@ def main():
             if args.plan is not None:raise JobError('maintenance_plan_modifier_not_applicable')
             result=getattr(jobs,args.action.replace('-','_'))()
         print(json.dumps(result,indent=2))
-        if result.get('archive_errors') or result['failed_attempt_count'] or result['incomplete_attempt_count'] or result['reason'] in ('attempt_cap','archive_cap','clock_regressed','plan_changed','disk_space_low'):parser.exit(1)
+        if maintenance_failed(result):parser.exit(1)
     except Exception as exc:
         code=str(exc) if isinstance(exc,JobError) else 'maintenance_unavailable'
         parser.exit(1,'NexyDAO maintenance stopped safely ('+code+').\n')

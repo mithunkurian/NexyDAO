@@ -102,6 +102,18 @@ were accessed or changed by that preparation.
 
 ## Hourly VM pilot
 
+The repository's one-shot pilot command takes the same private maintenance plan
+and mail profile as the separate commands. Set `NEXYDAO_DB` and
+`NEXYDAO_API_BUDGET_USD` to match both before running it. Initialize and arm the
+ledgers explicitly before commissioning. This command takes one maintenance tick
+and passes its original critical findings to the existing Gmail sender. A blocked
+or failed maintenance attempt yields a nonzero exit status.
+
+```bash
+python3 -m nexydao.maintenance_pilot --state /private/jobs.sqlite3 \
+  --plan /private/jobs.json --mail-state /private/mail.sqlite3 --profile /private/mail.json
+```
+
 On 5 November 2026, the owner confirmed inbox receipt of the one-time test
 submitted over Gmail SMTP from the VM. The user timer is enabled and active
 with linger enabled for the VM account. The pilot plan permits up to 24
