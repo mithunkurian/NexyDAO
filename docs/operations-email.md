@@ -154,6 +154,13 @@ starting the unit or reading its environment file. Record a matching unattended
 service result separately.
 On 6 November the resource drop-in was applied to the stopped VM pilot service.
 The installed-settings audit passed with zero mismatches and the timer disabled.
+The repository-managed service was then staged on the VM from release
+`operations-9f1da71`, preserving the prior unit in that release directory.
+One manual start using the exhausted plan returned `attempt_cap` with
+`work_started=false` and a nonzero service exit. The maintenance ledger still
+contained 24 attempts and the mail ledger zero attempts. The timer stayed disabled.
+This validates the installed command's cap handling. An unattended run of a
+newly commissioned plan and boot recovery are separate O2 checks.
 For rollback, disable future triggers, wait for any current job, restore the
 previous unit, drop-in and environment references, and reload the user manager.
 Keep any maintenance or mail attempts written during the cutover in their
