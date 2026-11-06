@@ -208,13 +208,18 @@ class MaintenanceJobs:
         # Claim is durable before any archive work. Crash/kill leaves it unknown;
         # later invocations cannot repeat it, release its cap or start another job.
         destination=Path(plan['backup_root'])/('job-'+identifier)
-        size=backups.MAX_DB;sha='';passed=False;critical=None
+        size=backups.MAX_DB;sha='';passed=False
         try:
             archive=backups.create_backup(Path(plan['source_db']),destination)
             size=archive['database_bytes'];sha=archive['database_sha256']
             health=operations_health(Path(plan['source_db']),Decimal(plan['api_budget_usd']),destination)
-            passed=health['local_health_checks_passed'];critical=health['critical_alert_count']
-        except Exception:pass  # Do not persist vendor/path/SQL exception text.
+            alerts = [{'code': item['code'], 'severity': 'critical', 'count': item['count']}
+                      for item in health['alerts'] if item['severity'] == 'critical']
+            passed=health['local_health_checks_passed']
+        except Exception:
+            # Retain a fixed finding for the caller without exception text.
+            code = 'operations_health_unavailable' if sha else 'backup_verification_failed'
+            alerts = [{'code': code, 'severity': 'critical', 'count': 1}]
         finished=self._now()
         if finished<started:passed=False;finished=started
         with self._db() as db:
@@ -225,7 +230,7 @@ class MaintenanceJobs:
                        (finished,'completed' if passed else 'failed',size,sha,identifier))
             if not passed:db.execute("UPDATE control SET enabled=0,reason='attempt_failed'")
             return self._report(*self._read(db),work_started=True,attempt_id=identifier,
-                                maintenance_passed=passed,critical_alert_count=critical)
+                                maintenance_passed=passed,critical_alert_count=len(alerts),alerts=alerts)
 
 
 def main():
