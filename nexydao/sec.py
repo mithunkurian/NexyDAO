@@ -68,9 +68,12 @@ class ResearchConfig:
     public_key_path: Path | None = None
     public_key_sha256: str = ''
     openssl_path: Path = DEFAULT_OPENSSL
+    include_prior_assets: bool = False
 
     def __post_init__(self):
         universe(self.issuers)
+        if type(self.include_prior_assets) is not bool:
+            raise ValueError('Prior asset periods require an explicit boolean')
         if self.receipt_mode not in ('hmac-sha256','ed25519'):
             raise ValueError('Unsupported research receipt mode')
         if self.receipt_mode == 'hmac-sha256' and self.key_path is None:
@@ -81,8 +84,10 @@ class ResearchConfig:
         if (not isinstance(self.concepts, (tuple, list)) or not self.concepts
                 or any(not isinstance(c, str) or c not in APPROVED_CONCEPTS for c in self.concepts)
                 or len(set(self.concepts)) != len(self.concepts)
-                or len(self.issuers)*len(self.concepts) > MAX_FACTS):
+                or len(self.issuers)*(len(self.concepts) + self.include_prior_assets) > MAX_FACTS):
             raise ValueError('Unique approved research concepts and at most nine facts required')
+        if self.include_prior_assets and 'Assets' not in self.concepts:
+            raise ValueError('Prior asset periods require the Assets concept')
         object.__setattr__(self, 'issuers', [dict(i) for i in self.issuers])
         object.__setattr__(self, 'concepts', tuple(self.concepts))
 
@@ -92,6 +97,9 @@ class ResearchConfig:
         key = os.environ.get('NEXYDAO_EVIDENCE_KEY_FILE', '')
         mode = os.environ.get('NEXYDAO_RESEARCH_RECEIPT_MODE','hmac-sha256')
         concepts = os.environ.get('NEXYDAO_RESEARCH_CONCEPTS', json.dumps(CONCEPTS))
+        prior_assets = os.environ.get('NEXYDAO_RESEARCH_PRIOR_ASSETS', 'false')
+        if prior_assets not in ('true', 'false'):
+            raise ValueError('NEXYDAO_RESEARCH_PRIOR_ASSETS must be true or false')
         if len(raw) > 2048 or len(concepts) > 1024 or (mode == 'hmac-sha256' and not key):
             raise ValueError('Bounded research universe and evidence key required')
         return cls(json.loads(raw), Path(key) if key and mode == 'hmac-sha256' else None, os.environ.get('NEXYDAO_SEC_USER_AGENT', ''),
@@ -100,7 +108,7 @@ class ResearchConfig:
                    Path(os.environ['NEXYDAO_RESEARCH_SIGNING_KEY_FILE']) if os.environ.get('NEXYDAO_RESEARCH_SIGNING_KEY_FILE') else None,
                    Path(os.environ['NEXYDAO_RESEARCH_PUBLIC_KEY_FILE']) if os.environ.get('NEXYDAO_RESEARCH_PUBLIC_KEY_FILE') else None,
                    os.environ.get('NEXYDAO_RESEARCH_PUBLIC_KEY_SHA256',''),
-                   Path(os.environ.get('NEXYDAO_OPENSSL_PATH',str(DEFAULT_OPENSSL))))
+                   Path(os.environ.get('NEXYDAO_OPENSSL_PATH',str(DEFAULT_OPENSSL))), prior_assets == 'true')
 
 
 def source_path(cik, concept=None):
@@ -229,7 +237,7 @@ def check_fact(fact, now):
         raise SourceError('invalid_filing_date') from None
 
 
-def extract(raw, issuer, concept, now):
+def extract(raw, issuer, concept, now, *, before=None):
     data = decode(raw)
     if (not isinstance(data, dict) or type(data.get('cik')) is not int or data['cik'] != int(issuer['cik'])
             or data.get('taxonomy') != 'us-gaap' or data.get('tag') != concept):
@@ -263,6 +271,8 @@ def extract(raw, issuer, concept, now):
         # Compare parsed dates while preserving the source fields in the receipt.
         start = date.fromisoformat(fact['start']) if fact['start'] else date.min
         context = (date.fromisoformat(fact['end']), date.fromisoformat(fact['filed']), start)
+        if before is not None and context[0] >= before:
+            continue
         candidates.append((context, fact))
     if not candidates:
         raise SourceError('no_recent_filing_fact')
@@ -297,13 +307,17 @@ def collect(config, getter=fetch, clock=time.time, sleeper=time.sleep):
             sleeper(0.5)  # At most two serial requests/second in this process.
             path = source_path(issuer['cik'], concept)
             raw = get(path)
-            facts.append(extract(raw, issuer, concept, int(clock())))
+            observed_at = int(clock())
+            latest = extract(raw, issuer, concept, observed_at)
+            facts.append(latest)
+            if config.include_prior_assets and concept == 'Assets':
+                facts.append(extract(raw, issuer, concept, observed_at, before=date.fromisoformat(latest['end'])))
             sources.append({'path': path, 'sha256': hashlib.sha256(raw).hexdigest()})
         sleeper(0.5)
     received = int(clock())
     if received-started > 180:
         raise SourceError('collection_time_limit')
-    payload = {'schema_version': 2, 'concepts': list(config.concepts),
+    payload = {'schema_version': 3 if config.include_prior_assets else 2, 'concepts': list(config.concepts),
                'source': 'sec_companyconcept', 'retrieved_at': received,
                'expires_at': received+RECEIPT_TTL, 'issuers': [dict(i) for i in config.issuers], 'facts': facts, 'sources': sources}
     validate_receipt(payload, config, received)
@@ -315,26 +329,33 @@ def validate_receipt(payload, config, now):
         raise SourceError('invalid_research_receipt')
     version = payload.get('schema_version')
     keys = {'schema_version', 'source', 'retrieved_at', 'expires_at', 'issuers', 'facts', 'sources'}
-    if version == 2:
+    if version in (2, 3):
         keys.add('concepts')
-    if (set(payload) != keys or type(version) is not int or version not in (1, 2)
+    if (set(payload) != keys or type(version) is not int or version not in (1, 2, 3)
             or payload['source'] != 'sec_companyconcept' or payload['issuers'] != config.issuers):
         raise SourceError('invalid_research_receipt')
-    if ((version == 1 and config.concepts != CONCEPTS)
-            or (version == 2 and payload['concepts'] != list(config.concepts))):
+    if ((version == 3) != config.include_prior_assets or (version == 1 and config.concepts != CONCEPTS)
+            or (version in (2, 3) and payload['concepts'] != list(config.concepts))):
         raise SourceError('research_concept_scope_mismatch')
     retrieved, expiry = payload['retrieved_at'], payload['expires_at']
     if (type(retrieved) is not int or type(expiry) is not int or retrieved > now+2
             or retrieved <= 0 or expiry != retrieved+RECEIPT_TTL or now >= expiry):
         raise SourceError('expired_research_receipt')
     facts = payload['facts']
-    if not isinstance(facts, list) or len(facts) != len(config.issuers)*len(config.concepts):
+    if not isinstance(facts, list) or len(facts) != len(config.issuers)*(len(config.concepts) + config.include_prior_assets):
         raise SourceError('incomplete_research_facts')
     required = {(i['symbol'], i['cik'], c) for i in config.issuers for c in config.concepts}
     for fact in facts:
         check_fact(fact, now)
     if {(f['symbol'], f['cik'], f['concept']) for f in facts} != required:
         raise SourceError('research_fact_identity_mismatch')
+    if config.include_prior_assets:
+        for symbol, cik, concept in required:
+            periods = [date.fromisoformat(f['end']) for f in facts
+                       if (f['symbol'], f['cik'], f['concept']) == (symbol, cik, concept)]
+            expected = 2 if concept == 'Assets' else 1
+            if len(periods) != expected or len(set(periods)) != expected:
+                raise SourceError('research_fact_period_mismatch')
     expected_paths = {source_path(i['cik'], c) for i in config.issuers for c in (None, *config.concepts)}
     sources = payload['sources']
     if not isinstance(sources, list) or len(sources) != len(expected_paths):

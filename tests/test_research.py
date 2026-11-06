@@ -80,6 +80,37 @@ class ResearchTests(unittest.TestCase):
                             **{key: evidence[0]['fact'][key] for key in CLAIM_CONTEXT}}]}],
                 'abstain_reason': ''}
 
+    def test_prior_asset_mode_selects_two_distinct_signed_periods(self):
+        standard = self.config
+        self.config = replace(standard, include_prior_assets=True)
+        prior = (self.today - timedelta(days=45)).isoformat()
+
+        def getter(path, contact):
+            raw = self.getter(path, contact)
+            if path.endswith('/Assets.json'):
+                doc = json.loads(raw)
+                latest = doc['units']['USD'][0]
+                doc['units']['USD'].extend([
+                    {**latest, 'end': prior, 'val': 123455},
+                    {**latest, 'filed': (self.today - timedelta(days=11)).isoformat()},
+                ])
+                return json.dumps(doc).encode()
+            return raw
+
+        with self.assertRaisesRegex(SourceError, 'no_recent_filing_fact'):
+            self.payload()
+        payload = collect(self.config, getter, lambda: self.now, lambda _: None)
+        self.assertEqual(payload['schema_version'], 3)
+        evidence = self.receipt(payload)
+        assets = [item['fact'] for item in evidence if item['fact']['concept'] == 'Assets']
+        self.assertEqual([(fact['end'], fact['value']) for fact in assets],
+                         [(self.end, '123456'), (prior, '123455')])
+        with self.assertRaisesRegex(SourceError, 'research_concept_scope_mismatch'):
+            load_research_evidence(self.config.snapshot, standard, self.now)
+        payload['facts'][1] = payload['facts'][0]
+        with self.assertRaisesRegex(SourceError, 'research_fact_period_mismatch'):
+            self.receipt(payload)
+
     def test_fixed_paths_and_configuration_reject_url_injection(self):
         for cik in ('127.0.0.1', '../secret', '0000000123?x=1', '0000000000'):
             with self.assertRaises(SourceError):
