@@ -140,6 +140,14 @@ that systemd reports the effective limits and the largest supported fixture
 finishes within the existing two-minute timeout. Keep the pilot ledger and
 archives for comparison across the change.
 
+On 6 November, an isolated Ubuntu user service ran one maintenance tick on a
+synthetic SQLite database padded to near the 64 MiB backup limit. The service
+verified its effective cgroup limits: one CPU, 256 MiB and 16 tasks. Backup and
+health verification passed in 1.06 seconds, producing a 66,158,592-byte archive
+with zero critical alerts. The full service exited successfully in 5.16 seconds.
+The fixture tests backup size using SQLite free pages. Runtime acceptance under
+the installed unit and boot recovery remain open.
+
 On the VM, check the timer, the last timer trigger and the service outcome.
 
 ```bash
