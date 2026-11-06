@@ -12,6 +12,7 @@ INITIAL = Decimal('5000')
 MAX_GROSS = Decimal('1000')
 MAX_DRAWDOWN = Decimal('0.10')
 QUANTUM = Decimal('0.00000001')
+MAX_SIMULATION_FILLS = 10_000
 
 
 class PortfolioError(RuntimeError):
@@ -124,8 +125,10 @@ class Portfolio:
         return self._read(self._reconcile)
 
     def _reconcile(self):
-        rows=self.db.execute('SELECT id,payload,settled,proceeds FROM simulation_fills ORDER BY rowid').fetchall()
-        if len(rows)>10000: raise PortfolioError('simulation_history_limit')
+        rows = self.db.execute('SELECT id,payload,settled,proceeds FROM simulation_fills ORDER BY rowid LIMIT ?',
+                               (MAX_SIMULATION_FILLS + 1,)).fetchall()
+        if len(rows) > MAX_SIMULATION_FILLS:
+            raise PortfolioError('simulation_history_limit')
         cash,pending,realized,fees=INITIAL,Decimal(0),Decimal(0),Decimal(0)
         positions={}
         with localcontext() as context:
@@ -196,6 +199,10 @@ class Portfolio:
         if old:
             if old[0]!=serialized: raise PortfolioError('conflicting_simulated_fill_id')
             return {'status':'already_recorded','id':data['id'],'execution_authorized':False}
+        at_capacity = self.db.execute('SELECT 1 FROM simulation_fills LIMIT 1 OFFSET ?',
+                                      (MAX_SIMULATION_FILLS - 1,)).fetchone()
+        if at_capacity:
+            raise PortfolioError('simulation_history_limit')
         snapshot = self.snapshot()
         if reservation_credit is not None:
             # The outer reservation transaction checks identity and remaining
