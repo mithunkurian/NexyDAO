@@ -12,10 +12,12 @@ import threading
 import time
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from nexydao import audit_backups as backups
 from nexydao.maintenance_jobs import MaintenanceJobs,JobError,validate_plan,decode_plan
+from nexydao.maintenance_pilot import run_tick
+from nexydao.operations_email import EmailAlerts
 from nexydao.store import Store
 
 
@@ -127,6 +129,29 @@ class MaintenanceJobTests(unittest.TestCase):
         self.assertEqual(result['critical_alert_count'], 1)
         with self.assertRaises(JobError):self.arm()
         self.assertFalse(self.jobs.tick(self.plan)['work_started'])
+
+    def test_pilot_delivers_original_backup_failure_and_skips_mail_for_no_work(self):
+        secret = self.root / 'mail-password'
+        secret.write_text('abcdefghijklmnop')
+        secret.chmod(0o600)
+        profile = {'source_db': str(self.source), 'api_budget_usd': '0.10',
+                   'mailbox': 'fixture@gmail.com', 'secret_file': str(secret)}
+        transport = Mock()
+        mailer = EmailAlerts(self.root / 'mail.sqlite3', transport)
+        mailer.initialize(profile)
+        mailer.arm(profile)
+        config = SimpleNamespace(db=self.source, budget=Decimal('0.10'))
+        self.arm()
+        with patch('nexydao.maintenance_jobs.backups.create_backup', side_effect=OSError):
+            report, failed = run_tick(config, self.jobs, self.plan, mailer, profile)
+        self.assertTrue(failed)
+        self.assertEqual(report, {'work_started': True, 'maintenance_passed': False,
+                                  'mail': 'mail_smtp_accepted'})
+        self.assertIn('backup_verification_failed', transport.call_args.args[2].get_content())
+        report, failed = run_tick(config, self.jobs, self.plan, mailer, profile)
+        self.assertTrue(failed)
+        self.assertFalse(report['work_started'])
+        transport.assert_called_once()
 
     def test_health_failure_retains_archive_and_source_uncertain_cost(self):
         self.store.reserve(self.run,'uncertain','fake',Decimal('.02'),Decimal('.10'));self.arm()
