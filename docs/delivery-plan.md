@@ -26,7 +26,7 @@ implementation order: independent work can proceed while broker access is blocke
 | E1 | Narrow paper executor with permits, price/quantity bounds and idempotency | Locked until prerequisites |
 | E2 | Execution ambiguity, partial fills, cancellation and crash/restart recovery | Locked until E1 |
 | O1 | Bounded scheduling, health/alerts and tested backup/restore | Accepted. The VM pilot reached its 24-attempt cap. All archives verified, the inspection restore and separate Gmail inbox test passed, and the timer was disabled after completion. |
-| O2 | VM/authentication reliability, resource limits and operational reporting | In progress. The candidate pilot service and its resource limits passed an isolated Ubuntu test. Production cutover and boot acceptance remain open. |
+| O2 | VM/authentication reliability, resource limits and operational reporting | In progress. The repository service and resource limits passed installed checks with the timer disabled. Unattended acceptance for a new plan, boot recovery and authentication reliability remain open. |
 | O3 | Sustained paper evaluation, outcome learning and readiness review | Planned; requires elapsed observation |
 
 Current planning count: **3/15 packages accepted**, with **12 open** and no reliable
