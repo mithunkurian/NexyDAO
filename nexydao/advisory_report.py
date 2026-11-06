@@ -15,6 +15,33 @@ MAX_RESULT_BYTES = 262144
 MAX_COST_ROWS = 64
 
 
+def _recorded_evidence(db, run_id):
+    rows = db.execute('SELECT CASE WHEN length(CAST(payload AS BLOB))<=? THEN payload END '
+                      "FROM events WHERE run_id=? AND role='input' LIMIT 2",
+                      (MAX_RESULT_BYTES, run_id)).fetchall()
+    if len(rows) != 1 or rows[0][0] is None:
+        return None
+    evidence = json.loads(rows[0][0]).get('evidence', [])
+    if not isinstance(evidence, list) or len(evidence) > 10:
+        raise ValueError('Invalid recorded advisory evidence')
+    snapshots = []
+    for item in evidence:
+        label = item.get('verification')
+        if label not in ('verified_filing_observation', 'verified_quote'):
+            continue
+        snapshot = {name: item[name] for name in ('id', 'verification', 'source_url', 'observed_at', 'expires_at')}
+        if label == 'verified_filing_observation':
+            fact = item['fact']
+            snapshot['fact'] = {name: fact[name] for name in
+                                ('symbol', 'cik', 'concept', 'unit', 'value', 'start', 'end', 'filed', 'form', 'accession')}
+        else:
+            quote = json.loads(item['summary'])
+            snapshot['quote'] = {name: quote['quote'][name] for name in ('bid', 'ask', 'event_time')}
+            snapshot['quote']['symbol'] = quote['contract']['symbol']
+        snapshots.append(snapshot)
+    return snapshots
+
+
 def read_report(path, run_id=None):
     if run_id is not None and str(uuid.UUID(run_id)) != run_id:
         raise ValueError('Expected a canonical run UUID')
@@ -44,10 +71,11 @@ def read_report(path, run_id=None):
             raise ValueError('Invalid or oversized advisory costs')
         with localcontext(prec=100):
             total = sum((_api_charge(amount) for amount, _ in costs), Decimal(0))
+        evidence = _recorded_evidence(db, identifier)
     return {'run_id': identifier, 'created_at': created, 'status': status,
             'recorded_api_costs': {'estimated_or_reserved_usd': str(total), 'calls': len(costs),
                                    'unsettled_calls': sum(state == 'reserved' for _, state in costs)},
-            'result': result}
+            'recorded_verified_evidence': evidence, 'result': result}
 
 
 def main():
@@ -58,7 +86,7 @@ def main():
     try:
         report = read_report(args.db, args.run_id)
         print(json.dumps(report, indent=2, allow_nan=False))
-    except (OSError, sqlite3.Error, ValueError, DecimalException):
+    except (OSError, sqlite3.Error, ValueError, DecimalException, AttributeError, KeyError, TypeError):
         parser.exit(1, 'Saved advisory report unavailable.\n')
 
 

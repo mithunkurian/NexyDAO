@@ -219,6 +219,10 @@ use `python3 -m nexydao.advisory_report --db /path/to/nexydao.sqlite3`. The
 read-only command shows the latest AI attempt, including failed attempts, or an
 explicit prior run selected with `--run-id`. It can also inspect a restored audit
 copy without opening it as a runtime database.
+`recorded_verified_evidence` shows the historical SEC facts and quote observations
+from the run's input event. Match their IDs to the decision and review citations.
+The recorded expiry is retained, so an old report can be inspected after its
+evidence expires. A missing or oversized input event yields `null` for that field.
 
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
 and mocked HTTP/OpenAI do not establish real retrieval or paid eight-call acceptance.
