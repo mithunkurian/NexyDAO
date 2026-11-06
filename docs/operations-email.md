@@ -127,6 +127,29 @@ The merged one-shot command passed an isolated Ubuntu smoke test on 6 November.
 It produced one verified archive and then returned a no-work result on the
 immediate second invocation. The stopped fixture mail ledger had zero attempts.
 
+A disposable Ubuntu user service also ran the merged unit's command and resource
+settings with a fixture environment file. Paths containing spaces expanded as
+individual arguments. The service exited successfully, one archive verified,
+and the stopped fixture mail ledger retained zero attempts.
+
+Before a production cutover, record the timer's enabled state and the current
+unit, release and environment references. Disable future triggers and let any
+in-flight job finish. Verify the archive ledger and mail state, including the
+last completion, remaining capacity and any uncertain delivery. A failed or
+incomplete maintenance attempt, uncertain mail delivery, or exhausted capacity
+requires operator review before commissioning a schedule. Keep both ledgers
+and all archives, including when a later pilot is commissioned separately.
+
+After installing the candidate unit and resource drop-in, reload the user
+manager and inspect the unit's effective timeout, CPU quota, memory maximum and
+task limit. Confirm the environment points to the intended release and existing
+private files. Restore the timer only after the installed unit passes its checks.
+For rollback, disable future triggers, wait for any current job, restore the
+previous unit, drop-in and environment references, and reload the user manager.
+Keep any maintenance or mail attempts written during the cutover in their
+original ledgers. Use the verified timer trigger and matching journal result to
+confirm the first unattended run after either change.
+
 On 5 November 2026, the owner confirmed inbox receipt of the one-time test
 submitted over Gmail SMTP from the VM. The user timer is enabled and active
 with linger enabled for the VM account. The pilot plan permits up to 24
