@@ -69,6 +69,8 @@ including separate processes. The same set of critical codes/counts is suppresse
 for 24 hours; other alerts have a one-hour cooldown and at most three attempts
 per rolling 24 hours. The ledger caps history at 1,000 attempts, fails safely on
 clock regression and does not delete records or reset limits on stop/rearm.
+The read-only `status` command reports `lifetime_capacity_reached` when the
+ledger hits that cap. Rearming then fails before reading the SMTP credential.
 
 An interrupted or uncertain attempt blocks further sending and rearm. Transport
 failure stops the sender; no automatic retry can duplicate a message whose SMTP

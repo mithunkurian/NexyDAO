@@ -103,12 +103,15 @@ class EmailAlerts:
         self.path=Path(path).absolute();self.transport=transport or send_gmail;self.clock=clock
 
     @contextmanager
-    def _db(self,initializing=False):
+    def _db(self,initializing=False,*,readonly=False):
         if not initializing:
             with backups._file(self.path,1024*1024):pass
-        db=sqlite3.connect(self.path,timeout=2,isolation_level=None)
+        target=self.path.as_uri()+'?mode=ro' if readonly else self.path
+        db=sqlite3.connect(target,uri=readonly,timeout=2,isolation_level=None)
         try:
-            db.execute('PRAGMA trusted_schema=OFF');db.execute('PRAGMA synchronous=FULL');db.execute('BEGIN IMMEDIATE')
+            db.execute('PRAGMA trusted_schema=OFF')
+            if not readonly:db.execute('PRAGMA synchronous=FULL')
+            db.execute('BEGIN' if readonly else 'BEGIN IMMEDIATE')
             yield db
             db.execute('COMMIT')
         except BaseException:
@@ -136,6 +139,7 @@ class EmailAlerts:
     def _result(self,db,reason,accepted=False):
         enabled,records=self._read(db)
         return {'status':reason,'enabled':enabled,'smtp_accepted':accepted,'attempt_count':len(records),
+            'lifetime_capacity_reached':len(records)>=MAX_RECORDS,
             'uncertain_attempt_count':sum(r[3]!='sent' for r in records),'recurring_automation_enabled':False,
             'execution_authorized':False}
 
@@ -150,7 +154,7 @@ class EmailAlerts:
         return self.status()
 
     def status(self):
-        with self._db() as db:return self._result(db,'mail_status')
+        with self._db(readonly=True) as db:return self._result(db,'mail_status')
 
     def stop(self):
         with self._db() as db:
@@ -161,6 +165,7 @@ class EmailAlerts:
         with self._db() as db:
             _,records=self._read(db,profile)
             if any(row[3]!='sent' for row in records):raise EmailError('mail_uncertain_delivery_requires_review')
+            if len(records)>=MAX_RECORDS:raise EmailError('mail_capacity_reached')
             read_secret(profile);db.execute('UPDATE control SET enabled=1');return self._result(db,'mail_armed')
 
     def deliver(self,profile,report):
