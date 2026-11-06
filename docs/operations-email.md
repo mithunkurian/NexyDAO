@@ -114,6 +114,19 @@ python3 -m nexydao.maintenance_pilot --state /private/jobs.sqlite3 \
   --plan /private/jobs.json --mail-state /private/mail.sqlite3 --profile /private/mail.json
 ```
 
+The repository includes a candidate `ops/nexydao-alert-pilot.service` user unit
+for this command. Its private `~/.config/nexydao/alert-pilot.env` file requires
+`PYTHONPATH` pointing to the pinned release root, `NEXYDAO_DB`,
+`NEXYDAO_API_BUDGET_USD`, and absolute paths in `NEXYDAO_PILOT_STATE`,
+`NEXYDAO_PILOT_PLAN`, `NEXYDAO_MAIL_STATE`, and `NEXYDAO_MAIL_PROFILE`.
+Keep the Gmail credential in the separate file referenced by the mail profile.
+Install the resource drop-in alongside the unit when commissioning it.
+Installation and timer cutover are separate from isolated validation.
+
+The merged one-shot command passed an isolated Ubuntu smoke test on 6 November.
+It produced one verified archive and then returned a no-work result on the
+immediate second invocation. The stopped fixture mail ledger had zero attempts.
+
 On 5 November 2026, the owner confirmed inbox receipt of the one-time test
 submitted over Gmail SMTP from the VM. The user timer is enabled and active
 with linger enabled for the VM account. The pilot plan permits up to 24
