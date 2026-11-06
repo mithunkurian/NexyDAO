@@ -69,7 +69,12 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
             for allocation in plan['allocations']:
                 check_asset_growth_claim(allocation, allocation['symbol'], evidence)
         except UnsupportedAssetGrowth as error:
-            store.event(run, 'portfolio_manager:evidence_rejected', {'code': str(error), 'attempt': attempt + 1})
+            store.event(run, 'portfolio_manager:evidence_rejected', {
+                'code': str(error), 'attempt': attempt + 1,
+                'cited_asset_observations': error.cited_asset_observations,
+                'reason': ('fewer_than_two_cited_assets' if error.cited_asset_observations < 2
+                           else 'cited_assets_do_not_show_comparable_increase'),
+            })
             if attempt:
                 raise
             policy.assert_current()

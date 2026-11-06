@@ -320,6 +320,11 @@ class PortfolioTests(unittest.TestCase):
         with self.assertRaises(UnsupportedAssetGrowth):
             run_cycle(self.store, rejected, evidence, portfolio=True)
         self.assertEqual(len(rejected.attempts), 2)
+        raw = self.store.db.execute(
+            "SELECT payload FROM events WHERE role='portfolio_manager:evidence_rejected' ORDER BY rowid DESC LIMIT 1"
+        ).fetchone()[0]
+        self.assertEqual(json.loads(raw), {'code': 'unsupported_advisory_asset_growth_claim', 'attempt': 2,
+                                           'cited_asset_observations': 0, 'reason': 'fewer_than_two_cited_assets'})
 
     def test_manager_cannot_use_unrelated_manual_citation_for_quote_allocation(self):
         self.ledger.fill(self.fill())
