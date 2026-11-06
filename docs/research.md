@@ -123,8 +123,9 @@ stop the run before model calls. Receipt inspection and publication each take on
 receipt.
 
 The research agents receive computed higher, lower or equal comparisons for the
-latest two eligible observations of an issuer, concept and unit. Duration facts
-also require equal-length, non-overlapping periods. Each comparison identifies
+latest observation and the most recent eligible earlier observation of an issuer,
+concept and unit. Duration facts also require equal-length, non-overlapping
+periods, so a newer overlapping period is skipped. Each comparison identifies
 both source facts by citation ID. It describes the reported values and leaves
 business interpretation to the advisory review.
 When these comparisons are available, research reports include a

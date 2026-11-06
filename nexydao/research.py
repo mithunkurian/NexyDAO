@@ -127,11 +127,13 @@ def _filing_comparisons(facts):
     for periods in groups.values():
         if len(periods) < 2:
             continue
-        earlier_end, later_end = sorted(periods)[-2:]
-        _, earlier = periods[earlier_end]
+        later_end = max(periods)
         later_start, later = periods[later_end]
-        if later_start is not None and later_start <= earlier_end:
+        cutoff = later_start if later_start is not None else later_end
+        earlier_end = max((end for end in periods if end < cutoff), default=None)
+        if earlier_end is None:
             continue
+        _, earlier = periods[earlier_end]
         earlier_value = numeric(earlier['fact']['value'])
         later_value = numeric(later['fact']['value'])
         direction = 'higher' if later_value > earlier_value else 'lower' if later_value < earlier_value else 'equal'

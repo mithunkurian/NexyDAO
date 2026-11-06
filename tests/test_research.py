@@ -528,6 +528,22 @@ class ResearchTests(unittest.TestCase):
             run_cycle(store, wrong, evidence, research=True)
         self.assertEqual([role for role, _ in wrong.calls], ['research_opportunity'])
 
+        for fact in payload['facts']:
+            fact['end'] = (self.today - timedelta(days=130)).isoformat()
+            if fact['start']:
+                fact['start'] = (self.today - timedelta(days=220)).isoformat()
+        older = self.receipt(payload)
+        evidence = current + prior + older
+        provider = self.provider(evidence)
+        run_cycle(store, provider, evidence, research=True)
+
+        def cash_flow(items):
+            return next(item['id'] for item in items if item['fact']['start'])
+
+        for _, context in provider.calls[:2]:
+            self.assertIn({'earlier_evidence_id': cash_flow(older), 'later_evidence_id': cash_flow(current),
+                           'reported_value_direction': 'higher'}, context['filing_comparisons'])
+
     def test_wrong_claim_context_stops_before_manager_and_ceo(self):
         evidence = self.receipt()
         store = Store(self.root/'context-failure.sqlite3')
