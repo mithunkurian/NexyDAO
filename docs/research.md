@@ -223,6 +223,8 @@ copy without opening it as a runtime database.
 from the run's input event. Match their IDs to the decision and review citations.
 The recorded expiry is retained, so an old report can be inspected after its
 evidence expires. A missing or oversized input event yields `null` for that field.
+`application_added_citations` identifies the role and each citation added by the
+application during validation, separate from citations supplied by the model.
 
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
 and mocked HTTP/OpenAI do not establish real retrieval or paid eight-call acceptance.

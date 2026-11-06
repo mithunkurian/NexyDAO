@@ -5,6 +5,7 @@ from contextlib import closing
 from decimal import Decimal, DecimalException, localcontext
 import json
 from pathlib import Path
+import re
 import sqlite3
 import time
 import uuid
@@ -13,6 +14,7 @@ from .store import _api_charge
 
 MAX_RESULT_BYTES = 262144
 MAX_COST_ROWS = 64
+MAX_CITATION_COMPLETIONS = 16
 
 
 def _recorded_evidence(db, run_id):
@@ -40,6 +42,23 @@ def _recorded_evidence(db, run_id):
             snapshot['quote']['symbol'] = quote['contract']['symbol']
         snapshots.append(snapshot)
     return snapshots
+
+
+def _citation_completions(db, run_id):
+    rows = db.execute("SELECT role,CASE WHEN length(CAST(payload AS BLOB))<=1024 THEN payload END "
+                      "FROM events WHERE run_id=? AND role GLOB '*:evidence_completed' "
+                      'ORDER BY sequence LIMIT ?', (run_id, MAX_CITATION_COMPLETIONS + 1)).fetchall()
+    if len(rows) > MAX_CITATION_COMPLETIONS:
+        raise ValueError('Oversized advisory citation audit')
+    completions = []
+    for role, raw in rows:
+        if raw is None or not re.fullmatch(r'[a-z_]{1,32}:evidence_completed', role):
+            raise ValueError('Invalid advisory citation audit')
+        added = json.loads(raw).get('added_evidence_id', '')
+        if not re.fullmatch(r'sec-[0-9a-f]{64}', added):
+            raise ValueError('Invalid advisory citation ID')
+        completions.append({'role': role.removesuffix(':evidence_completed'), 'added_evidence_id': added})
+    return completions
 
 
 def read_report(path, run_id=None):
@@ -72,10 +91,12 @@ def read_report(path, run_id=None):
         with localcontext(prec=100):
             total = sum((_api_charge(amount) for amount, _ in costs), Decimal(0))
         evidence = _recorded_evidence(db, identifier)
+        completions = _citation_completions(db, identifier)
     return {'run_id': identifier, 'created_at': created, 'status': status,
             'recorded_api_costs': {'estimated_or_reserved_usd': str(total), 'calls': len(costs),
                                    'unsettled_calls': sum(state == 'reserved' for _, state in costs)},
-            'recorded_verified_evidence': evidence, 'result': result}
+            'recorded_verified_evidence': evidence,
+            'application_added_citations': completions, 'result': result}
 
 
 def main():
