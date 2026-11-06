@@ -138,6 +138,10 @@ dates for each selected issuer, drawn from the same approved SEC source response
 Other metrics still contribute one observation each. Both asset observations must
 meet the existing filing freshness rules, and each counts toward the nine-fact
 cap. The default continues to produce and accept the existing receipt format.
+The advisory cycle exposes computed comparisons, including both evidence IDs and
+the reported direction, to the portfolio manager, CEO, risk and committee roles.
+An isolated live SEC collection on 6 November 2026 verified MSFT asset
+observations of $758.376 billion at 30 June and $779.403 billion at 30 September.
 
 The portfolio manager, CEO, risk reviewers and committee also check common
 affirmative asset-growth wording in rationales. An assertion such as “the filings

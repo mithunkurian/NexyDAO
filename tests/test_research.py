@@ -606,6 +606,10 @@ class ResearchTests(unittest.TestCase):
                 self.assertEqual([role for role, _ in provider.calls], ['ceo'])
             else:
                 self.assertFalse(run_cycle(store, provider, evidence)['policy']['execution_authorized'])
+                expected = [{'earlier_evidence_id': earlier[0]['id'], 'later_evidence_id': assets[0]['id'],
+                             'reported_value_direction': 'higher'}]
+                for _, context in provider.calls:
+                    self.assertEqual(context['filing_comparisons'], expected)
 
     def test_wrong_claim_context_stops_before_manager_and_ceo(self):
         evidence = self.receipt()

@@ -2,7 +2,8 @@ import json
 
 from .records import PROPOSAL, REVIEW, VOTE, PROMPT_VERSION, SCHEMA_VERSION, validate, validate_references
 from .safety import evaluate
-from .research import ASSET_GROWTH_GUIDANCE, check_asset_growth_claim
+from .research import (ASSET_GROWTH_GUIDANCE, check_asset_growth_claim,
+                       check_research_observations, filing_comparisons)
 
 COMMON = """You serve NexyDAO, an AI investment company with $5,000 simulated USD.
 15% annual NET return is an objective, never a promise. Preserve capital and account
@@ -87,6 +88,9 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
                    "api_costs": store.costs(), "owner_policy": owner_policy.document(),
                    "owner_policy_sha256": owner_policy.digest}
         context['quote_liquidity']=quote_liquidity.report()
+        comparisons = filing_comparisons(check_research_observations(evidence))
+        if comparisons:
+            context['filing_comparisons'] = comparisons
         if revision_context is not None:
             context['revision_context'] = revision_context
         store.event(run, "input", context)
@@ -95,9 +99,6 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             from .research import run_research
             reports = run_research(store, provider, run, evidence, owner_policy, revision_context=revision_context)
             context['research_reports'] = reports
-        else:
-            from .research import check_research_observations
-            check_research_observations(evidence)
         plan=None
         if portfolio:
             from .portfolio_manager import run_manager
