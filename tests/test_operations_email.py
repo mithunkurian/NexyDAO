@@ -82,6 +82,19 @@ class OperationsEmailTests(unittest.TestCase):
         self.assertEqual(self.mail.deliver(self.profile,alert(count=4))['status'],'mail_capacity_reached')
         self.assertEqual(self.transport.call_count,3)
 
+    def test_exhausted_lifetime_capacity_blocks_rearm_before_reading_secret(self):
+        self.arm()
+        with patch('nexydao.operations_email.MAX_RECORDS', 1):
+            self.assertTrue(self.mail.deliver(self.profile, alert())['smtp_accepted'])
+            self.mail.stop()
+            self.assertTrue(self.mail.status()['lifetime_capacity_reached'])
+            with patch('nexydao.operations_email.read_secret') as read_secret:
+                with self.assertRaisesRegex(EmailError, 'mail_capacity_reached'):
+                    self.mail.arm(self.profile)
+                read_secret.assert_not_called()
+            self.assertFalse(self.mail.status()['enabled'])
+        self.transport.assert_called_once()
+
     def test_backward_clock_cannot_bypass_delivery_limits(self):
         self.arm();self.mail.deliver(self.profile,alert());self.clock[0]-=1
         with self.assertRaisesRegex(EmailError,'clock_regressed'):self.mail.deliver(self.profile,alert(count=2))
