@@ -179,7 +179,16 @@ The running service was observed as `Type=oneshot` with a two-minute start
 timeout, `Restart=no`, `UMask=0077` and `NoNewPrivileges=yes`. Its effective
 `TasksMax` was 680, and CPU quota and memory maximum were unlimited at the
 unit level. Explicit CPU and memory bounds and boot acceptance remain O2 work.
-The full pilot window is still in progress.
+The bounded pilot completed on 6 November. The final successful maintenance
+attempt finished at 19:42:02 Stockholm time. All 24 archive bundles verified
+against the attempt ledger, totaling 5,996,544 bytes. There were zero failed or
+incomplete attempts, zero full unobserved intervals between starts, and a maximum
+start gap of 3,661 seconds. Subsequent triggers observed the attempt cap and did
+no work. The timer was disabled and confirmed inactive. The mail ledger recorded
+zero delivery attempts during the maintenance pilot, consistent with its
+no-critical-alert results. Inbox delivery and inspection restore had passed
+separately. This closes O1. Production service cutover and boot acceptance are
+tracked in O2.
 
 The repository's `ops/nexydao-alert-pilot.service.d/20-resources.conf` is a
 candidate for the post-pilot service. It sets a one-CPU quota, a 256 MiB memory

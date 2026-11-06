@@ -25,12 +25,13 @@ implementation order: independent work can proceed while broker access is blocke
 | R4 | Portfolio liquidity/stress enforcement and complete aggregate-risk acceptance | In progress; PR #32 stress/commitment limits, PR #33 immutable quote spread guard; executable depth/full-book liquidity and complete acceptance remain |
 | E1 | Narrow paper executor with permits, price/quantity bounds and idempotency | Locked until prerequisites |
 | E2 | Execution ambiguity, partial fills, cancellation and crash/restart recovery | Locked until E1 |
-| O1 | Bounded scheduling, health/alerts and tested backup/restore | In progress. Gmail inbox delivery, regular unattended runs and an inspection restore are verified. PR #61's archive audit verified all ten pilot backups through 05:28 on 6 November Stockholm time. The full pilot window remains open. |
-| O2 | VM/authentication reliability, resource limits and operational reporting | Planned |
+| O1 | Bounded scheduling, health/alerts and tested backup/restore | Accepted. The VM pilot reached its 24-attempt cap. All archives verified, the inspection restore and separate Gmail inbox test passed, and the timer was disabled after completion. |
+| O2 | VM/authentication reliability, resource limits and operational reporting | In progress. The candidate pilot service and its resource limits passed an isolated Ubuntu test. Production cutover and boot acceptance remain open. |
 | O3 | Sustained paper evaluation, outcome learning and readiness review | Planned; requires elapsed observation |
 
-Current planning count: **2/15 packages closed** after PR #26 merged, leaving
-**13 delivery packages**. PR #27/#28 add a shadow permit foundation and temporary
+Current planning count: **3/15 packages accepted**, with **12 open** and no reliable
+remaining PR count. S1 and S2 closed after PR #26. O1 closed after the bounded
+pilot acceptance. PR #27/#28 add a shadow permit foundation and temporary
 identity/owner-control acceptance inside S3; they do not close S3 or reduce that
 remaining count. PR #29 adds typed execution/fee observations inside D2 without
 closing full D2 acceptance. PR #30 adds order-prefix/status visibility and diagnostic
@@ -73,12 +74,11 @@ Sequencing refinement on 5 November (no scope/count increase): remaining broker
 receipt key migration is paired with D2/D3's broker-data schema integration. S2
 delivers the SEC service boundary now; public-only broker evidence remains required
 before full P5/executor acceptance. No key-isolation requirement is dropped.
-The owner-facing overall progress estimate remains **approximately 45% (40–50%)**,
-a subjective engineering guide rather than measured milestone completion or an
-investment-readiness claim. Reassess it when material acceptance gates close.
+Use accepted packages and specific remaining gates for owner-facing progress.
+The earlier percentage and PR-count estimates are historical planning figures.
 
 Every PR handoff includes completed scope, validation evidence, remaining work,
-blockers, the remaining delivery count and a labelled estimate/progress bar. Full
+blockers and the accepted and open package counts. Full
 P1–P8 criteria remain in [remaining work](remaining-work.md). Real-money account,
 eligibility, access and commissioning are a separate authorization/design phase.
 
