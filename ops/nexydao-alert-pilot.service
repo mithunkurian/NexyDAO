@@ -1,0 +1,11 @@
+[Unit]
+Description=NexyDAO bounded maintenance and critical Gmail alerts
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/nexydao/alert-pilot.env
+ExecStart=/usr/bin/python3 -B -P -s -m nexydao.maintenance_pilot --state ${NEXYDAO_PILOT_STATE} --plan ${NEXYDAO_PILOT_PLAN} --mail-state ${NEXYDAO_MAIL_STATE} --profile ${NEXYDAO_MAIL_PROFILE}
+TimeoutStartSec=2min
+Restart=no
+UMask=0077
+NoNewPrivileges=yes
