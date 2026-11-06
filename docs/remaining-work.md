@@ -1,6 +1,9 @@
 # Remaining work and planned PR packages
 
-Planning snapshot: 5 November 2026, Europe/Stockholm.
+Current acceptance on 6 November 2026, Europe/Stockholm: **3 of 15 packages**
+(S1, S2 and O1), with **12 open**. The bounded operations pilot passed all 24
+maintenance attempts, archive verification, inspection restore and the separate
+Gmail inbox commissioning check. The earlier estimates below are historical.
 
 Estimate after PR #23: **about 15 further PRs (12–18 range)** across eight paper
 workstreams. The [delivery baseline](delivery-plan.md) tracks finite packages and

@@ -37,10 +37,9 @@ Status key: **Validated** = acceptance evidence recorded; **In progress** = impl
 | M4 | Independent authorization and paper execution | **In progress; execution locked** | Shadow permit protocol underway; separate authorizer/executor, accepted gates, reservations and recovery remain |
 | M5 | Autonomous paper operations | **Planned** | Bounded scheduling, recovery, alerts, outcome learning and sustained performance evaluation |
 
-Owner-facing rough progress estimate: **about 45% (40–50%)** toward autonomous paper
-operation. Milestones differ substantially in scope; this is a subjective planning
-guide, not a measured score or evidence of investment readiness.
-Passing M2A does not mean NexyDAO is autonomously investing.
+Owner-facing progress on 6 November 2026: **3 of 15 packages accepted**. S1 and S2
+passed protected SEC service acceptance. O1 passed the bounded maintenance pilot.
+Twelve packages remain open. A reliable remaining PR count is unavailable.
 
 Remaining delivery baseline after PR #23: **about 15 PRs (12–18 range)** across the
 eight paper workstreams; S1/S2 are closed after merged PR #24–#26:
