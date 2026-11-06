@@ -114,7 +114,7 @@ def check_research_observations(evidence):
     return facts
 
 
-def _filing_comparisons(facts):
+def filing_comparisons(facts):
     groups = {}
     for item in sorted(facts, key=lambda observation: observation['id']):
         fact = item['fact']
@@ -146,6 +146,7 @@ def _filing_comparisons(facts):
 ASSET_GROWTH_GUIDANCE = (
     ' State a reported asset increase only if you cite both comparable SEC asset observations '
     'for the issuer and the newer value is higher. One observation supports only the reported level.'
+    ' Use filing_comparisons, when present, to identify comparable observations and their direction.'
 )
 ASSET_GROWTH_ASSERTION = re.compile(
     r'\b(?:show(?:s|ed|ing)?|indicat(?:e|es|ed|ing)|demonstrat(?:e|es|ed|ing)|'
@@ -163,7 +164,7 @@ def check_asset_growth_claim(record, symbol, evidence):
     facts = [item for item in evidence if item['id'] in cited
              and item.get('verification') == 'verified_filing_observation'
              and item['fact']['symbol'] == symbol and item['fact']['concept'] == 'Assets']
-    if not any(pair['reported_value_direction'] == 'higher' for pair in _filing_comparisons(facts)):
+    if not any(pair['reported_value_direction'] == 'higher' for pair in filing_comparisons(facts)):
         raise SourceError('unsupported_advisory_asset_growth_claim')
 
 
@@ -174,7 +175,7 @@ def run_research(store, provider, run, evidence, owner_policy, revision_context=
     context = {'filing_observations': facts, 'memory': store.memory(),
                'scope': 'Filing observations only; no current valuation or investment authorization.',
                'owner_policy': owner_policy.document(), 'owner_policy_sha256': owner_policy.digest}
-    comparisons = _filing_comparisons(facts)
+    comparisons = filing_comparisons(facts)
     comparison_instructions = ''
     if comparisons:
         context['filing_comparisons'] = comparisons
