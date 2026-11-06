@@ -50,6 +50,23 @@ SQLite defaults to `data/nexydao.sqlite3` and is excluded from Git.
 
 ## Real AI deliberation
 
+### Manual investment review
+
+With the local API settings loaded and verified SEC and fresh quote receipts
+ready, run one read-only advisory cycle. The command records an advisory in the
+existing local audit database and prints a decision, review notes, cited evidence,
+and recorded API cost. Broker order execution is disabled.
+
+```bash
+python -m nexydao portfolio --research-evidence sec.json --market-evidence quote.json --summary
+```
+
+For a follow-up that addresses a saved advisory, add `--revise-run RUN_UUID`.
+Use the [SEC receipt setup](docs/research.md) and [quote receipt setup](docs/public-market-quotes.md)
+to prepare inputs, and collect the short-lived quote last. The command uses the
+existing lifetime budget. A completed advisory can be read again without an API
+call using `python -m nexydao.advisory_report --db data/nexydao.sqlite3 --run-id RUN_UUID --summary`.
+
 Use the existing credential locally on the VM; never paste it into chat, command
 history, Git or screenshots. Supply `OPENAI_API_KEY` securely to the process as described
 in deployment instructions. The app reads environment variables, not `.env` files;

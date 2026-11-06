@@ -99,14 +99,68 @@ def read_report(path, run_id=None):
             'application_added_citations': completions, 'result': result}
 
 
+def format_summary(report):
+    costs = report['recorded_api_costs']
+    lines = [f"NexyDAO advisory: {report['status']}", f"Run: {report['run_id']}",
+             'Execution disabled. No orders were placed.',
+             f"Recorded API cost or reserve: USD {costs['estimated_or_reserved_usd']} "
+             f"({costs['calls']} calls, {costs['unsettled_calls']} unsettled)"]
+    if report['status'] != 'completed':
+        return '\n'.join(lines)
+
+    result = report['result']
+    proposal = result['proposal']
+    evidence = report['recorded_verified_evidence'] or []
+    labels = {item['id']: f'E{index}' for index, item in enumerate(evidence, 1)}
+
+    def rationale(record):
+        refs = ', '.join(labels.get(ref, 'unverified or unavailable') for ref in record['evidence_ids'])
+        return ' '.join(record['rationale'].split()) + (f' [{refs}]' if refs else '')
+
+    review = result['policy'].get('advisory_review')
+    if review is None:
+        reasons = result['policy']['reasons']
+        review = {'risk_cleared': 'risk_clearance_missing' not in reasons,
+                  'committee_approved': 'committee_approval_missing' not in reasons}
+    lines += ['', f"Decision: {proposal['action'].replace('_', ' ')} "
+              f"{proposal['symbol']} | simulated allocation USD {proposal['allocation_usd']}",
+              f"Review: risk {'cleared' if review['risk_cleared'] else 'not cleared'}; "
+              f"committee {'approved' if review['committee_approved'] else 'did not approve'}",
+              f"Why: {rationale(proposal)}",
+              f"What would change it: {' '.join(proposal['invalidation_conditions'].split())}", '', 'Review notes']
+    for index, record in enumerate(result['risk_reviews'], 1):
+        lines.append(f"- Risk {index} ({record['verdict']}): {rationale(record)}")
+    for index, record in enumerate(result['committee_votes'], 1):
+        lines.append(f"- Committee {index} ({record['vote']}): {rationale(record)}")
+    lines += ['', 'Verified inputs at the time of the run']
+    for item in evidence:
+        label = labels[item['id']]
+        if 'fact' in item:
+            fact = item['fact']
+            period = f"{fact['start']} to {fact['end']}" if fact['start'] else fact['end']
+            lines.append(f"- {label}: {fact['symbol']} {fact['concept']} = {fact['value']} {fact['unit']} "
+                         f"({period}; filed {fact['filed']})")
+        else:
+            quote = item['quote']
+            lines.append(f"- {label}: {quote['symbol']} bid {quote['bid']} / ask {quote['ask']} USD "
+                         f"(observed {item['observed_at']})")
+    if not evidence:
+        lines.append('- No verified input snapshots are available in this report.')
+    for entry in report['application_added_citations']:
+        label = labels.get(entry['added_evidence_id'], entry['added_evidence_id'])
+        lines.append(f"- NexyDAO supplied citation {label} for {entry['role'].replace('_', ' ')}.")
+    return '\n'.join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--db', type=Path, required=True)
     parser.add_argument('--run-id')
+    parser.add_argument('--summary', action='store_true')
     args = parser.parse_args()
     try:
         report = read_report(args.db, args.run_id)
-        print(json.dumps(report, indent=2, allow_nan=False))
+        print(format_summary(report) if args.summary else json.dumps(report, indent=2, allow_nan=False))
     except (OSError, sqlite3.Error, ValueError, DecimalException, AttributeError, KeyError, TypeError):
         parser.exit(1, 'Saved advisory report unavailable.\n')
 
