@@ -174,6 +174,16 @@ expanded real retrieval, paid workflow and VM acceptance were pending; their
 29 October results are recorded above. This slice advances P3
 while PR #16's IBKR authentication acceptance is deferred; it does not complete P3.
 
+On 6 November 2026, the first quote-backed MSFT advisory ran locally using two
+authenticated SEC observations and a fresh signed paper quote. The seven-role
+cycle proposed a $500 simulated allocation. Both risk reviewers passed it and
+all three committee voters approved. Execution stayed denied, simulated cash
+remained $5,000, and seven calls cost $0.00470430 with zero unsettled charges.
+The quote spread was 0.056324%. The reviewers repeated an asset growth claim
+even though only one asset period was supplied. PR #78 added a targeted check
+for that wording. The observed outcome establishes the quote-backed advisory
+path, while broader narrative validation and paper execution remain open.
+
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
 and mocked HTTP/OpenAI do not establish real retrieval or paid eight-call acceptance.
 Tests cover DNS/SSRF, redirects, source identity/body limits, contradictions, signatures,
