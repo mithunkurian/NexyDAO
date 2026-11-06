@@ -123,6 +123,8 @@ class MaintenanceJobTests(unittest.TestCase):
         with patch('nexydao.maintenance_jobs.backups.create_backup',side_effect=OSError('private secret path')):result=self.jobs.tick(self.plan)
         self.assertFalse(result['enabled']);self.assertEqual(result['reason'],'attempt_failed')
         self.assertEqual(result['retained_or_reserved_backup_bytes'],backups.MAX_DB);self.assertNotIn('secret',json.dumps(result))
+        self.assertEqual(result['alerts'], [{'code': 'backup_verification_failed', 'severity': 'critical', 'count': 1}])
+        self.assertEqual(result['critical_alert_count'], 1)
         with self.assertRaises(JobError):self.arm()
         self.assertFalse(self.jobs.tick(self.plan)['work_started'])
 
@@ -130,6 +132,8 @@ class MaintenanceJobTests(unittest.TestCase):
         self.store.reserve(self.run,'uncertain','fake',Decimal('.02'),Decimal('.10'));self.arm()
         result=self.jobs.tick(self.plan);self.assertFalse(result['maintenance_passed']);self.assertFalse(result['enabled'])
         self.assertGreater(result['critical_alert_count'],0);self.assertEqual(self.store.costs()['unsettled_calls'],1)
+        self.assertEqual(result['critical_alert_count'], len(result['alerts']))
+        self.assertIn('finished_runs_have_uncertain_api_costs', {item['code'] for item in result['alerts']})
         self.assertTrue((self.archives/('job-'+result['attempt_id'])/'manifest.json').exists())
 
     def test_stop_during_work_does_not_get_undone_by_successful_completion(self):

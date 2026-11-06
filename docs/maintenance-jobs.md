@@ -108,6 +108,9 @@ an early/stopped/no-work tick is reported without claiming work succeeded.
 
 Output includes fixed reasons, attempt/capacity counts, the attempt ID and local
 maintenance outcome. It excludes source paths, plan contents and exception text.
+A tick that starts work also returns its original critical findings in `alerts`.
+An alerting caller can use those findings directly without rerunning health checks
+against a potentially different database snapshot.
 `paid_job_supported`, `recurring_automation_installed`, `alert_delivery_performed`
 and `execution_authorized` always remain false. The separate job-state DB is not
 an application/authority ledger and is excluded by application backup schema checks.
