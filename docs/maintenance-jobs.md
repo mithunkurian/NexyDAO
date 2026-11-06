@@ -60,6 +60,12 @@ recent successful completion, or `null` before the first success. A later failed
 or incomplete attempt leaves this timestamp at the last successful completion.
 The `status` command opens the ledger read-only.
 
+The cadence report gives the longest gap between recorded attempt starts and
+counts the full unobserved intervals between those starts. For a 60-second plan,
+a 61-second gap counts as zero unobserved intervals, while a 181-second gap
+counts as two. The report excludes time before the first and after the last
+recorded start. It cannot distinguish a deliberate stop from a missed trigger.
+
 ## Scheduling and failure behaviour
 
 A short SQLite `BEGIN IMMEDIATE` transaction checks cadence, stopped state,
