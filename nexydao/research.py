@@ -2,7 +2,7 @@
 import copy
 from datetime import date
 import re
-from .records import TEXT, schema, validate
+from .records import REFERENCES, TEXT, schema, validate
 from .sec import SourceError, numeric, check_research_freshness, universe
 
 CLAIM_CONTEXT = ('concept', 'unit', 'start', 'end', 'filed', 'form', 'accession')
@@ -167,11 +167,21 @@ def check_asset_growth_claim(record, symbol, evidence):
     if not ASSET_GROWTH_ASSERTION.search(record['rationale']):
         return
     cited = set(record['evidence_ids'])
-    facts = [item for item in evidence if item['id'] in cited
-             and item.get('verification') == 'verified_filing_observation'
-             and item['fact']['symbol'] == symbol and item['fact']['concept'] == 'Assets']
-    if not any(pair['reported_value_direction'] == 'higher' for pair in filing_comparisons(facts)):
-        raise UnsupportedAssetGrowth(len(facts))
+    assets = [item for item in evidence if item.get('verification') == 'verified_filing_observation'
+              and item['fact']['symbol'] == symbol and item['fact']['concept'] == 'Assets']
+    cited_assets = [item for item in assets if item['id'] in cited]
+    if any(pair['reported_value_direction'] == 'higher' for pair in filing_comparisons(cited_assets)):
+        return
+    if len(cited_assets) == 1 and len(record['evidence_ids']) < REFERENCES['maxItems']:
+        matches = []
+        for pair in filing_comparisons(assets):
+            pair_ids = {pair['earlier_evidence_id'], pair['later_evidence_id']}
+            if pair['reported_value_direction'] == 'higher' and cited_assets[0]['id'] in pair_ids:
+                matches.extend(pair_ids - cited)
+        if len(matches) == 1:
+            record['evidence_ids'] = [*record['evidence_ids'], matches[0]]
+            return matches[0]
+    raise UnsupportedAssetGrowth(len(cited_assets))
 
 
 def run_research(store, provider, run, evidence, owner_policy, revision_context=None):

@@ -67,7 +67,9 @@ def run_manager(store,provider,run,context,evidence,policy,ledger,revision,quote
             seen.add(allocation['symbol'])
         try:
             for allocation in plan['allocations']:
-                check_asset_growth_claim(allocation, allocation['symbol'], evidence)
+                added = check_asset_growth_claim(allocation, allocation['symbol'], evidence)
+                if added:
+                    store.event(run, 'portfolio_manager:evidence_completed', {'added_evidence_id': added})
         except UnsupportedAssetGrowth as error:
             store.event(run, 'portfolio_manager:evidence_rejected', {
                 'code': str(error), 'attempt': attempt + 1,

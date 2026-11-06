@@ -587,7 +587,7 @@ class ResearchTests(unittest.TestCase):
         evidence = current + earlier
         store = Store(self.root / 'asset-growth.sqlite3')
         self.addCleanup(store.close)
-        for citations in (assets, assets + earlier):
+        for citations in ([], assets, assets + earlier):
             provider = self.provider(evidence)
             original = provider.decide
 
@@ -600,12 +600,18 @@ class ResearchTests(unittest.TestCase):
                 return result
 
             provider.decide = claim_growth
-            if len(citations) == 1:
+            if not citations:
                 with self.assertRaisesRegex(SourceError, 'unsupported_advisory_asset_growth_claim'):
                     run_cycle(store, provider, evidence)
                 self.assertEqual([role for role, _ in provider.calls], ['ceo'])
             else:
-                self.assertFalse(run_cycle(store, provider, evidence)['policy']['execution_authorized'])
+                result = run_cycle(store, provider, evidence)
+                self.assertFalse(result['policy']['execution_authorized'])
+                self.assertEqual(result['proposal']['evidence_ids'], [item['id'] for item in assets + earlier])
+                audit = store.db.execute('SELECT payload FROM events WHERE run_id=? AND role=?',
+                                         (result['run_id'], 'ceo:evidence_completed')).fetchone()
+                self.assertEqual(json.loads(audit[0]) if audit else None,
+                                 {'added_evidence_id': earlier[0]['id']} if len(citations) == 1 else None)
                 expected = [{'earlier_evidence_id': earlier[0]['id'], 'later_evidence_id': assets[0]['id'],
                              'reported_value_direction': 'higher'}]
                 for _, context in provider.calls:

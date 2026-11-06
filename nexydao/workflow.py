@@ -123,7 +123,9 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
                                      + ASSET_GROWTH_GUIDANCE, data, spec)
             validate(result, spec)
             validate_references(result, evidence)
-            check_asset_growth_claim(result, result.get('symbol') if symbol is None else symbol, evidence)
+            added = check_asset_growth_claim(result, result.get('symbol') if symbol is None else symbol, evidence)
+            if added:
+                store.event(run, role + ':evidence_completed', {'added_evidence_id': added})
             store.event(run, role, result)
             return result
 

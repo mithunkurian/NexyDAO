@@ -151,6 +151,11 @@ match stops the advisory cycle. This targeted check covers the wording observed
 in the first quote-backed MSFT pilot. Other narrative claims and paraphrases still
 require review.
 
+When a rationale cites exactly one asset observation from the verified increasing
+pair for its issuer, the application can append the other citation. The decision
+record contains both IDs, and the audit identifies the ID added by the application.
+An uncited assertion or a cited observation outside that pair still fails the check.
+
 The Portfolio Manager gets one correction attempt for this specific citation
 failure if the quote, filing evidence and policy are still current. The attempt
 uses the remaining API budget and updated funding view. It can supply the missing
