@@ -149,8 +149,9 @@ task limit. Confirm the environment points to the intended release and existing
 private files. Restore the timer only after the installed unit passes its checks.
 Run `python3 ops/check-alert-pilot-service.py --timer-state inactive` before
 enabling the timer and repeat with `--timer-state active` afterward. The command
-checks effective settings and linger without starting the unit or reading its
-environment file. Record a matching unattended service result separately.
+checks effective settings, the timer target and cadence, and linger without
+starting the unit or reading its environment file. Record a matching unattended
+service result separately.
 On 6 November the resource drop-in was applied to the stopped VM pilot service.
 The installed-settings audit passed with zero mismatches and the timer disabled.
 For rollback, disable future triggers, wait for any current job, restore the
