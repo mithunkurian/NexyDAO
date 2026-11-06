@@ -29,11 +29,14 @@ def evaluate(proposal, reviews, votes, owner_policy=None, portfolio_snapshot=Non
         reasons.append("position_limit_exceeded")
     if INITIAL_CAPITAL - Decimal(str(proposal["allocation_usd"])) < MIN_CASH_RESERVE:
         reasons.append("cash_reserve_breached")
-    if len(reviews) != 2 or any(r["verdict"] != "pass" for r in reviews):
+    risk_cleared = len(reviews) == 2 and all(r['verdict'] == 'pass' for r in reviews)
+    committee_approved = len(votes) == 3 and sum(v['vote'] == 'approve' for v in votes) >= 2
+    if not risk_cleared:
         reasons.append("risk_clearance_missing")
-    if len(votes) != 3 or sum(v["vote"] == "approve" for v in votes) < 2:
+    if not committee_approved:
         reasons.append("committee_approval_missing")
-    return {"execution_authorized": False, "reasons": reasons}
+    return {"execution_authorized": False, "reasons": reasons,
+            "advisory_review": {"risk_cleared": risk_cleared, "committee_approved": committee_approved}}
 
 
 class PaperBroker:
