@@ -132,6 +132,14 @@ When these comparisons are available, research reports include a
 `comparison_claims` list. Each claim must match a supplied pair and direction.
 An unsupported or duplicate claim stops the run before advisory review.
 
+The portfolio manager, CEO, risk reviewers and committee also check common
+affirmative asset-growth wording in rationales. An assertion such as “the filings
+show significant asset growth” requires both citations for comparable SEC asset
+observations from the same issuer, with the newer value higher. An unsupported
+match stops the advisory cycle. This targeted check covers the wording observed
+in the first quote-backed MSFT pilot. Other narrative claims and paraphrases still
+require review.
+
 ## Acceptance and deployment
 
 On 29 October 2026, merged PR #17 (`c28a0ec`) was deployed into the isolated VM

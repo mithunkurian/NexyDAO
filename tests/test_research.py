@@ -544,6 +544,38 @@ class ResearchTests(unittest.TestCase):
             self.assertIn({'earlier_evidence_id': cash_flow(older), 'later_evidence_id': cash_flow(current),
                            'reported_value_direction': 'higher'}, context['filing_comparisons'])
 
+    def test_advisory_asset_growth_needs_two_cited_observations_showing_an_increase(self):
+        payload = self.payload()
+        current = self.receipt(payload)
+        for fact in payload['facts']:
+            if fact['concept'] == 'Assets':
+                fact['end'] = (self.today - timedelta(days=30)).isoformat()
+                fact['value'] = '123455'
+        earlier = [item for item in self.receipt(payload) if item['fact']['concept'] == 'Assets']
+        assets = [item for item in current if item['fact']['concept'] == 'Assets']
+        evidence = current + earlier
+        store = Store(self.root / 'asset-growth.sqlite3')
+        self.addCleanup(store.close)
+        for citations in (assets, assets + earlier):
+            provider = self.provider(evidence)
+            original = provider.decide
+
+            def claim_growth(run, role, instructions, context, spec):
+                result = original(run, role, instructions, context, spec)
+                if role == 'ceo':
+                    result.update(symbol=assets[0]['fact']['symbol'],
+                                  rationale='The filings show significant asset growth.',
+                                  evidence_ids=[item['id'] for item in citations])
+                return result
+
+            provider.decide = claim_growth
+            if len(citations) == 1:
+                with self.assertRaisesRegex(SourceError, 'unsupported_advisory_asset_growth_claim'):
+                    run_cycle(store, provider, evidence)
+                self.assertEqual([role for role, _ in provider.calls], ['ceo'])
+            else:
+                self.assertFalse(run_cycle(store, provider, evidence)['policy']['execution_authorized'])
+
     def test_wrong_claim_context_stops_before_manager_and_ceo(self):
         evidence = self.receipt()
         store = Store(self.root/'context-failure.sqlite3')

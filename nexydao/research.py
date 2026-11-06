@@ -1,6 +1,7 @@
 """Two independent advisory researchers; application checks numeric claim bindings."""
 import copy
 from datetime import date
+import re
 from .records import TEXT, schema, validate
 from .sec import SourceError, numeric, check_research_freshness, universe
 
@@ -140,6 +141,30 @@ def _filing_comparisons(facts):
         comparisons.append({'earlier_evidence_id': earlier['id'], 'later_evidence_id': later['id'],
                             'reported_value_direction': direction})
     return comparisons
+
+
+ASSET_GROWTH_GUIDANCE = (
+    ' State a reported asset increase only if you cite both comparable SEC asset observations '
+    'for the issuer and the newer value is higher. One observation supports only the reported level.'
+)
+ASSET_GROWTH_ASSERTION = re.compile(
+    r'\b(?:show(?:s|ed|ing)?|indicat(?:e|es|ed|ing)|demonstrat(?:e|es|ed|ing)|'
+    r'report(?:s|ed|ing)?|confirm(?:s|ed|ing)?)\s+'
+    r'(?:(?:strong|significant|substantial|solid|modest|continued)\s+)?asset growth\b'
+    r'|\bassets\s+(?:(?:has|have|had)\s+)?(?:grew|grown|rose|risen|increased)\b',
+    re.IGNORECASE,
+)
+
+
+def check_asset_growth_claim(record, symbol, evidence):
+    if not ASSET_GROWTH_ASSERTION.search(record['rationale']):
+        return
+    cited = set(record['evidence_ids'])
+    facts = [item for item in evidence if item['id'] in cited
+             and item.get('verification') == 'verified_filing_observation'
+             and item['fact']['symbol'] == symbol and item['fact']['concept'] == 'Assets']
+    if not any(pair['reported_value_direction'] == 'higher' for pair in _filing_comparisons(facts)):
+        raise SourceError('unsupported_advisory_asset_growth_claim')
 
 
 def run_research(store, provider, run, evidence, owner_policy, revision_context=None):

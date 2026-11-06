@@ -2,6 +2,7 @@ import json
 
 from .records import PROPOSAL, REVIEW, VOTE, PROMPT_VERSION, SCHEMA_VERSION, validate, validate_references
 from .safety import evaluate
+from .research import ASSET_GROWTH_GUIDANCE, check_asset_growth_claim
 
 COMMON = """You serve NexyDAO, an AI investment company with $5,000 simulated USD.
 15% annual NET return is an objective, never a promise. Preserve capital and account
@@ -106,7 +107,7 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             context['portfolio_plan']=plan
             context['account']=ledger.snapshot()
 
-        def ask(role, instructions, spec, data):
+        def ask(role, instructions, spec, data, symbol=None):
             if revision_metadata is not None:
                 from .revisions import assert_parent_current
                 assert_parent_current(store, revision_metadata)
@@ -117,9 +118,11 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
             check_evidence_freshness(evidence)
             check_research_freshness(evidence)
             quote_liquidity.assert_current(evidence)
-            result = provider.decide(run, role, COMMON + owner_policy.instructions() + instructions, data, spec)
+            result = provider.decide(run, role, COMMON + owner_policy.instructions() + instructions
+                                     + ASSET_GROWTH_GUIDANCE, data, spec)
             validate(result, spec)
             validate_references(result, evidence)
+            check_asset_growth_claim(result, result.get('symbol') if symbol is None else symbol, evidence)
             store.event(run, role, result)
             return result
 
@@ -130,10 +133,10 @@ def run_cycle(store, provider, evidence, research=False, owner_policy=None, port
                        "as incremental committed cash including costs, not a target position; use the recorded "
                        "simulation state and challenge the Portfolio Manager's plan if supplied.", PROPOSAL, context)
         risk_context = {**context, "proposal": proposal}
-        reviews = [ask("risk_capital", "Independently challenge capital loss, sizing and liquidity.", REVIEW, risk_context),
-                   ask("risk_evidence", "Independently challenge provenance, freshness, contradictions and security.", REVIEW, risk_context)]
+        reviews = [ask("risk_capital", "Independently challenge capital loss, sizing and liquidity.", REVIEW, risk_context, proposal['symbol']),
+                   ask("risk_evidence", "Independently challenge provenance, freshness, contradictions and security.", REVIEW, risk_context, proposal['symbol'])]
         committee_context = {**risk_context, "risk_reviews": reviews}
-        votes = [ask(f"committee_{role}", instruction, VOTE, committee_context)
+        votes = [ask(f"committee_{role}", instruction, VOTE, committee_context, proposal['symbol'])
                  for role, instruction in [
                      ("investment", "Vote independently on thesis and alternatives; respect risk challenges."),
                      ("fiduciary", "Vote independently on capital preservation and net costs."),
