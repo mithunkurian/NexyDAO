@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 import subprocess
 
 
@@ -15,20 +16,35 @@ SERVICE_SETTINGS = {
     'MemoryAccounting': 'yes', 'MemoryMax': '268435456',
     'TasksAccounting': 'yes', 'TasksMax': '16',
 }
+TIMER_CADENCE = 'OnActiveUSec=1h, OnUnitInactiveUSec=1h'
 
 
 def read_settings(command, properties):
     args = [*command, *(f'--property={name}' for name in properties)]
     result = subprocess.run(args, capture_output=True, text=True, check=True,
                             timeout=5, env={**os.environ, 'LC_ALL': 'C'})
-    settings = dict(line.split('=', 1) for line in result.stdout.splitlines() if '=' in line)
+    settings = {}
+    monotonic = []
+    for line in result.stdout.splitlines():
+        name, separator, value = line.partition('=')
+        if not separator:
+            continue
+        if name == 'TimersMonotonic':
+            match = re.fullmatch(r'\{ (\w+=\S+) ; next_elapse=.* \}', value)
+            monotonic.append(match[1] if match else 'unrecognized timer')
+        else:
+            settings[name] = value
+    settings['TimersMonotonic'] = ', '.join(sorted(monotonic))
+    settings.setdefault('TimersCalendar', '')
     return {name: settings.get(name) for name in properties}
 
 
 def audit(timer_state):
     timer_settings = {'LoadState': 'loaded', 'NeedDaemonReload': 'no',
                       'ActiveState': 'active' if timer_state == 'active' else 'inactive',
-                      'UnitFileState': 'enabled' if timer_state == 'active' else 'disabled'}
+                      'UnitFileState': 'enabled' if timer_state == 'active' else 'disabled',
+                      'Unit': SERVICE, 'TimersMonotonic': TIMER_CADENCE, 'TimersCalendar': '',
+                      'Persistent': 'no', 'RandomizedDelayUSec': '0'}
     checks = [
         (SERVICE, ['systemctl', '--user', 'show', SERVICE], SERVICE_SETTINGS),
         (TIMER, ['systemctl', '--user', 'show', TIMER], timer_settings),
