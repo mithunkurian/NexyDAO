@@ -97,6 +97,10 @@ ticks and is not undone by successful completion. It does not cancel an already
 running archive/check. Wall-clock time and the private state/code remain trusted;
 this is not administrator-resistant anti-rollback or process-liveness detection.
 
+Reports show `capacity_stop_reason` as `attempt_cap` or `archive_cap` when the
+ledger lacks capacity for another claim. Otherwise it is `null`. An arm request
+with exhausted capacity fails without changing the ledger's enabled state.
+
 The dispatch is finite and reuses bounded SQLite/backup/health stages. There is no
 new hard process watchdog; slow filesystem/kernel calls still need O2 resource/
 service acceptance. Failure/unknown/cap conditions produce nonzero CLI status;

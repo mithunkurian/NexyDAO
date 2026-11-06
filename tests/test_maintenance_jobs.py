@@ -142,13 +142,19 @@ class MaintenanceJobTests(unittest.TestCase):
     def test_attempt_cap_is_lifetime_and_not_reset_by_manual_rearm(self):
         plan={**self.plan,'max_attempts':1};path=self.root/'limited.sqlite3';jobs=MaintenanceJobs(path,lambda:self.clock[0])
         jobs.initialize(plan);jobs.arm(plan);jobs.tick(plan);self.clock[0]+=60
+        self.assertEqual(jobs.status()['capacity_stop_reason'], 'attempt_cap')
         result=jobs.tick(plan);self.assertEqual(result['reason'],'attempt_cap');self.assertFalse(result['work_started'])
-        jobs.arm(plan);self.assertEqual(jobs.tick(plan)['reason'],'attempt_cap')
+        with self.assertRaisesRegex(JobError, 'maintenance_attempt_cap'):
+            jobs.arm(plan)
+        self.assertEqual(jobs.status(), {key: value for key, value in result.items() if key != 'work_started'})
 
     def test_archive_cap_reserves_worst_case_before_work_and_does_not_delete_old_archives(self):
         plan={**self.plan,'max_backup_bytes':backups.MAX_DB};jobs=MaintenanceJobs(self.root/'small.sqlite3',lambda:self.clock[0])
         jobs.initialize(plan);jobs.arm(plan);jobs.tick(plan);self.clock[0]+=60
+        self.assertEqual(jobs.status()['capacity_stop_reason'], 'archive_cap')
         result=jobs.tick(plan);self.assertEqual(result['reason'],'archive_cap');self.assertEqual(len(list(self.archives.iterdir())),1)
+        with self.assertRaisesRegex(JobError, 'maintenance_archive_cap'):
+            jobs.arm(plan)
 
     def test_plan_change_or_backward_clock_stops_without_more_work(self):
         self.arm();changed={**self.plan,'interval_seconds':120}

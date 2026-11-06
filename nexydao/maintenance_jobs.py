@@ -27,6 +27,14 @@ REASONS={'initialized_stopped','armed','owner_stopped','attempt_failed','attempt
 class JobError(ValueError):pass
 
 
+def _capacity_stop_reason(plan, attempts):
+    if len(attempts) >= plan['max_attempts']:
+        return 'attempt_cap'
+    if sum(attempt[4] for attempt in attempts) + backups.MAX_DB > plan['max_backup_bytes']:
+        return 'archive_cap'
+    return None
+
+
 def validate_plan(plan):
     if not isinstance(plan,dict) or set(plan)!=FIELDS:raise JobError('maintenance_plan_schema')
     for name in ('source_db','backup_root'):
@@ -127,6 +135,7 @@ class MaintenanceJobs:
             'incomplete_attempt_count':sum(a[3]=='running' for a in attempts),
             'failed_attempt_count':sum(a[3]=='failed' for a in attempts),
             'last_completed_at':completed_at,
+            'capacity_stop_reason':_capacity_stop_reason(plan, attempts),
             'longest_start_gap_seconds':max(gaps, default=None),
             'unobserved_intervals_between_attempts':sum(max(0, gap // interval - 1) for gap in gaps),
             'retained_or_reserved_backup_bytes':sum(a[4] for a in attempts),
@@ -169,6 +178,9 @@ class MaintenanceJobs:
             enabled,reason,stored,attempts=self._read(db)
             if canonical(plan)!=canonical(stored):raise JobError('maintenance_plan_changed')
             if any(a[3]!='completed' for a in attempts):raise JobError('maintenance_unknown_or_failed_attempt_requires_review')
+            capacity_stop = _capacity_stop_reason(stored, attempts)
+            if capacity_stop:
+                raise JobError('maintenance_' + capacity_stop)
             db.execute("UPDATE control SET enabled=1,reason='armed'")
             return self._report(*self._read(db))
 
@@ -187,8 +199,9 @@ class MaintenanceJobs:
             if last is not None and started<last:return stop('clock_regressed')
             if last is not None and started<last+plan['interval_seconds']:
                 return self._report(enabled,reason,stored,attempts,work_started=False,next_due_at=last+plan['interval_seconds'])
-            if len(attempts)>=plan['max_attempts']:return stop('attempt_cap')
-            if sum(a[4] for a in attempts)+backups.MAX_DB>plan['max_backup_bytes']:return stop('archive_cap')
+            capacity_stop = _capacity_stop_reason(stored, attempts)
+            if capacity_stop:
+                return stop(capacity_stop)
             if shutil.disk_usage(plan['backup_root']).free<MIN_FREE_BYTES+backups.MAX_DB:return stop('disk_space_low')
             identifier=secrets.token_hex(16)
             db.execute('INSERT INTO attempts VALUES(?,?,NULL,?,?,?)',(identifier,started,'running',backups.MAX_DB,''))
