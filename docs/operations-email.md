@@ -161,6 +161,12 @@ One manual start using the exhausted plan returned `attempt_cap` with
 contained 24 attempts and the mail ledger zero attempts. The timer stayed disabled.
 This validates the installed command's cap handling. An unattended run of a
 newly commissioned plan and boot recovery are separate O2 checks.
+
+An isolated transient systemd timer also invoked the repository command with
+the same resource caps and a disposable one-attempt plan. The journal and
+fixture ledger recorded one successful unattended run and one verified archive.
+The stopped fixture mail ledger had zero attempts. The installed timer and
+completed pilot ledger were outside this test.
 For rollback, disable future triggers, wait for any current job, restore the
 previous unit, drop-in and environment references, and reload the user manager.
 Keep any maintenance or mail attempts written during the cutover in their
