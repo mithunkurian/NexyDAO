@@ -122,6 +122,9 @@ for this command. Its private `~/.config/nexydao/alert-pilot.env` file requires
 Keep the Gmail credential in the separate file referenced by the mail profile.
 Install the resource drop-in alongside the unit when commissioning it.
 Installation and timer cutover are separate from isolated validation.
+The repository timer uses the pilot's observed cadence: one hour after timer
+activation and one hour after the preceding service completes. Enable it only
+with a separately commissioned plan and ledger with capacity for future work.
 
 The merged one-shot command passed an isolated Ubuntu smoke test on 6 November.
 It produced one verified archive and then returned a no-work result on the
@@ -148,6 +151,8 @@ Run `python3 ops/check-alert-pilot-service.py --timer-state inactive` before
 enabling the timer and repeat with `--timer-state active` afterward. The command
 checks effective settings and linger without starting the unit or reading its
 environment file. Record a matching unattended service result separately.
+On 6 November the resource drop-in was applied to the stopped VM pilot service.
+The installed-settings audit passed with zero mismatches and the timer disabled.
 For rollback, disable future triggers, wait for any current job, restore the
 previous unit, drop-in and environment references, and reload the user manager.
 Keep any maintenance or mail attempts written during the cutover in their

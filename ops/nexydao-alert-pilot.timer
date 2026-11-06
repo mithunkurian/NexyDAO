@@ -1,0 +1,9 @@
+[Unit]
+Description=NexyDAO hourly maintenance and critical alert pilot
+
+[Timer]
+OnActiveSec=1h
+OnUnitInactiveSec=1h
+
+[Install]
+WantedBy=timers.target
