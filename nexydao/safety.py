@@ -20,7 +20,7 @@ def evaluate(proposal, reviews, votes, owner_policy=None, portfolio_snapshot=Non
     if proposal["action"] == "propose_investment":
         if quote_liquidity is None:reasons.append('fresh_quote_liquidity_evidence_required')
         else:reasons.extend(quote_liquidity.reasons([proposal],portfolio_snapshot))
-        reasons.append("verified_market_evidence_pipeline_not_implemented")
+        reasons.append("executable_market_depth_not_verified")
         if not proposal["symbol"] or not proposal["evidence_ids"] or proposal["allocation_usd"] <= 0:
             reasons.append("incomplete_investment_proposal")
     elif proposal["allocation_usd"] != 0:

@@ -199,7 +199,7 @@ class Tests(unittest.TestCase):
         proposal = {**self.proposal, "action": "propose_investment", "symbol": "TEST", "allocation_usd": 4999, "evidence_ids": ["e1"]}
         result = evaluate(proposal, [{"verdict": "pass"}] * 2, [{"vote": "approve"}] * 3)
         self.assertFalse(result["execution_authorized"])
-        for reason in ("position_limit_exceeded", "cash_reserve_breached", "verified_market_evidence_pipeline_not_implemented"):
+        for reason in ("position_limit_exceeded", "cash_reserve_breached", "executable_market_depth_not_verified"):
             self.assertIn(reason, result["reasons"])
         with self.assertRaises(PermissionError):
             PaperBroker().execute(proposal, authorization=True)
