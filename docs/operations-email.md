@@ -131,6 +131,15 @@ timeout, `Restart=no`, `UMask=0077` and `NoNewPrivileges=yes`. Its effective
 unit level. Explicit CPU and memory bounds and boot acceptance remain O2 work.
 The full pilot window is still in progress.
 
+The repository's `ops/nexydao-alert-pilot.service.d/20-resources.conf` is a
+candidate for the post-pilot service. It sets a one-CPU quota, a 256 MiB memory
+maximum and a 16-task limit, with accounting enabled for all three. The memory
+and task limits match the existing offline controller service. Validate against
+an isolated maintenance fixture before applying it to the user service. Check
+that systemd reports the effective limits and the largest supported fixture
+finishes within the existing two-minute timeout. Keep the pilot ledger and
+archives for comparison across the change.
+
 On the VM, check the timer, the last timer trigger and the service outcome.
 
 ```bash
