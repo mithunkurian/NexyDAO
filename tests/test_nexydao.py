@@ -212,8 +212,11 @@ class Tests(unittest.TestCase):
     def test_risk_and_quorum(self):
         result = evaluate(self.proposal, [{"verdict": "veto"}] * 2, [{"vote": "approve"}] * 3)
         self.assertIn("risk_clearance_missing", result["reasons"])
+        self.assertEqual(result['advisory_review'], {'risk_cleared': False, 'committee_approved': True})
         result = evaluate(self.proposal, [{"verdict": "pass"}] * 2, [{"vote": "reject"}] * 3)
         self.assertIn("committee_approval_missing", result["reasons"])
+        self.assertEqual(result['advisory_review'], {'risk_cleared': True, 'committee_approved': False})
+        self.assertFalse(result['execution_authorized'])
 
     def test_invalid_numbers_and_fields(self):
         for change in ({"allocation_usd": float("nan")}, {"allocation_usd": True}, {"allocation_usd": -1}, {"execution_authorized": True}):
