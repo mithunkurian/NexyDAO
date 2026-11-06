@@ -225,6 +225,9 @@ The recorded expiry is retained, so an old report can be inspected after its
 evidence expires. A missing or oversized input event yields `null` for that field.
 `application_added_citations` identifies the role and each citation added by the
 application during validation, separate from citations supplied by the model.
+An inspection restore of the live advisory ledger reproduced the completed MSFT
+report, evidence, citation audit and exact cost. The runtime guard refused the
+inspection copy, and the restored archive reverified after the read-only report.
 
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
 and mocked HTTP/OpenAI do not establish real retrieval or paid eight-call acceptance.
