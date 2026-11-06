@@ -214,6 +214,12 @@ retained $5,000 cash and revision zero. The cycle cost $0.00856875 with zero
 unsettled charges. The signed spread observation did not establish executable
 market depth.
 
+To retrieve a saved advisory and its per-run API charges without a model call,
+use `python3 -m nexydao.advisory_report --db /path/to/nexydao.sqlite3`. The
+read-only command shows the latest AI attempt, including failed attempts, or an
+explicit prior run selected with `--run-id`. It can also inspect a restored audit
+copy without opening it as a runtime database.
+
 Run `python3 -m unittest discover -s tests -v` and the ordinary offline demo. Fixtures
 and mocked HTTP/OpenAI do not establish real retrieval or paid eight-call acceptance.
 Tests cover DNS/SSRF, redirects, source identity/body limits, contradictions, signatures,
