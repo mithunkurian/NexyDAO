@@ -54,6 +54,21 @@ class PortfolioTests(unittest.TestCase):
             'signature':hmac.new(b'x'*32,canonical(payload),hashlib.sha256).hexdigest()}))
         return self.ledger.mark(self.market.snapshot,self.market)
 
+    def test_fill_at_history_limit_keeps_ledger_reconcilable_and_retries_idempotent(self):
+        first = self.fill('first', quantity='0.1', fee='0')
+        second = self.fill('second', side='sell', quantity='0.1', fee='0')
+        with patch('nexydao.portfolio.MAX_SIMULATION_FILLS', 2):
+            self.ledger.fill(first, self.policy)
+            self.ledger.fill(second, self.policy)
+            before = self.ledger.snapshot()
+            with self.assertRaisesRegex(PortfolioError, 'simulation_history_limit'):
+                self.ledger.fill(self.fill('overflow'), self.policy)
+            self.assertEqual(self.ledger.fill(second, self.policy)['status'], 'already_recorded')
+            self.assertEqual(self.ledger.snapshot(), before)
+            self.assertTrue(self.ledger.reconcile())
+            self.assertEqual(self.ledger.settle('second')['status'], 'simulation_settled')
+            self.assertTrue(self.ledger.reconcile())
+
     def test_initial_capital_is_seeded_once_across_connections(self):
         other=Store(self.path)
         self.addCleanup(other.close)
